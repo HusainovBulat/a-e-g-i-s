@@ -65,13 +65,13 @@ def mmss(minutes: Optional[float]) -> Optional[str]:
     return f"{total // 60:02d}:{total % 60:02d}"
 
 
-def _slope_per_min(samples: Deque[Tuple[float, float]], window_s: float) -> Optional[float]:
+def _slope_per_min(samples: Deque[Tuple[float, float]], window_s: float, min_span_s: float = 4.0) -> Optional[float]:
     """Least-squares slope (units per minute) over the last ``window_s`` seconds."""
     if len(samples) < 5:
         return None
     t_end = samples[-1][0]
     pts = [(t, v) for t, v in samples if t >= t_end - window_s]
-    if len(pts) < 5 or pts[-1][0] - pts[0][0] < 4:
+    if len(pts) < 5 or pts[-1][0] - pts[0][0] < min_span_s:
         return None
     n = len(pts)
     mt = sum(t for t, _ in pts) / n
@@ -182,7 +182,8 @@ class Engine:
         }
         fatigue, model_a_used = self.models.predict_fatigue(a_values, nirs_ok=nirs_ok)
         tel.fatigue_hist.append((t, fatigue))
-        rate = _slope_per_min(tel.fatigue_hist, 300.0)
+        # Need >= 30 s of history: a few seconds of noise must not turn into "legs fail in 0.3 min".
+        rate = _slope_per_min(tel.fatigue_hist, 300.0, min_span_s=30.0)
         if fatigue >= 90:
             legs_fail = 0.0
         elif rate is not None and rate > 0.05:

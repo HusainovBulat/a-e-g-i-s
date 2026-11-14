@@ -1,0 +1,150 @@
+{
+  "crew": "Crew_A",
+  "crew_id": "Crew_A",
+  "crew_name": "Astronaut A (EVA Specialist)",
+  "sol": 14,
+  "readiness_score": 18.8,
+  "band": "red",
+  "eva_status": "PROHIBITED",
+  "badge_text": "🔴 PROHIBITED: SWAP SCHEDULE",
+  "readiness_if_all_quests": 56.8,
+  "mismatch_detected": true,
+  "masking_detected": true,
+  "mismatch_text": "🟡 Mismatch Detected: self-reported energy 9/10 but objective score is 14/100. Subjective report (90.0/100) exceeds objective sensors (13.8/100) by 76.2 points (threshold >= 30.0).",
+  "subjective_score": 90,
+  "subjective_energy_slider": 9,
+  "objective_score": 13.8,
+  "objective_breakdown": {
+    "osdr_day_telemetry_score": 38.6,
+    "live_model_a_fatigue": 86.2,
+    "vital_penalties": {}
+  },
+  "delta": 76.2,
+  "escalation_level": "CREW_COMMANDER_ATTENTION",
+  "quests": [
+    {
+      "id": "hydration",
+      "title": "Electrolyte hydration (500 mL isotonic)",
+      "bonus": 15,
+      "completed": true
+    },
+    {
+      "id": "compression",
+      "title": "Pneumatic calf compression / FES myostimulation (40 min)",
+      "bonus": 18,
+      "completed": false
+    },
+    {
+      "id": "breathing",
+      "title": "Guided breathing & cortisol reset (10 min)",
+      "bonus": 20,
+      "completed": false
+    }
+  ],
+  "completed_quests": {
+    "hydration": true,
+    "compression": false,
+    "breathing": false
+  },
+  "forecast_minutes": [
+    0,
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    110,
+    120
+  ],
+  "forecast_curve_no_rest": [
+    35,
+    33.4,
+    31.4,
+    29.1,
+    26.7,
+    24.1,
+    21.5,
+    18.7,
+    15.9,
+    13,
+    10,
+    18,
+    10
+  ],
+  "forecast_curve_with_quests": [
+    56.8,
+    55.9,
+    54.8,
+    53.8,
+    52.6,
+    51.5,
+    50.3,
+    49.1,
+    47.8,
+    46.6,
+    45.3,
+    44.1,
+    42.8
+  ],
+  "forecast_failure_minute": 110,
+  "organ_scores_6": {
+    "cns_brain": {
+      "name": "Head / Brain (CNS)",
+      "score": 92,
+      "band": "green"
+    },
+    "cardiovascular": {
+      "name": "Heart & Vessels",
+      "score": 61.2,
+      "band": "amber"
+    },
+    "respiratory": {
+      "name": "Lungs & Respiration",
+      "score": 79.3,
+      "band": "amber"
+    },
+    "immune_thermo": {
+      "name": "Immune & Thermoregulation",
+      "score": 100,
+      "band": "green"
+    },
+    "metabolic_nutrition": {
+      "name": "Nutrition & Metabolism",
+      "score": 100,
+      "band": "green"
+    },
+    "musculoskeletal": {
+      "name": "Legs, Muscles & Bones",
+      "score": 49.8,
+      "band": "red"
+    }
+  },
+  "flight_surgeons_alert": true,
+  "vitals": {
+    "calf_smo2_pct": 40.8,
+    "cum_bone_load_g": 266.7,
+    "sleep_hours": 4.9,
+    "bp_sys": 118,
+    "bp_dia": 76,
+    "resting_hr_bpm": 80.3,
+    "blood_sugar_mgdl": 108,
+    "body_temp_c": 36.8
+  },
+  "inputs": {
+    "sliders": {
+      "sleep": 9,
+      "energy": 9,
+      "mood": 9,
+      "pain_free": 9,
+      "nutrition": 9
+    },
+    "completed_quests": [
+      "hydration"
+    ]
+  }
+}

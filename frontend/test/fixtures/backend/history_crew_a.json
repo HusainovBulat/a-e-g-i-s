@@ -1,0 +1,865 @@
+{
+  "id": "Crew_A",
+  "name": "Astronaut A",
+  "role": "EVA Specialist",
+  "assignment": "Primary Lunar Surface Sortie Operator",
+  "status_band": "caution",
+  "current_sol": 14,
+  "history": [
+    {
+      "sol": 1,
+      "is_eva_day": false,
+      "calf_smo2_pct": 81.6,
+      "cum_bone_load_g": 13.1,
+      "sleep_hours": 7.2,
+      "blood_sugar_mgdl": 86.4,
+      "resting_hr_bpm": 63.3,
+      "body_temp_c": 36.6,
+      "objective_sensor_score": 96.3,
+      "subjective_energy_slider": 10,
+      "subjective_sleep_slider": 7.8,
+      "subjective_mood_slider": 8.1,
+      "subjective_pain_free_slider": 8.6,
+      "subjective_nutrition_slider": 8,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 2,
+      "is_eva_day": false,
+      "calf_smo2_pct": 79.3,
+      "cum_bone_load_g": 24.8,
+      "sleep_hours": 6.5,
+      "blood_sugar_mgdl": 89,
+      "resting_hr_bpm": 62.6,
+      "body_temp_c": 36.7,
+      "objective_sensor_score": 90.4,
+      "subjective_energy_slider": 8.7,
+      "subjective_sleep_slider": 6.7,
+      "subjective_mood_slider": 8.5,
+      "subjective_pain_free_slider": 8.5,
+      "subjective_nutrition_slider": 8.1,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 3,
+      "is_eva_day": true,
+      "calf_smo2_pct": 68.1,
+      "cum_bone_load_g": 62.9,
+      "sleep_hours": 6.5,
+      "blood_sugar_mgdl": 95.5,
+      "resting_hr_bpm": 71.1,
+      "body_temp_c": 36.6,
+      "objective_sensor_score": 75.8,
+      "subjective_energy_slider": 8,
+      "subjective_sleep_slider": 7.2,
+      "subjective_mood_slider": 7.7,
+      "subjective_pain_free_slider": 6.2,
+      "subjective_nutrition_slider": 7.8,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 4,
+      "is_eva_day": false,
+      "calf_smo2_pct": 78.2,
+      "cum_bone_load_g": 74.3,
+      "sleep_hours": 7.1,
+      "blood_sugar_mgdl": 89.7,
+      "resting_hr_bpm": 65.9,
+      "body_temp_c": 36.5,
+      "objective_sensor_score": 91.5,
+      "subjective_energy_slider": 8.6,
+      "subjective_sleep_slider": 7.9,
+      "subjective_mood_slider": 7.9,
+      "subjective_pain_free_slider": 8.3,
+      "subjective_nutrition_slider": 8.3,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 5,
+      "is_eva_day": false,
+      "calf_smo2_pct": 77.4,
+      "cum_bone_load_g": 85.1,
+      "sleep_hours": 6.6,
+      "blood_sugar_mgdl": 95.9,
+      "resting_hr_bpm": 65.9,
+      "body_temp_c": 36.6,
+      "objective_sensor_score": 87.5,
+      "subjective_energy_slider": 8.4,
+      "subjective_sleep_slider": 6.9,
+      "subjective_mood_slider": 7.5,
+      "subjective_pain_free_slider": 8.2,
+      "subjective_nutrition_slider": 8.4,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 6,
+      "is_eva_day": false,
+      "calf_smo2_pct": 77.5,
+      "cum_bone_load_g": 98.2,
+      "sleep_hours": 6.3,
+      "blood_sugar_mgdl": 94.4,
+      "resting_hr_bpm": 67.8,
+      "body_temp_c": 36.8,
+      "objective_sensor_score": 84.6,
+      "subjective_energy_slider": 8.3,
+      "subjective_sleep_slider": 6.8,
+      "subjective_mood_slider": 7,
+      "subjective_pain_free_slider": 8.1,
+      "subjective_nutrition_slider": 7.7,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 7,
+      "is_eva_day": true,
+      "calf_smo2_pct": 68.8,
+      "cum_bone_load_g": 141.2,
+      "sleep_hours": 6.9,
+      "blood_sugar_mgdl": 102.2,
+      "resting_hr_bpm": 75.2,
+      "body_temp_c": 36.8,
+      "objective_sensor_score": 76,
+      "subjective_energy_slider": 7.9,
+      "subjective_sleep_slider": 8,
+      "subjective_mood_slider": 7.2,
+      "subjective_pain_free_slider": 5.8,
+      "subjective_nutrition_slider": 9.5,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 8,
+      "is_eva_day": false,
+      "calf_smo2_pct": 73.9,
+      "cum_bone_load_g": 152.2,
+      "sleep_hours": 6.3,
+      "blood_sugar_mgdl": 96.9,
+      "resting_hr_bpm": 69.3,
+      "body_temp_c": 36.6,
+      "objective_sensor_score": 80.9,
+      "subjective_energy_slider": 8,
+      "subjective_sleep_slider": 7,
+      "subjective_mood_slider": 7.3,
+      "subjective_pain_free_slider": 7.9,
+      "subjective_nutrition_slider": 8,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 9,
+      "is_eva_day": false,
+      "calf_smo2_pct": 73.1,
+      "cum_bone_load_g": 166.7,
+      "sleep_hours": 6,
+      "blood_sugar_mgdl": 100.1,
+      "resting_hr_bpm": 71.5,
+      "body_temp_c": 36.8,
+      "objective_sensor_score": 77,
+      "subjective_energy_slider": 7.8,
+      "subjective_sleep_slider": 7,
+      "subjective_mood_slider": 6.8,
+      "subjective_pain_free_slider": 7.8,
+      "subjective_nutrition_slider": 8.1,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 10,
+      "is_eva_day": false,
+      "calf_smo2_pct": 73.7,
+      "cum_bone_load_g": 175.5,
+      "sleep_hours": 5.9,
+      "blood_sugar_mgdl": 96.3,
+      "resting_hr_bpm": 71.4,
+      "body_temp_c": 36.8,
+      "objective_sensor_score": 77,
+      "subjective_energy_slider": 7.7,
+      "subjective_sleep_slider": 6.4,
+      "subjective_mood_slider": 6.1,
+      "subjective_pain_free_slider": 7.7,
+      "subjective_nutrition_slider": 8,
+      "mismatch_detected": false,
+      "masking_detected": false
+    },
+    {
+      "sol": 11,
+      "is_eva_day": true,
+      "calf_smo2_pct": 51.7,
+      "cum_bone_load_g": 219.5,
+      "sleep_hours": 5.6,
+      "blood_sugar_mgdl": 114.9,
+      "resting_hr_bpm": 76.5,
+      "body_temp_c": 36.7,
+      "objective_sensor_score": 48.3,
+      "subjective_energy_slider": 9.4,
+      "subjective_sleep_slider": 8.9,
+      "subjective_mood_slider": 9.2,
+      "subjective_pain_free_slider": 9,
+      "subjective_nutrition_slider": 9.1,
+      "mismatch_detected": true,
+      "masking_detected": true
+    },
+    {
+      "sol": 12,
+      "is_eva_day": false,
+      "calf_smo2_pct": 56.6,
+      "cum_bone_load_g": 227.8,
+      "sleep_hours": 5.7,
+      "blood_sugar_mgdl": 108.6,
+      "resting_hr_bpm": 72.6,
+      "body_temp_c": 36.9,
+      "objective_sensor_score": 42.1,
+      "subjective_energy_slider": 9.1,
+      "subjective_sleep_slider": 9.3,
+      "subjective_mood_slider": 9,
+      "subjective_pain_free_slider": 9.2,
+      "subjective_nutrition_slider": 9.4,
+      "mismatch_detected": true,
+      "masking_detected": true
+    },
+    {
+      "sol": 13,
+      "is_eva_day": false,
+      "calf_smo2_pct": 55.1,
+      "cum_bone_load_g": 238.4,
+      "sleep_hours": 5.3,
+      "blood_sugar_mgdl": 107.1,
+      "resting_hr_bpm": 75.4,
+      "body_temp_c": 36.8,
+      "objective_sensor_score": 47.3,
+      "subjective_energy_slider": 9,
+      "subjective_sleep_slider": 8.8,
+      "subjective_mood_slider": 8.9,
+      "subjective_pain_free_slider": 9.2,
+      "subjective_nutrition_slider": 9.3,
+      "mismatch_detected": true,
+      "masking_detected": true
+    },
+    {
+      "sol": 14,
+      "is_eva_day": true,
+      "calf_smo2_pct": 52.1,
+      "cum_bone_load_g": 266.7,
+      "sleep_hours": 4.9,
+      "blood_sugar_mgdl": 121.8,
+      "resting_hr_bpm": 80.3,
+      "body_temp_c": 36.9,
+      "objective_sensor_score": 38.6,
+      "subjective_energy_slider": 3.5,
+      "subjective_sleep_slider": 5.9,
+      "subjective_mood_slider": 5.5,
+      "subjective_pain_free_slider": 5.1,
+      "subjective_nutrition_slider": 8.1,
+      "mismatch_detected": false,
+      "masking_detected": false
+    }
+  ],
+  "source": "NASA OSDR OSD-783 & OSD-435 / Project A.E.G.I.S.",
+  "route_profile": [
+    {
+      "point_idx": 0,
+      "distance_m": 0,
+      "elevation_m": 796.9,
+      "slope_deg": 20.71
+    },
+    {
+      "point_idx": 1,
+      "distance_m": 50,
+      "elevation_m": 815.4,
+      "slope_deg": 15.36
+    },
+    {
+      "point_idx": 2,
+      "distance_m": 100,
+      "elevation_m": 831.8,
+      "slope_deg": 22.06
+    },
+    {
+      "point_idx": 3,
+      "distance_m": 150,
+      "elevation_m": 848.1,
+      "slope_deg": 16.55
+    },
+    {
+      "point_idx": 4,
+      "distance_m": 200,
+      "elevation_m": 865.9,
+      "slope_deg": 18.5
+    },
+    {
+      "point_idx": 5,
+      "distance_m": 250,
+      "elevation_m": 883.5,
+      "slope_deg": 21.86
+    },
+    {
+      "point_idx": 6,
+      "distance_m": 300,
+      "elevation_m": 900.7,
+      "slope_deg": 12.09
+    },
+    {
+      "point_idx": 7,
+      "distance_m": 350,
+      "elevation_m": 915.7,
+      "slope_deg": 17.75
+    },
+    {
+      "point_idx": 8,
+      "distance_m": 400,
+      "elevation_m": 934.4,
+      "slope_deg": 15.8
+    },
+    {
+      "point_idx": 9,
+      "distance_m": 450,
+      "elevation_m": 950.5,
+      "slope_deg": 20.04
+    },
+    {
+      "point_idx": 10,
+      "distance_m": 500,
+      "elevation_m": 966.7,
+      "slope_deg": 17.96
+    },
+    {
+      "point_idx": 11,
+      "distance_m": 550,
+      "elevation_m": 985.7,
+      "slope_deg": 22.29
+    },
+    {
+      "point_idx": 12,
+      "distance_m": 600,
+      "elevation_m": 1001.7,
+      "slope_deg": 14.76
+    },
+    {
+      "point_idx": 13,
+      "distance_m": 650,
+      "elevation_m": 1015.1,
+      "slope_deg": 18.97
+    },
+    {
+      "point_idx": 14,
+      "distance_m": 700,
+      "elevation_m": 1034,
+      "slope_deg": 19.71
+    },
+    {
+      "point_idx": 15,
+      "distance_m": 750,
+      "elevation_m": 1052.4,
+      "slope_deg": 19.12
+    },
+    {
+      "point_idx": 16,
+      "distance_m": 800,
+      "elevation_m": 1071.1,
+      "slope_deg": 20.86
+    },
+    {
+      "point_idx": 17,
+      "distance_m": 850,
+      "elevation_m": 1090.3,
+      "slope_deg": 17.74
+    },
+    {
+      "point_idx": 18,
+      "distance_m": 900,
+      "elevation_m": 1108.5,
+      "slope_deg": 16.44
+    },
+    {
+      "point_idx": 19,
+      "distance_m": 950,
+      "elevation_m": 1123.7,
+      "slope_deg": 14.76
+    },
+    {
+      "point_idx": 20,
+      "distance_m": 1000,
+      "elevation_m": 1141.4,
+      "slope_deg": 18.79
+    },
+    {
+      "point_idx": 21,
+      "distance_m": 1050,
+      "elevation_m": 1159.6,
+      "slope_deg": 16.77
+    },
+    {
+      "point_idx": 22,
+      "distance_m": 1100,
+      "elevation_m": 1178.7,
+      "slope_deg": 20.28
+    },
+    {
+      "point_idx": 23,
+      "distance_m": 1150,
+      "elevation_m": 1199.6,
+      "slope_deg": 20.8
+    },
+    {
+      "point_idx": 24,
+      "distance_m": 1200,
+      "elevation_m": 1219.5,
+      "slope_deg": 19.12
+    },
+    {
+      "point_idx": 25,
+      "distance_m": 1250,
+      "elevation_m": 1240.3,
+      "slope_deg": 17.66
+    },
+    {
+      "point_idx": 26,
+      "distance_m": 1300,
+      "elevation_m": 1261.7,
+      "slope_deg": 21.89
+    },
+    {
+      "point_idx": 27,
+      "distance_m": 1350,
+      "elevation_m": 1280.4,
+      "slope_deg": 14.16
+    },
+    {
+      "point_idx": 28,
+      "distance_m": 1400,
+      "elevation_m": 1293.9,
+      "slope_deg": 11.48
+    },
+    {
+      "point_idx": 29,
+      "distance_m": 1450,
+      "elevation_m": 1308.5,
+      "slope_deg": 20.51
+    },
+    {
+      "point_idx": 30,
+      "distance_m": 1500,
+      "elevation_m": 1334.9,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 31,
+      "distance_m": 1550,
+      "elevation_m": 1360.4,
+      "slope_deg": 11.19
+    },
+    {
+      "point_idx": 32,
+      "distance_m": 1600,
+      "elevation_m": 1372.4,
+      "slope_deg": 17.4
+    },
+    {
+      "point_idx": 33,
+      "distance_m": 1650,
+      "elevation_m": 1385.3,
+      "slope_deg": 13.54
+    },
+    {
+      "point_idx": 34,
+      "distance_m": 1700,
+      "elevation_m": 1399.6,
+      "slope_deg": 15.1
+    },
+    {
+      "point_idx": 35,
+      "distance_m": 1750,
+      "elevation_m": 1413.1,
+      "slope_deg": 11.65
+    },
+    {
+      "point_idx": 36,
+      "distance_m": 1800,
+      "elevation_m": 1425.9,
+      "slope_deg": 17.98
+    },
+    {
+      "point_idx": 37,
+      "distance_m": 1850,
+      "elevation_m": 1445.2,
+      "slope_deg": 16.17
+    },
+    {
+      "point_idx": 38,
+      "distance_m": 1900,
+      "elevation_m": 1461.4,
+      "slope_deg": 12.67
+    },
+    {
+      "point_idx": 39,
+      "distance_m": 1950,
+      "elevation_m": 1476.1,
+      "slope_deg": 9.19
+    },
+    {
+      "point_idx": 40,
+      "distance_m": 2000,
+      "elevation_m": 1486.6,
+      "slope_deg": 11.42
+    },
+    {
+      "point_idx": 41,
+      "distance_m": 2050,
+      "elevation_m": 1497.6,
+      "slope_deg": 13.1
+    },
+    {
+      "point_idx": 42,
+      "distance_m": 2100,
+      "elevation_m": 1509.3,
+      "slope_deg": 10.84
+    },
+    {
+      "point_idx": 43,
+      "distance_m": 2150,
+      "elevation_m": 1519.5,
+      "slope_deg": 8.52
+    },
+    {
+      "point_idx": 44,
+      "distance_m": 2200,
+      "elevation_m": 1526.2,
+      "slope_deg": 12.32
+    },
+    {
+      "point_idx": 45,
+      "distance_m": 2250,
+      "elevation_m": 1534.8,
+      "slope_deg": 20.69
+    },
+    {
+      "point_idx": 46,
+      "distance_m": 2300,
+      "elevation_m": 1549,
+      "slope_deg": 15.92
+    },
+    {
+      "point_idx": 47,
+      "distance_m": 2350,
+      "elevation_m": 1553.9,
+      "slope_deg": 11.23
+    },
+    {
+      "point_idx": 48,
+      "distance_m": 2400,
+      "elevation_m": 1562.3,
+      "slope_deg": 19.46
+    },
+    {
+      "point_idx": 49,
+      "distance_m": 2450,
+      "elevation_m": 1580,
+      "slope_deg": 10.78
+    },
+    {
+      "point_idx": 50,
+      "distance_m": 2500,
+      "elevation_m": 1594,
+      "slope_deg": 13.71
+    },
+    {
+      "point_idx": 51,
+      "distance_m": 2550,
+      "elevation_m": 1611.1,
+      "slope_deg": 12.39
+    },
+    {
+      "point_idx": 52,
+      "distance_m": 2600,
+      "elevation_m": 1625.7,
+      "slope_deg": 12.13
+    },
+    {
+      "point_idx": 53,
+      "distance_m": 2650,
+      "elevation_m": 1639.5,
+      "slope_deg": 12.94
+    },
+    {
+      "point_idx": 54,
+      "distance_m": 2700,
+      "elevation_m": 1651.1,
+      "slope_deg": 9.99
+    },
+    {
+      "point_idx": 55,
+      "distance_m": 2750,
+      "elevation_m": 1660.9,
+      "slope_deg": 9.98
+    },
+    {
+      "point_idx": 56,
+      "distance_m": 2800,
+      "elevation_m": 1673.2,
+      "slope_deg": 14.08
+    },
+    {
+      "point_idx": 57,
+      "distance_m": 2850,
+      "elevation_m": 1684.4,
+      "slope_deg": 10.18
+    },
+    {
+      "point_idx": 58,
+      "distance_m": 2900,
+      "elevation_m": 1695.2,
+      "slope_deg": 9.2
+    },
+    {
+      "point_idx": 59,
+      "distance_m": 2950,
+      "elevation_m": 1701.9,
+      "slope_deg": 5.9
+    },
+    {
+      "point_idx": 60,
+      "distance_m": 3000,
+      "elevation_m": 1705,
+      "slope_deg": 3.18
+    },
+    {
+      "point_idx": 61,
+      "distance_m": 3050,
+      "elevation_m": 1704,
+      "slope_deg": 2.21
+    },
+    {
+      "point_idx": 62,
+      "distance_m": 3100,
+      "elevation_m": 1698.6,
+      "slope_deg": 16.02
+    },
+    {
+      "point_idx": 63,
+      "distance_m": 3150,
+      "elevation_m": 1683.5,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 64,
+      "distance_m": 3200,
+      "elevation_m": 1665,
+      "slope_deg": 21.88
+    },
+    {
+      "point_idx": 65,
+      "distance_m": 3250,
+      "elevation_m": 1649.7,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 66,
+      "distance_m": 3300,
+      "elevation_m": 1633.2,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 67,
+      "distance_m": 3350,
+      "elevation_m": 1612.6,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 68,
+      "distance_m": 3400,
+      "elevation_m": 1587.6,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 69,
+      "distance_m": 3450,
+      "elevation_m": 1563.6,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 70,
+      "distance_m": 3500,
+      "elevation_m": 1539.5,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 71,
+      "distance_m": 3550,
+      "elevation_m": 1515.1,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 72,
+      "distance_m": 3600,
+      "elevation_m": 1490.5,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 73,
+      "distance_m": 3650,
+      "elevation_m": 1461.9,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 74,
+      "distance_m": 3700,
+      "elevation_m": 1435.6,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 75,
+      "distance_m": 3750,
+      "elevation_m": 1409.7,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 76,
+      "distance_m": 3800,
+      "elevation_m": 1384.9,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 77,
+      "distance_m": 3850,
+      "elevation_m": 1363.7,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 78,
+      "distance_m": 3900,
+      "elevation_m": 1341.6,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 79,
+      "distance_m": 3950,
+      "elevation_m": 1314.8,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 80,
+      "distance_m": 4000,
+      "elevation_m": 1287.3,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 81,
+      "distance_m": 4050,
+      "elevation_m": 1260.6,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 82,
+      "distance_m": 4100,
+      "elevation_m": 1235.7,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 83,
+      "distance_m": 4150,
+      "elevation_m": 1207.2,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 84,
+      "distance_m": 4200,
+      "elevation_m": 1179,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 85,
+      "distance_m": 4250,
+      "elevation_m": 1153.1,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 86,
+      "distance_m": 4300,
+      "elevation_m": 1125.3,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 87,
+      "distance_m": 4350,
+      "elevation_m": 1096,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 88,
+      "distance_m": 4400,
+      "elevation_m": 1067.7,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 89,
+      "distance_m": 4450,
+      "elevation_m": 1040.2,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 90,
+      "distance_m": 4500,
+      "elevation_m": 1012.7,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 91,
+      "distance_m": 4550,
+      "elevation_m": 984.3,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 92,
+      "distance_m": 4600,
+      "elevation_m": 956.6,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 93,
+      "distance_m": 4650,
+      "elevation_m": 934,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 94,
+      "distance_m": 4700,
+      "elevation_m": 903.1,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 95,
+      "distance_m": 4750,
+      "elevation_m": 875.6,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 96,
+      "distance_m": 4800,
+      "elevation_m": 851.6,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 97,
+      "distance_m": 4850,
+      "elevation_m": 826.4,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 98,
+      "distance_m": 4900,
+      "elevation_m": 799.5,
+      "slope_deg": 22.5
+    },
+    {
+      "point_idx": 99,
+      "distance_m": 4950,
+      "elevation_m": 768,
+      "slope_deg": 22.5
+    }
+  ]
+}

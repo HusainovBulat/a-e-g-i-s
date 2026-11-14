@@ -1,0 +1,16 @@
+{
+  "type": "event",
+  "ts": "2026-11-14T15:29:21.007+00:00",
+  "crew": "Crew_A",
+  "data": {
+    "id": 2,
+    "time": "15:29",
+    "ts": "2026-11-14T15:29:21",
+    "type": "scenario",
+    "crew": "Crew_A",
+    "text": "15:29 Crew A scenario: Steep Crater Climb (LRO LOLA +18°)",
+    "data": {
+      "scenario": "steep_climb"
+    }
+  }
+}

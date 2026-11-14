@@ -1,0 +1,683 @@
+{
+  "type": "hello",
+  "ts": "2026-11-14T15:29:20.482+00:00",
+  "data": {
+    "crews": {
+      "Crew_A": {
+        "crew": "Crew_A",
+        "t": 0.274,
+        "env": "lunar_base_habitat",
+        "environment": {
+          "environment_id": "lunar_base_habitat",
+          "display_name": "Lunar Base Habitat (1/6g)",
+          "gravity_g": 0.166,
+          "hazards": {
+            "radiation": "low",
+            "isolation": 0.4,
+            "distance_delay_s": 1.3,
+            "altered_gravity": "1/6g lunar gravity",
+            "hostile_environment": "Pressurized habitat with airlock scrubbers"
+          },
+          "baseline_shift": {
+            "hr": 1,
+            "bp_sys": 0,
+            "smo2": 0,
+            "cortisol": 3
+          }
+        },
+        "vitals": {
+          "hr": 68,
+          "sys": 116,
+          "dia": 74,
+          "spo2": 99,
+          "resp": 14,
+          "st": 0,
+          "temp": 36.6,
+          "blood_sugar_mgdl": 90,
+          "smo2": 82,
+          "emg_mdf": 0,
+          "gait": 0.15,
+          "slope": 0,
+          "speed": 0,
+          "o2_left": 750,
+          "fall": 0,
+          "nirs_ok": 1,
+          "dizzy": 0
+        },
+        "organ_scores": {
+          "cns_brain": {
+            "name": "Head / Brain (CNS)",
+            "score": 65.8,
+            "band": "amber",
+            "key_metrics": {
+              "sleep_index": 59,
+              "mood_index": 55,
+              "gait_tremor_sd": 0.15
+            }
+          },
+          "cardiovascular": {
+            "name": "Heart & Vessels",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "hr_bpm": 68,
+              "bp_sys_mmhg": 116,
+              "bp_dia_mmhg": 74,
+              "st_elevation_mv": 0,
+              "st_elevation_mm": 0
+            }
+          },
+          "respiratory": {
+            "name": "Lungs & Respiration",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "spo2_pct": 99,
+              "resp_rate_bpm": 14,
+              "co2_pp_mmhg": 2.5
+            }
+          },
+          "immune_thermo": {
+            "name": "Immune & Thermoregulation",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "body_temp_c": 36.6,
+              "temp_status": "nominal"
+            }
+          },
+          "metabolic_nutrition": {
+            "name": "Nutrition & Metabolism",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "blood_sugar_mgdl": 90,
+              "unit": "mg/dL"
+            }
+          },
+          "musculoskeletal": {
+            "name": "Legs, Muscles & Bones",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "calf_smo2_pct": 82,
+              "effective_smo2_pct": 82
+            }
+          }
+        },
+        "composite_score": 94.9,
+        "composite_band": "green",
+        "model_a": {
+          "fatigue_score": 9.9,
+          "fatigue_rate_per_min": null,
+          "legs_fail_in_min": null,
+          "calf_smo2_pct": 82,
+          "nirs_desat_slope": 0,
+          "semg_mdf_shift_pct": 0,
+          "gait_wobble": 0.15,
+          "nirs_fogged": false,
+          "model": "model_a_full"
+        },
+        "model_b": {
+          "metabolic_rate_watts": 154,
+          "o2_burn_rate_l_min": 0.47,
+          "o2_left_l": 750,
+          "o2_left_pct": 100,
+          "slope_deg": 0,
+          "speed_kmh": 0,
+          "model": "resting_suited"
+        },
+        "walk_back": null,
+        "route_position": null,
+        "traffic_light": "green",
+        "alerts": [],
+        "visor": {
+          "light": "green",
+          "timer": null,
+          "instruction": "NOMINAL",
+          "line": "🟢 NOMINAL",
+          "dim_non_essential": false
+        },
+        "name": "Astronaut A",
+        "role": "EVA Specialist",
+        "source": "idle",
+        "scenario": null,
+        "alarm": null,
+        "fall_countdown_s": null,
+        "packets_received": 1,
+        "has_triage": false,
+        "evening_readiness": null
+      },
+      "Crew_B": {
+        "crew": "Crew_B",
+        "t": 0.276,
+        "env": "lunar_base_habitat",
+        "environment": {
+          "environment_id": "lunar_base_habitat",
+          "display_name": "Lunar Base Habitat (1/6g)",
+          "gravity_g": 0.166,
+          "hazards": {
+            "radiation": "low",
+            "isolation": 0.4,
+            "distance_delay_s": 1.3,
+            "altered_gravity": "1/6g lunar gravity",
+            "hostile_environment": "Pressurized habitat with airlock scrubbers"
+          },
+          "baseline_shift": {
+            "hr": 1,
+            "bp_sys": 0,
+            "smo2": 0,
+            "cortisol": 3
+          }
+        },
+        "vitals": {
+          "hr": 68,
+          "sys": 116,
+          "dia": 74,
+          "spo2": 99,
+          "resp": 14,
+          "st": 0,
+          "temp": 36.6,
+          "blood_sugar_mgdl": 90,
+          "smo2": 82,
+          "emg_mdf": 0,
+          "gait": 0.15,
+          "slope": 0,
+          "speed": 0,
+          "o2_left": 750,
+          "fall": 0,
+          "nirs_ok": 1,
+          "dizzy": 0
+        },
+        "organ_scores": {
+          "cns_brain": {
+            "name": "Head / Brain (CNS)",
+            "score": 67.3,
+            "band": "amber",
+            "key_metrics": {
+              "sleep_index": 60,
+              "mood_index": 58,
+              "gait_tremor_sd": 0.15
+            }
+          },
+          "cardiovascular": {
+            "name": "Heart & Vessels",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "hr_bpm": 68,
+              "bp_sys_mmhg": 116,
+              "bp_dia_mmhg": 74,
+              "st_elevation_mv": 0,
+              "st_elevation_mm": 0
+            }
+          },
+          "respiratory": {
+            "name": "Lungs & Respiration",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "spo2_pct": 99,
+              "resp_rate_bpm": 14,
+              "co2_pp_mmhg": 2.5
+            }
+          },
+          "immune_thermo": {
+            "name": "Immune & Thermoregulation",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "body_temp_c": 36.6,
+              "temp_status": "nominal"
+            }
+          },
+          "metabolic_nutrition": {
+            "name": "Nutrition & Metabolism",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "blood_sugar_mgdl": 90,
+              "unit": "mg/dL"
+            }
+          },
+          "musculoskeletal": {
+            "name": "Legs, Muscles & Bones",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "calf_smo2_pct": 82,
+              "effective_smo2_pct": 82
+            }
+          }
+        },
+        "composite_score": 95.1,
+        "composite_band": "green",
+        "model_a": {
+          "fatigue_score": 9.9,
+          "fatigue_rate_per_min": null,
+          "legs_fail_in_min": null,
+          "calf_smo2_pct": 82,
+          "nirs_desat_slope": 0,
+          "semg_mdf_shift_pct": 0,
+          "gait_wobble": 0.15,
+          "nirs_fogged": false,
+          "model": "model_a_full"
+        },
+        "model_b": {
+          "metabolic_rate_watts": 154,
+          "o2_burn_rate_l_min": 0.47,
+          "o2_left_l": 750,
+          "o2_left_pct": 100,
+          "slope_deg": 0,
+          "speed_kmh": 0,
+          "model": "resting_suited"
+        },
+        "walk_back": null,
+        "route_position": null,
+        "traffic_light": "green",
+        "alerts": [],
+        "visor": {
+          "light": "green",
+          "timer": null,
+          "instruction": "NOMINAL",
+          "line": "🟢 NOMINAL",
+          "dim_non_essential": false
+        },
+        "name": "Astronaut B",
+        "role": "Systems Engineer",
+        "source": "idle",
+        "scenario": null,
+        "alarm": null,
+        "fall_countdown_s": null,
+        "packets_received": 1,
+        "has_triage": false,
+        "evening_readiness": null
+      },
+      "Crew_C": {
+        "crew": "Crew_C",
+        "t": 0.277,
+        "env": "lunar_base_habitat",
+        "environment": {
+          "environment_id": "lunar_base_habitat",
+          "display_name": "Lunar Base Habitat (1/6g)",
+          "gravity_g": 0.166,
+          "hazards": {
+            "radiation": "low",
+            "isolation": 0.4,
+            "distance_delay_s": 1.3,
+            "altered_gravity": "1/6g lunar gravity",
+            "hostile_environment": "Pressurized habitat with airlock scrubbers"
+          },
+          "baseline_shift": {
+            "hr": 1,
+            "bp_sys": 0,
+            "smo2": 0,
+            "cortisol": 3
+          }
+        },
+        "vitals": {
+          "hr": 68,
+          "sys": 116,
+          "dia": 74,
+          "spo2": 99,
+          "resp": 14,
+          "st": 0,
+          "temp": 36.6,
+          "blood_sugar_mgdl": 90,
+          "smo2": 82,
+          "emg_mdf": 0,
+          "gait": 0.15,
+          "slope": 0,
+          "speed": 0,
+          "o2_left": 750,
+          "fall": 0,
+          "nirs_ok": 1,
+          "dizzy": 0
+        },
+        "organ_scores": {
+          "cns_brain": {
+            "name": "Head / Brain (CNS)",
+            "score": 70.1,
+            "band": "amber",
+            "key_metrics": {
+              "sleep_index": 67,
+              "mood_index": 57,
+              "gait_tremor_sd": 0.15
+            }
+          },
+          "cardiovascular": {
+            "name": "Heart & Vessels",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "hr_bpm": 68,
+              "bp_sys_mmhg": 116,
+              "bp_dia_mmhg": 74,
+              "st_elevation_mv": 0,
+              "st_elevation_mm": 0
+            }
+          },
+          "respiratory": {
+            "name": "Lungs & Respiration",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "spo2_pct": 99,
+              "resp_rate_bpm": 14,
+              "co2_pp_mmhg": 2.5
+            }
+          },
+          "immune_thermo": {
+            "name": "Immune & Thermoregulation",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "body_temp_c": 36.6,
+              "temp_status": "nominal"
+            }
+          },
+          "metabolic_nutrition": {
+            "name": "Nutrition & Metabolism",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "blood_sugar_mgdl": 90,
+              "unit": "mg/dL"
+            }
+          },
+          "musculoskeletal": {
+            "name": "Legs, Muscles & Bones",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "calf_smo2_pct": 82,
+              "effective_smo2_pct": 82
+            }
+          }
+        },
+        "composite_score": 95.5,
+        "composite_band": "green",
+        "model_a": {
+          "fatigue_score": 9.9,
+          "fatigue_rate_per_min": null,
+          "legs_fail_in_min": null,
+          "calf_smo2_pct": 82,
+          "nirs_desat_slope": 0,
+          "semg_mdf_shift_pct": 0,
+          "gait_wobble": 0.15,
+          "nirs_fogged": false,
+          "model": "model_a_full"
+        },
+        "model_b": {
+          "metabolic_rate_watts": 154,
+          "o2_burn_rate_l_min": 0.47,
+          "o2_left_l": 750,
+          "o2_left_pct": 100,
+          "slope_deg": 0,
+          "speed_kmh": 0,
+          "model": "resting_suited"
+        },
+        "walk_back": null,
+        "route_position": null,
+        "traffic_light": "green",
+        "alerts": [],
+        "visor": {
+          "light": "green",
+          "timer": null,
+          "instruction": "NOMINAL",
+          "line": "🟢 NOMINAL",
+          "dim_non_essential": false
+        },
+        "name": "Astronaut C",
+        "role": "Flight Surgeon",
+        "source": "idle",
+        "scenario": null,
+        "alarm": null,
+        "fall_countdown_s": null,
+        "packets_received": 1,
+        "has_triage": false,
+        "evening_readiness": null
+      },
+      "Crew_D": {
+        "crew": "Crew_D",
+        "t": 0.277,
+        "env": "lunar_base_habitat",
+        "environment": {
+          "environment_id": "lunar_base_habitat",
+          "display_name": "Lunar Base Habitat (1/6g)",
+          "gravity_g": 0.166,
+          "hazards": {
+            "radiation": "low",
+            "isolation": 0.4,
+            "distance_delay_s": 1.3,
+            "altered_gravity": "1/6g lunar gravity",
+            "hostile_environment": "Pressurized habitat with airlock scrubbers"
+          },
+          "baseline_shift": {
+            "hr": 1,
+            "bp_sys": 0,
+            "smo2": 0,
+            "cortisol": 3
+          }
+        },
+        "vitals": {
+          "hr": 68,
+          "sys": 116,
+          "dia": 74,
+          "spo2": 99,
+          "resp": 14,
+          "st": 0,
+          "temp": 36.6,
+          "blood_sugar_mgdl": 90,
+          "smo2": 82,
+          "emg_mdf": 0,
+          "gait": 0.15,
+          "slope": 0,
+          "speed": 0,
+          "o2_left": 750,
+          "fall": 0,
+          "nirs_ok": 1,
+          "dizzy": 0
+        },
+        "organ_scores": {
+          "cns_brain": {
+            "name": "Head / Brain (CNS)",
+            "score": 66.8,
+            "band": "amber",
+            "key_metrics": {
+              "sleep_index": 59,
+              "mood_index": 58,
+              "gait_tremor_sd": 0.15
+            }
+          },
+          "cardiovascular": {
+            "name": "Heart & Vessels",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "hr_bpm": 68,
+              "bp_sys_mmhg": 116,
+              "bp_dia_mmhg": 74,
+              "st_elevation_mv": 0,
+              "st_elevation_mm": 0
+            }
+          },
+          "respiratory": {
+            "name": "Lungs & Respiration",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "spo2_pct": 99,
+              "resp_rate_bpm": 14,
+              "co2_pp_mmhg": 2.5
+            }
+          },
+          "immune_thermo": {
+            "name": "Immune & Thermoregulation",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "body_temp_c": 36.6,
+              "temp_status": "nominal"
+            }
+          },
+          "metabolic_nutrition": {
+            "name": "Nutrition & Metabolism",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "blood_sugar_mgdl": 90,
+              "unit": "mg/dL"
+            }
+          },
+          "musculoskeletal": {
+            "name": "Legs, Muscles & Bones",
+            "score": 100,
+            "band": "green",
+            "key_metrics": {
+              "calf_smo2_pct": 82,
+              "effective_smo2_pct": 82
+            }
+          }
+        },
+        "composite_score": 95,
+        "composite_band": "green",
+        "model_a": {
+          "fatigue_score": 9.9,
+          "fatigue_rate_per_min": null,
+          "legs_fail_in_min": null,
+          "calf_smo2_pct": 82,
+          "nirs_desat_slope": 0,
+          "semg_mdf_shift_pct": 0,
+          "gait_wobble": 0.15,
+          "nirs_fogged": false,
+          "model": "model_a_full"
+        },
+        "model_b": {
+          "metabolic_rate_watts": 154,
+          "o2_burn_rate_l_min": 0.47,
+          "o2_left_l": 750,
+          "o2_left_pct": 100,
+          "slope_deg": 0,
+          "speed_kmh": 0,
+          "model": "resting_suited"
+        },
+        "walk_back": null,
+        "route_position": null,
+        "traffic_light": "green",
+        "alerts": [],
+        "visor": {
+          "light": "green",
+          "timer": null,
+          "instruction": "NOMINAL",
+          "line": "🟢 NOMINAL",
+          "dim_non_essential": false
+        },
+        "name": "Astronaut D",
+        "role": "Geology Specialist",
+        "source": "idle",
+        "scenario": null,
+        "alarm": null,
+        "fall_countdown_s": null,
+        "packets_received": 1,
+        "has_triage": false,
+        "evening_readiness": null
+      }
+    },
+    "events": [
+      {
+        "id": 1,
+        "time": "15:29",
+        "ts": "2026-11-14T15:29:20",
+        "type": "reset",
+        "crew": null,
+        "text": "15:29 Reset all — nominal baseline restored for all crew",
+        "data": {}
+      }
+    ],
+    "scenarios": [
+      "normal_walk",
+      "steep_climb",
+      "fall_in_crater",
+      "chest_pain",
+      "tired_says_fine",
+      "reset_all"
+    ],
+    "environments": [
+      "spacecraft_mars_transit",
+      "space_station_orbital",
+      "pressurized_rover",
+      "lunar_base_habitat",
+      "surface_eva_spacesuit"
+    ],
+    "models": {
+      "model_a_full": {
+        "name": "model_a_full",
+        "source": "trained_from_csv",
+        "features": [
+          "calf_smo2_pct",
+          "nirs_desat_slope",
+          "semg_mdf_shift_pct",
+          "imu_gait_asymmetry"
+        ],
+        "metrics": {
+          "holdout_mae": 1.72,
+          "holdout_r2": 0.9951,
+          "algorithm": "LightGBM Monotonic Regressor"
+        }
+      },
+      "model_a_fallback": {
+        "name": "model_a_fallback",
+        "source": "trained_from_csv",
+        "features": [
+          "semg_mdf_shift_pct",
+          "imu_gait_asymmetry",
+          "hr_bpm"
+        ],
+        "metrics": {
+          "holdout_mae": 1.97,
+          "holdout_r2": 0.9936,
+          "algorithm": "LightGBM Monotonic Regressor"
+        }
+      },
+      "model_b_metabolic": {
+        "name": "model_b_metabolic",
+        "source": "trained_from_csv",
+        "features": [
+          "speed_kmh",
+          "slope_deg",
+          "muscle_fatigue_score"
+        ],
+        "metrics": {
+          "holdout_mae_w": 10.6,
+          "holdout_r2": 0.9772,
+          "algorithm": "LightGBM Monotonic Regressor"
+        }
+      },
+      "model_c_triage": {
+        "name": "model_c_triage",
+        "source": "trained_from_csv",
+        "features": [
+          "hr",
+          "bp_sys",
+          "bp_dia",
+          "spo2",
+          "resp_rate",
+          "st_elevation_mv",
+          "temp",
+          "chest_pain",
+          "dizzy",
+          "short_breath",
+          "cold_sweat",
+          "fall_event"
+        ],
+        "metrics": {
+          "holdout_accuracy": 1,
+          "holdout_accuracy_missing_symptoms": 1,
+          "algorithm": "LightGBM + Explainability Tree Surrogate"
+        }
+      }
+    },
+    "consoles_connected": 2
+  }
+}

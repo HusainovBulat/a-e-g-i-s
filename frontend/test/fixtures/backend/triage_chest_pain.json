@@ -1,0 +1,90 @@
+{
+  "primary_class": "Acute Coronary Ischemia",
+  "confidence": 1,
+  "ranked_other_classes": [
+    {
+      "class": "Orthostatic Syncope",
+      "probability": 0
+    },
+    {
+      "class": "Decompression Barotrauma",
+      "probability": 0
+    },
+    {
+      "class": "Nominal",
+      "probability": 0
+    },
+    {
+      "class": "Hypercapnia CO2",
+      "probability": 0
+    }
+  ],
+  "tree_path_why": "SpO2 94.5 > 87.2 + ST elevation (mV) 0.286 > 0.123 → Acute Coronary Ischemia",
+  "dont_give_list": [
+    {
+      "drug": "Nitroglycerin",
+      "reason": "BP 82/50 < 90 mmHg",
+      "banner": "⛔ DON'T GIVE NITROGLYCERIN (BP 82/50 < 90 mmHg)",
+      "spoken": "Do not give nitroglycerin. Blood pressure is too low."
+    }
+  ],
+  "protocol_name": "Acute Coronary Ischemia Emergency Response",
+  "protocol_steps": [
+    {
+      "step": 1,
+      "title": "Patient Posture & High-Flow Oxygen",
+      "action": "Place astronaut in semi-sitting position (45°). Administer high-flow 100% O2.",
+      "status": "ready"
+    },
+    {
+      "step": 2,
+      "title": "⛔ NITROGLYCERIN CONTRAINDICATED (BP < 90)",
+      "action": "DO NOT GIVE NITROGLYCERIN! Administer chewable Aspirin (325 mg) ONLY. Monitor BP closely.",
+      "status": "blocked",
+      "warning": "⛔ HARD-BLOCK: DO NOT ADMINISTER NITROGLYCERIN! Systolic BP is critically low (82 mmHg < 90 mmHg). High risk of fatal cardiogenic collapse!"
+    },
+    {
+      "step": 3,
+      "title": "Automated External Defibrillator (AED)",
+      "action": "Retrieve AED from Bay B2. Attach pads in antero-apical configuration. Stand by for rhythm analysis.",
+      "status": "standby"
+    }
+  ],
+  "interlocks": {
+    "dont_give_nitro": true,
+    "nitro_contraindication_banner": "⛔ HARD-BLOCK: DO NOT ADMINISTER NITROGLYCERIN! Systolic BP is critically low (82 mmHg < 90 mmHg). High risk of fatal cardiogenic collapse!",
+    "trigger_o2_surge": false,
+    "o2_alert": null,
+    "trigger_co2_purge": false,
+    "co2_alert": null
+  },
+  "warnings": [
+    "⛔ HARD-BLOCK: DO NOT ADMINISTER NITROGLYCERIN! Systolic BP is critically low (82 mmHg < 90 mmHg). High risk of fatal cardiogenic collapse!"
+  ],
+  "flight_surgeons_queued": true,
+  "flight_surgeons_reasons": [
+    "Primary class is Acute Coronary Ischemia"
+  ],
+  "flight_surgeons_badge": "📡 Queued for Flight Surgeons on Earth",
+  "ultrasound_attached": false,
+  "symptom_flags": {
+    "chest_pain": true,
+    "dizzy": true,
+    "short_breath": false,
+    "cold_sweat": true,
+    "fall_event": false
+  },
+  "vitals_used": {
+    "hr": 118,
+    "sys": 82,
+    "dia": 50,
+    "spo2": 94.5,
+    "resp": 24,
+    "st_mv": 0.286,
+    "temp": 36.8
+  },
+  "spoken_text": "Suspected Acute Coronary Ischemia. Do not give nitroglycerin. Blood pressure is too low. Step 1: Patient Posture & High-Flow Oxygen. Step 2: ⛔ NITROGLYCERIN CONTRAINDICATED (BP < 90). Step 3: Automated External Defibrillator (AED).",
+  "model": "model_c_triage (trained_from_csv)",
+  "crew": "Crew_A",
+  "trigger": "console"
+}

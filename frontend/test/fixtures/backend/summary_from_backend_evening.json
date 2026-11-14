@@ -1,0 +1,24 @@
+{
+  "source": "DETERMINISTIC_FALLBACK_TEMPLATE",
+  "fallback_reason": "NO_GROQ_API_KEY",
+  "masking_detected": true,
+  "mismatch_detected": true,
+  "schedule_action": "SWAP_SCHEDULE",
+  "recommended_replacement": "Crew_B (Systems Engineer, EVA Readiness: 89/100)",
+  "badge_text": "🔴 PROHIBITED: SCHEDULE SWAP MANDATED",
+  "badge_color": "#EF4444",
+  "commander_summary": "### 📋 MISSION COMMANDER OPERATIONAL BRIEFING (Sol 14)\n\n**Crewmember:** Astronaut A (EVA Specialist)\n**Crater EVA Clearance:** 🔴 **PROHIBITED (EVA Clearance Revoked)**\n**Readiness Score:** `18.8/100` (NASA-STD-3001 Threshold: $\\ge 85.0$)\n\n**⚠️ DISQUALIFICATION CAUSE:**\nCritical psychological masking detected (**Masking / Mismatch Detected**, discrepancy $\\Delta = +76.2$ pts). Subjective energy self-report (9.0/10) severely contradicts objective biometric smart base-layer telemetry (calf muscle oxygenation $\\text{SmO}_2 = 40.8\\%$, objective status score `13.8/100`).\n\n**📖 NASA-STD-3001 COMPLIANCE (Sections 4.2 & 4.3):**\n*\"Any identified discrepancy between subjective reporting and objective biometrics mandates Commander schedule reassignment. EVA sortie authorization is strictly barred at Readiness < 85.\"*\n\n**🎯 COMMANDER DIRECTIVE & COUNTERMEASURES:**\n1. **Schedule Rotation:** Reassign tomorrow's lunar crater EVA to primary backup — **Crew_B (Systems Engineer, EVA Readiness: 89/100)**.\n2. **Prescribed Recovery Protocol for Crew_A:** 40 min soleus pneumatic compression + isotonic electrolyte rehydration + minimum 8 hrs sleep.\n3. **Telemetry Downlink:** Flight telemetry burst queued for Ground Flight Surgeons (`Flight Surgeons Queue`).",
+  "standard_citations": [
+    "NASA-STD-3001 Vol 1 Section 4.2 (EVA Readiness >= 85)",
+    "NASA-STD-3001 Vol 1 Section 4.3 (Musculoskeletal Conditioning)"
+  ],
+  "latency_ms": 0.4,
+  "crew": "Crew_A",
+  "recommended_crew": {
+    "crew": "Crew_C",
+    "name": "Astronaut C",
+    "role": "Flight Surgeon",
+    "objective_score": 72.5
+  },
+  "readiness_score": 18.8
+}

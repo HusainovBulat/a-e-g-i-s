@@ -83,3 +83,15 @@ Consoles can send `{"type":"ping"}`, `{"type":"get_state"}`, `{"type":"event", "
 | `GET /route`, `GET /thresholds`, `GET /standards`, `GET /info` (LAN URLs for QR), `GET /health` | data |
 
 Crew ids accept `Crew_A`, `A`, `crew a`.
+
+## Tests
+
+```bash
+python -m pytest -q tests            # backend (models, API, WebSockets, engine)
+cd frontend && npm test              # console: API adapter, WS mapping, Mode 2, phone simulator, voice, motion
+npm run typecheck
+```
+
+Frontend contract tests run against **real Base Server responses** in `frontend/test/fixtures/backend/`.
+After changing the backend API, start the server and re-capture them with `npm run test:fixtures`.
+Tests marked `it.fails` document known frontend bugs: when a bug is fixed, that test starts failing — switch it to `it`.

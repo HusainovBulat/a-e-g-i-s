@@ -1,0 +1,9 @@
+{
+  "type": "fall_countdown",
+  "ts": "2026-11-14T15:30:03.059+00:00",
+  "crew": "Crew_C",
+  "data": {
+    "crew": "Crew_C",
+    "seconds": 30
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "type": "alarm_jump_to_emergency",
+  "ts": "2026-11-14T15:30:01.039+00:00",
+  "crew": "Crew_B",
+  "data": {
+    "crew": "Crew_B",
+    "reasons": [
+      "st_elevation",
+      "hypotension"
+    ],
+    "triage": {
+      "primary_class": "Acute Coronary Ischemia",
+      "confidence": 1,
+      "ranked_other_classes": [
+        {
+          "class": "Orthostatic Syncope",
+          "probability": 0
+        },
+        {
+          "class": "Decompression Barotrauma",
+          "probability": 0
+        },
+        {
+          "class": "Nominal",
+          "probability": 0
+        },
+        {
+          "class": "Hypercapnia CO2",
+          "probability": 0
+        }
+      ],
+      "tree_path_why": "SpO2 94.4 > 87.2 + ST elevation (mV) 0.289 > 0.123 → Acute Coronary Ischemia",
+      "dont_give_list": [
+        {
+          "drug": "Nitroglycerin",
+          "reason": "BP 81/54 < 90 mmHg",
+          "banner": "⛔ DON'T GIVE NITROGLYCERIN (BP 81/54 < 90 mmHg)",
+          "spoken": "Do not give nitroglycerin. Blood pressure is too low."
+        }
+      ],
+      "protocol_name": "Acute Coronary Ischemia Emergency Response",
+      "protocol_steps": [
+        {
+          "step": 1,
+          "title": "Patient Posture & High-Flow Oxygen",
+          "action": "Place astronaut in semi-sitting position (45°). Administer high-flow 100% O2.",
+          "status": "ready"
+        },
+        {
+          "step": 2,
+          "title": "⛔ NITROGLYCERIN CONTRAINDICATED (BP < 90)",
+          "action": "DO NOT GIVE NITROGLYCERIN! Administer chewable Aspirin (325 mg) ONLY. Monitor BP closely.",
+          "status": "blocked",
+          "warning": "⛔ HARD-BLOCK: DO NOT ADMINISTER NITROGLYCERIN! Systolic BP is critically low (81 mmHg < 90 mmHg). High risk of fatal cardiogenic collapse!"
+        },
+        {
+          "step": 3,
+          "title": "Automated External Defibrillator (AED)",
+          "action": "Retrieve AED from Bay B2. Attach pads in antero-apical configuration. Stand by for rhythm analysis.",
+          "status": "standby"
+        }
+      ],
+      "interlocks": {
+        "dont_give_nitro": true,
+        "nitro_contraindication_banner": "⛔ HARD-BLOCK: DO NOT ADMINISTER NITROGLYCERIN! Systolic BP is critically low (81 mmHg < 90 mmHg). High risk of fatal cardiogenic collapse!",
+        "trigger_o2_surge": false,
+        "o2_alert": null,
+        "trigger_co2_purge": false,
+        "co2_alert": null
+      },
+      "warnings": [
+        "⛔ HARD-BLOCK: DO NOT ADMINISTER NITROGLYCERIN! Systolic BP is critically low (81 mmHg < 90 mmHg). High risk of fatal cardiogenic collapse!"
+      ],
+      "flight_surgeons_queued": true,
+      "flight_surgeons_reasons": [
+        "Primary class is Acute Coronary Ischemia"
+      ],
+      "flight_surgeons_badge": "📡 Queued for Flight Surgeons on Earth",
+      "ultrasound_attached": false,
+      "symptom_flags": {
+        "chest_pain": true,
+        "dizzy": true,
+        "short_breath": true,
+        "cold_sweat": true,
+        "fall_event": false
+      },
+      "vitals_used": {
+        "hr": 118.2,
+        "sys": 80.6,
+        "dia": 54.5,
+        "spo2": 94.4,
+        "resp": 24.7,
+        "st_mv": 0.289,
+        "temp": 36.79
+      },
+      "spoken_text": "Suspected Acute Coronary Ischemia. Do not give nitroglycerin. Blood pressure is too low. Step 1: Patient Posture & High-Flow Oxygen. Step 2: ⛔ NITROGLYCERIN CONTRAINDICATED (BP < 90). Step 3: Automated External Defibrillator (AED).",
+      "model": "model_c_triage (trained_from_csv)",
+      "crew": "Crew_B",
+      "trigger": "auto"
+    },
+    "state": {
+      "crew": "Crew_B",
+      "t": 40.845,
+      "env": "surface_eva_spacesuit",
+      "environment": {
+        "environment_id": "surface_eva_spacesuit",
+        "display_name": "Surface EVA Spacesuit (1/6g Crater)",
+        "gravity_g": 0.166,
+        "hazards": {
+          "radiation": "high",
+          "isolation": 0.8,
+          "distance_delay_s": 1.3,
+          "altered_gravity": "1/6g lunar locomotion in pressurized suit (4.3 psi)",
+          "hostile_environment": "Extreme thermal swings (-130°C to +120°C), abrasive dust, hard vacuum"
+        },
+        "baseline_shift": {
+          "hr": 15,
+          "bp_sys": 8,
+          "smo2": -8,
+          "cortisol": 25
+        }
+      },
+      "vitals": {
+        "hr": 118.2,
+        "sys": 80.6,
+        "dia": 54.5,
+        "spo2": 94.4,
+        "resp": 24.7,
+        "st": 0.289,
+        "temp": 36.79,
+        "blood_sugar_mgdl": 104,
+        "smo2": 62.6,
+        "emg_mdf": -5,
+        "gait": 0.35,
+        "slope": 4,
+        "speed": 0.5,
+        "o2_left": 550,
+        "fall": 0,
+        "nirs_ok": 1,
+        "dizzy": 1
+      },
+      "organ_scores": {
+        "cns_brain": {
+          "name": "Head / Brain (CNS)",
+          "score": 67.3,
+          "band": "amber",
+          "key_metrics": {
+            "sleep_index": 60,
+            "mood_index": 58,
+            "gait_tremor_sd": 0.35
+          }
+        },
+        "cardiovascular": {
+          "name": "Heart & Vessels",
+          "score": 0,
+          "band": "red",
+          "key_metrics": {
+            "hr_bpm": 118.2,
+            "bp_sys_mmhg": 80.6,
+            "bp_dia_mmhg": 54.5,
+            "st_elevation_mv": 0.289,
+            "st_elevation_mm": 2.89
+          }
+        },
+        "respiratory": {
+          "name": "Lungs & Respiration",
+          "score": 84.7,
+          "band": "green",
+          "key_metrics": {
+            "spo2_pct": 94.4,
+            "resp_rate_bpm": 24.7,
+            "co2_pp_mmhg": 2.5
+          }
+        },
+        "immune_thermo": {
+          "name": "Immune & Thermoregulation",
+          "score": 100,
+          "band": "green",
+          "key_metrics": {
+            "body_temp_c": 36.79,
+            "temp_status": "nominal"
+          }
+        },
+        "metabolic_nutrition": {
+          "name": "Nutrition & Metabolism",
+          "score": 100,
+          "band": "green",
+          "key_metrics": {
+            "blood_sugar_mgdl": 104,
+            "unit": "mg/dL"
+          }
+        },
+        "musculoskeletal": {
+          "name": "Legs, Muscles & Bones",
+          "score": 88.2,
+          "band": "green",
+          "key_metrics": {
+            "calf_smo2_pct": 62.6,
+            "effective_smo2_pct": 70.6
+          }
+        }
+      },
+      "composite_score": 64.5,
+      "composite_band": "amber",
+      "model_a": {
+        "fatigue_score": 42.7,
+        "fatigue_rate_per_min": null,
+        "legs_fail_in_min": null,
+        "calf_smo2_pct": 62.6,
+        "nirs_desat_slope": 0,
+        "semg_mdf_shift_pct": -5,
+        "gait_wobble": 0.35,
+        "nirs_fogged": false,
+        "model": "model_a_full"
+      },
+      "model_b": {
+        "metabolic_rate_watts": 338,
+        "o2_burn_rate_l_min": 1.12,
+        "o2_left_l": 550,
+        "o2_left_pct": 73.3,
+        "slope_deg": 4,
+        "speed_kmh": 0.5,
+        "model": "model_b_metabolic"
+      },
+      "walk_back": {
+        "minutes": 328.51,
+        "display": "328:31",
+        "level": "green",
+        "label": "Safe margin",
+        "o2_reserve_l": 150,
+        "o2_return_l": 33.2,
+        "return_time_min": 33,
+        "distance_from_base_m": 1200
+      },
+      "route_position": {
+        "distance_m": 1200,
+        "total_m": 4950,
+        "point_idx": 24,
+        "elevation_m": 1219.5,
+        "route_slope_deg": 19.12
+      },
+      "traffic_light": "red",
+      "alerts": [
+        {
+          "level": "red",
+          "code": "hypotension",
+          "text": "BP 81/54 < 90 mmHg"
+        },
+        {
+          "level": "red",
+          "code": "st_elevation",
+          "text": "ST elevation 0.29 mV"
+        },
+        {
+          "level": "amber",
+          "code": "dizzy",
+          "text": "Crew reports dizziness"
+        }
+      ],
+      "visor": {
+        "light": "red",
+        "timer": "328:31",
+        "instruction": "SOS · HOLD POSITION",
+        "line": "🔴 328:31 · SOS · HOLD POSITION",
+        "dim_non_essential": true
+      },
+      "name": "Astronaut B",
+      "role": "Systems Engineer",
+      "source": "scenario:chest_pain",
+      "scenario": "chest_pain",
+      "alarm": {
+        "level": "red",
+        "reasons": [
+          "st_elevation",
+          "hypotension"
+        ],
+        "since": 40.8
+      },
+      "fall_countdown_s": null,
+      "packets_received": 1,
+      "has_triage": true,
+      "evening_readiness": null
+    }
+  }
+}
