@@ -1,0 +1,26 @@
+{
+  "NASA-STD-3001-VOL-1-EVAFITNESS": {
+    "title": "NASA-STD-3001 Section 4.2: EVA Crewmember Physiological Readiness",
+    "rule": "Crewmembers scheduled for Extravehicular Activity must demonstrate an EVA Readiness Score >= 85/100, calf muscle oxygen reserve >= 45%, and sleep duration >= 6.5 hours in the preceding 24-hour cycle. Any identified masking between subjective reporting and objective biometrics mandates Commander schedule reassignment."
+  },
+  "NASA-STD-3001-VOL-2-CARDIO": {
+    "title": "NASA-STD-3001 Section 6.3: Acute Cardiovascular Events and Nitroglycerin Administration",
+    "rule": "In the event of suspected acute myocardial ischemia or angina, nitroglycerin shall NEVER be administered if measured systolic blood pressure is below 90 mmHg. Vasodilation in the presence of cardiogenic hypotension risks fatal hemodynamic collapse. Automated External Defibrillator (AED) and high-flow oxygen shall be readied immediately."
+  },
+  "NASA-STD-3001-VOL-2-HYPOXIA": {
+    "title": "NASA-STD-3001 Section 6.1: Respiratory Monitoring & Hypoxia Countermeasures",
+    "rule": "Arterial oxygen saturation (SpO2) falling below 92% represents an urgent operational threshold requiring immediate intervention. If SpO2 < 88%, the crewmember is in severe decompensation, requiring 100% supplemental oxygen delivery and immediate habitat ingress."
+  },
+  "NASA-OCHMO-TB-004-CO2": {
+    "title": "NASA OCHMO Technical Bulletin TB-004: Carbon Dioxide In-Suit Limits",
+    "rule": "Spacesuit partial pressure of CO2 shall be maintained below 4.0 mmHg during nominal EVA. Excursions above 7.5 mmHg induce hypercapnic cognitive impairment, headache, and ventilatory fatigue, demanding immediate termination of surface activities."
+  },
+  "NASA-STD-3001-VOL-1-SLEEP": {
+    "title": "NASA-STD-3001 Section 5.1: Circadian Rhythm and Sleep Deficit",
+    "rule": "Cumulative sleep deficit exceeding 6 hours across a 72-hour window impairs cognitive vigilance, reaction time, and fine motor control. Astronauts with PVT latency increase > 2.0 SD shall not be cleared for safety-critical robotic or surface operations."
+  },
+  "NASA-STD-3001-VOL-1-MUSCLE": {
+    "title": "NASA-STD-3001 Section 4.3: Musculoskeletal Conditioning and Recovery",
+    "rule": "Soleus and gastrocnemius muscular endurance degrades at approximately 1.0-1.5% per week of spaceflight without targeted countermeasures. Evening recovery protocols including pneumatic compression, hydration with isotonic electrolytes, and neuromuscular stimulation restore microvascular compliance."
+  }
+}

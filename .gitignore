@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+certs/
+.pytest_cache/
+# duplicates of data/ (kept locally as originals)
+/data.zip
+/scenarios.json
+/crew_history.json

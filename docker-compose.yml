@@ -1,0 +1,18 @@
+services:
+  aegis:
+    build: .
+    image: aegis-backend
+    container_name: aegis-backend
+    ports:
+      - "${AEGIS_PORT:-8000}:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      AEGIS_PUBLIC_HOSTS: ${AEGIS_PUBLIC_HOSTS:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
