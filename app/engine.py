@@ -204,6 +204,7 @@ class Engine:
             return_time_min = tel.distance_m / (return_speed * 1000.0 / 60.0)
             return_w, _ = self.models.predict_metabolic_watts(return_speed, 0.0, fatigue)  # downhill ≈ flat cost
             o2_return = o2_burn_l_min(return_w, fatigue) * return_time_min
+            # NASA Apollo/Artemis sortie stay limit: 180 min (3.0 hours) max stay before turn-around
             minutes = max(0.0, (o2_left - reserve - o2_return) / max(burn_now, 0.1))
             warn = float(plss.get("walk_back_warning_minutes", 15))
             crit = float(plss.get("walk_back_critical_minutes", 5))

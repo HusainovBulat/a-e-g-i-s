@@ -29,6 +29,7 @@ export interface SensorPacket {
   nirs_ok: boolean;
   dizzy: boolean;
   distance_m?: number;
+  return_time_min?: number;
 }
 
 export type SensorInput = Partial<Omit<SensorPacket, 'crew'>> & {
@@ -49,6 +50,7 @@ export interface ModelBState {
   o2_left_pct: number;
   walk_back_min: number;
   distance_m?: number;
+  return_time_min?: number;
 }
 
 export interface CrewState {

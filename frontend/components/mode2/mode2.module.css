@@ -279,3 +279,40 @@
   border: 1px solid var(--line-subtle);
   margin-top: 4px;
 }
+
+.symptomThumbWrap {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--line-subtle);
+  background: #020509;
+  margin-bottom: 2px;
+}
+
+.symptomThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.symptomCard:hover .symptomThumb {
+  transform: scale(1.04);
+}
+
+.stepImageWrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--line-subtle);
+  background: #020509;
+  margin-top: 6px;
+}
+
+.stepImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

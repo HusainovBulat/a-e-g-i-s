@@ -50,8 +50,51 @@ import { StatusBadge } from '../ui/StatusBadge';
 import { Icon } from '../ui/icons';
 import { useConsole } from '../../lib/ConsoleProvider';
 import { createSpeechRecognizer, speakInstruction, stopSpeaking } from '../../lib/speech';
-import type { SymptomId, TriageResponse } from '../../lib/api/types';
+import type { ProtocolStep, SymptomId, TriageResponse } from '../../lib/api/types';
 import styles from './mode2.module.css';
+
+
+function resolveStepImage(step: ProtocolStep, isNominal: boolean, usedImages: Set<string>): { src: string; alt: string } | null {
+  if (isNominal) {
+    // In nominal baseline, crew is healthy; do not show scary resuscitation photos for routine tasks
+    return null;
+  }
+  const fullText = `${step.title} ${step.instruction}`.toLowerCase();
+
+  // 1. AED / Defibrillator
+  if (fullText.includes('aed') || fullText.includes('defibrillator') || fullText.includes('rhythm analysis')) {
+    if (!usedImages.has('aed')) {
+      usedImages.add('aed');
+      return { src: '/images/2_3_step3_defibrillator_pads.png', alt: 'AED Defibrillator Pad Placement' };
+    }
+  }
+
+  // 2. Posture / Semi-sitting 30-45° / Elevation / Bed
+  if (fullText.includes('posture') || fullText.includes('semi-sitting') || fullText.includes('elevat') || fullText.includes('supine') || (fullText.includes('position') && !fullText.includes('sampling'))) {
+    if (!usedImages.has('position')) {
+      usedImages.add('position');
+      return { src: '/images/2_1_step1_position_casualty.png', alt: '30° Semi-Sitting Casualty Posture' };
+    }
+  }
+
+  // 3. High-flow O2 / Oxygen Purge / Umbilical / Mask / Breathing loop
+  if (fullText.includes('100%') || fullText.includes('purge') || fullText.includes('umbilical') || fullText.includes('normobaric') || fullText.includes('mask') || fullText.includes('airway') || fullText.includes('oxygen')) {
+    if (!usedImages.has('oxygen')) {
+      usedImages.add('oxygen');
+      return { src: '/images/2_2_step2_oxygen_umbilical.png', alt: 'High-Flow 100% O2 Purge Umbilical' };
+    }
+  }
+
+  // 4. Hyperbaric chamber / Airlock evacuation
+  if (fullText.includes('hyperbaric') || fullText.includes('airlock') || fullText.includes('chamber')) {
+    if (!usedImages.has('airlock')) {
+      usedImages.add('airlock');
+      return { src: '/images/1_2_gasping_air.png', alt: 'Hyperbaric Airlock Evacuation Chamber' };
+    }
+  }
+
+  return null;
+}
 
 export function Mode2Screen() {
   const { currentCrew, crew, api } = useConsole();
@@ -404,8 +447,13 @@ export function Mode2Screen() {
             className={`${styles.symptomCard} ${selectedSymptoms.includes('chest_pain') ? styles.symptomCardActive : ''}`}
             onClick={() => toggleSymptom('chest_pain')}
           >
-            <Icon name="heart" size={24} style={{ color: 'var(--red)' }} />
-            <div className={styles.symptomCardTitle}>CLUTCHING CHEST / CHEST PAIN</div>
+            <div className={styles.symptomThumbWrap}>
+              <img src="/images/1_1_clutching_chest.png" alt="Clutching chest pain" className={styles.symptomThumb} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Icon name="heart" size={16} style={{ color: 'var(--red)' }} />
+              <div className={styles.symptomCardTitle}>CLUTCHING CHEST / CHEST PAIN</div>
+            </div>
             <div className={styles.symptomCardDesc}>Holding chest, squeezing pain spreading to left arm, neck, or jaw.</div>
           </div>
 
@@ -413,8 +461,13 @@ export function Mode2Screen() {
             className={`${styles.symptomCard} ${selectedSymptoms.includes('shortness_of_breath') ? styles.symptomCardActive : ''}`}
             onClick={() => toggleSymptom('shortness_of_breath')}
           >
-            <Icon name="activity" size={24} style={{ color: 'var(--blue-bright)' }} />
-            <div className={styles.symptomCardTitle}>GASPING FOR AIR / SHORT OF BREATH</div>
+            <div className={styles.symptomThumbWrap}>
+              <img src="/images/1_2_gasping_air.png" alt="Gasping for air" className={styles.symptomThumb} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Icon name="activity" size={16} style={{ color: 'var(--blue-bright)' }} />
+              <div className={styles.symptomCardTitle}>GASPING FOR AIR / SHORT OF BREATH</div>
+            </div>
             <div className={styles.symptomCardDesc}>Breathing very fast, struggling to catch breath, or blue lips.</div>
           </div>
 
@@ -422,8 +475,13 @@ export function Mode2Screen() {
             className={`${styles.symptomCard} ${selectedSymptoms.includes('dizziness') ? styles.symptomCardActive : ''}`}
             onClick={() => toggleSymptom('dizziness')}
           >
-            <Icon name="spark" size={24} style={{ color: 'var(--amber)' }} />
-            <div className={styles.symptomCardTitle}>DIZZY / COLD SWEAT / CONFUSED</div>
+            <div className={styles.symptomThumbWrap}>
+              <img src="/images/1_3_dizzy_confused.png" alt="Dizzy / Confused" className={styles.symptomThumb} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Icon name="spark" size={16} style={{ color: 'var(--amber)' }} />
+              <div className={styles.symptomCardTitle}>DIZZY / COLD SWEAT / CONFUSED</div>
+            </div>
             <div className={styles.symptomCardDesc}>Pale sweaty forehead, lightheaded, blurred vision, or about to faint.</div>
           </div>
 
@@ -431,8 +489,13 @@ export function Mode2Screen() {
             className={`${styles.symptomCard} ${selectedSymptoms.includes('fall') ? styles.symptomCardActive : ''}`}
             onClick={() => toggleSymptom('fall')}
           >
-            <Icon name="warning" size={24} style={{ color: 'var(--red)' }} />
-            <div className={styles.symptomCardTitle}>FELL DOWN / LEG CRAMPS</div>
+            <div className={styles.symptomThumbWrap}>
+              <img src="/images/1_4_fell_down_leg_cramps.png" alt="Fell down leg cramps" className={styles.symptomThumb} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Icon name="warning" size={16} style={{ color: 'var(--red)' }} />
+              <div className={styles.symptomCardTitle}>FELL DOWN / LEG CRAMPS</div>
+            </div>
             <div className={styles.symptomCardDesc}>Collapsed on the floor/ground, unable to stand, or shaking legs.</div>
           </div>
 
@@ -521,59 +584,33 @@ export function Mode2Screen() {
         }
       >
         <div className={styles.stepsGrid}>
-          {triageResult?.protocol_steps && triageResult.protocol_steps.length > 0 ? (
-            triageResult.protocol_steps.map(step => (
-              <div key={step.order} className={styles.stepCard}>
-                <div className={styles.stepHeader}>
-                  <span className={styles.stepOrder}>STEP 0{step.order}</span>
-                  <StatusBadge tone="neutral">NON-DOCTOR</StatusBadge>
-                </div>
-                <div className={styles.stepTitle}>{step.title}</div>
-                <p className={styles.stepInst}>{step.instruction}</p>
+          {(() => {
+            const usedImages = new Set<string>();
+            return triageResult?.protocol_steps && triageResult.protocol_steps.length > 0 ? (
+              triageResult.protocol_steps.map(step => {
+                const img = resolveStepImage(step, isNominal, usedImages);
+                return (
+                  <div key={step.order} className={styles.stepCard}>
+                    <div className={styles.stepHeader}>
+                      <span className={styles.stepOrder}>STEP 0{step.order}</span>
+                      <StatusBadge tone="neutral">NON-DOCTOR</StatusBadge>
+                    </div>
+                    <div className={styles.stepTitle}>{step.title}</div>
+                    <p className={styles.stepInst}>{step.instruction}</p>
 
-                {/* Illustrated SVG Diagram - ONLY rendered if an actual illustration exists */}
-                {step.diagram && step.diagram !== 'none' && (
-                  <div className={styles.diagramSvg}>
-                    {step.diagram === 'position' && (
-                      <svg viewBox="0 0 240 70" width="100%" height="100%">
-                        <line x1="20" y1="55" x2="220" y2="55" stroke="var(--line-subtle)" strokeWidth="2" />
-                        <polygon points="40,55 140,55 90,20" fill="rgba(76,141,255,0.15)" stroke="var(--blue-bright)" strokeWidth="1.5" />
-                        <circle cx="85" cy="15" r="8" fill="var(--blue-bright)" />
-                        <text x="150" y="38" fill="var(--text-muted)" fontSize="9" fontFamily="var(--font-mono)">30° ELEVATED</text>
-                      </svg>
-                    )}
-                    {step.diagram === 'oxygen' && (
-                      <svg viewBox="0 0 240 70" width="100%" height="100%">
-                        <rect x="30" y="15" width="45" height="40" rx="0" fill="rgba(46,204,113,0.15)" stroke="var(--green)" strokeWidth="1.5" />
-                        <path d="M75,35 L140,35" stroke="var(--green)" strokeWidth="2" strokeDasharray="4,3" />
-                        <circle cx="170" cy="35" r="16" fill="rgba(76,141,255,0.2)" stroke="var(--blue-bright)" strokeWidth="1.5" />
-                        <text x="162" y="39" fill="#fff" fontSize="11" fontFamily="var(--font-mono)" fontWeight="700">O₂</text>
-                      </svg>
-                    )}
-                    {step.diagram === 'bay' && (
-                      <svg viewBox="0 0 240 70" width="100%" height="100%">
-                        <rect x="40" y="15" width="70" height="40" fill="#0b1018" stroke="var(--amber)" strokeWidth="1.5" />
-                        <text x="48" y="38" fill="var(--amber)" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">BAY B2</text>
-                        <path d="M125,35 L170,35" stroke="var(--line-bright)" strokeWidth="1.5" />
-                        <circle cx="190" cy="35" r="12" fill="rgba(245,179,1,0.2)" stroke="var(--amber)" strokeWidth="1.5" />
-                        <text x="183" y="39" fill="var(--amber)" fontSize="10" fontFamily="var(--font-mono)">AED</text>
-                      </svg>
-                    )}
-                    {step.diagram === 'aed' && (
-                      <svg viewBox="0 0 240 70" width="100%" height="100%">
-                        <ellipse cx="120" cy="35" rx="35" ry="24" fill="rgba(255,255,255,0.02)" stroke="var(--line-subtle)" strokeWidth="1.5" />
-                        <rect x="100" y="18" width="12" height="12" fill="var(--red)" />
-                        <rect x="130" y="38" width="12" height="12" fill="var(--red)" />
-                        <text x="30" y="38" fill="var(--text-muted)" fontSize="9" fontFamily="var(--font-mono)">PAD PLACEMENT</text>
-                      </svg>
+                    {/* High-res semantically matched instruction photo without duplicates */}
+                    {img && (
+                      <div className={styles.stepImageWrap}>
+                        <img src={img.src} alt={img.alt} className={styles.stepImage} />
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div>Loading protocol steps...</div>
-          )}
+                );
+              })
+            ) : (
+              <div>Loading protocol steps...</div>
+            );
+          })()}
         </div>
       </Panel>
 
