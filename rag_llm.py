@@ -270,47 +270,74 @@ def generate_deterministic_fallback(
     smo2 = float(vitals.get("calf_smo2_pct", vitals.get("smo2", 52.0)))
     energy_slider = float(mode3_payload.get("subjective_energy_slider", 9.1))
 
-    # Decision logic based on NASA-STD-3001 thresholds
-    if masking_detected or readiness_score < 60.0:
+    # Decision logic based on NASA-STD-3001 thresholds & Commander-in-the-loop
+    if masking_detected:
         schedule_action = "SWAP_SCHEDULE"
         recommended_replacement = "Crew_B (Systems Engineer, EVA Readiness: 89/100)"
-        badge_text = "🔴 PROHIBITED: SCHEDULE SWAP MANDATED"
-        badge_color = "#EF4444"
-
-        briefing_text = (
-            f"### 📋 MISSION COMMANDER OPERATIONAL BRIEFING (Sol {sol})\n\n"
-            f"**Crewmember:** {crew_name}\n"
-            f"**Crater EVA Clearance:** 🔴 **PROHIBITED (EVA Clearance Revoked)**\n"
-            f"**Readiness Score:** `{readiness_score:.1f}/100` (NASA-STD-3001 Threshold: $\\ge 85.0$)\n\n"
-            f"**⚠️ DISQUALIFICATION CAUSE:**\n"
-            f"Critical psychological masking detected (**Masking / Mismatch Detected**, discrepancy $\\Delta = +{delta:.1f}$ pts). "
-            f"Subjective energy self-report ({energy_slider:.1f}/10) severely contradicts objective biometric smart base-layer "
-            f"telemetry (calf muscle oxygenation $\\text{{SmO}}_2 = {smo2:.1f}\\%$, objective status score `{obj_score:.1f}/100`).\n\n"
-            f"**📖 NASA-STD-3001 COMPLIANCE (Sections 4.2 & 4.3):**\n"
-            f"*\"Any identified discrepancy between subjective reporting and objective biometrics mandates Commander "
-            f"schedule reassignment. EVA sortie authorization is strictly barred at Readiness < 85.\"*\n\n"
-            f"**🎯 COMMANDER DIRECTIVE & COUNTERMEASURES:**\n"
-            f"1. **Schedule Rotation:** Reassign tomorrow's lunar crater EVA to primary backup — **{recommended_replacement}**.\n"
-            f"2. **Prescribed Recovery Protocol for {crew_id}:** 40 min soleus pneumatic compression + isotonic electrolyte rehydration + minimum 8 hrs sleep.\n"
-            f"3. **Telemetry Downlink:** Flight telemetry burst queued for Ground Flight Surgeons (`Flight Surgeons Queue`)."
-        )
-    elif readiness_score < 85.0:
-        schedule_action = "REDUCE_EVA_DURATION"
-        recommended_replacement = "Crew_A (Restricted to 60-min near-habitat EVA)"
-        badge_text = "🟡 CAUTION: REDUCE EVA DURATION"
+        badge_text = "🟡 CAUTION: MISMATCH DETECTED — RECOMMEND REASSIGN"
         badge_color = "#F59E0B"
 
         briefing_text = (
-            f"### 📋 MISSION COMMANDER OPERATIONAL BRIEFING (Sol {sol})\n\n"
+            f"### 📋 AI FLIGHT SURGEON ADVISORY BRIEFING (Sol {sol})\n\n"
             f"**Crewmember:** {crew_name}\n"
-            f"**Crater EVA Clearance:** 🟡 **CAUTION: RESTRICTED EVA DURATION**\n"
+            f"**Advisory Status:** 🟡 **CAUTION: MISMATCH DETECTED**\n"
+            f"**AI Recommendation:** ⚠️ **RECOMMEND NOT TO CLEAR / REASSIGN TO REST (РЕКОМЕНДУЮ НЕ ВЫПУСКАТЬ)**\n"
+            f"**Readiness Score:** `{readiness_score:.1f}/100` (NASA-STD-3001 Threshold: $\\ge 85.0$)\n\n"
+            f"**⚠️ PHYSIOLOGICAL & MASKING ASSESSMENT:**\n"
+            f"Critical psychological discrepancy detected (**Masking / Mismatch Detected**, discrepancy $\\Delta = +{delta:.1f}$ pts). "
+            f"Astronaut self-reported maximal capability ({energy_slider:.1f}/10), but objective base-layer telemetry indicates "
+            f"compromised physical reserve (calf muscle oxygenation $\\text{{SmO}}_2 = {smo2:.1f}\\%$, objective status score `{obj_score:.1f}/100`).\n\n"
+            f"**📖 NASA-STD-3001 COMPLIANCE (Sections 4.2 & 4.3):**\n"
+            f"*\"Any identified discrepancy between subjective reporting and objective biometrics mandates Commander "
+            f"schedule review. EVA sortie authorization is strictly not recommended at Readiness < 85.\"*\n\n"
+            f"**🎯 AI ADVISORY RECOMMENDATIONS FOR COMMANDER:**\n"
+            f"1. **Schedule Rotation:** AI recommends Commander reassign tomorrow's lunar crater EVA to primary backup — **{recommended_replacement}**.\n"
+            f"2. **Prescribed Recovery Protocol for {crew_id}:** 40 min soleus pneumatic compression + isotonic electrolyte rehydration + minimum 8 hrs sleep.\n"
+            f"3. **Telemetry Downlink:** Flight telemetry burst queued for Ground Flight Surgeons (`Flight Surgeons Queue`).\n\n"
+            f"*Operational Note: Final decision and mission clearance rests with Mission Commander.*"
+        )
+    elif readiness_score < 60.0:
+        schedule_action = "SWAP_SCHEDULE"
+        recommended_replacement = "Crew_B (Systems Engineer, EVA Readiness: 89/100)"
+        badge_text = "🔴 PROHIBITED: SEVERE EXHAUSTION"
+        badge_color = "#EF4444"
+
+        briefing_text = (
+            f"### 📋 AI FLIGHT SURGEON ADVISORY BRIEFING (Sol {sol})\n\n"
+            f"**Crewmember:** {crew_name}\n"
+            f"**Advisory Status:** 🔴 **PROHIBITED: SEVERE EXHAUSTION**\n"
+            f"**AI Recommendation:** ⛔ **RECOMMEND COMPLETE REST / REASSIGN (РЕКОМЕНДУЮ НЕ ВЫПУСКАТЬ)**\n"
+            f"**Readiness Score:** `{readiness_score:.1f}/100` (Critical Depletion Zone: $< 60.0$)\n\n"
+            f"**⚠️ PHYSIOLOGICAL ASSESSMENT:**\n"
+            f"Both subjective reporting and objective biometrics confirm acute physiological depletion (objective status `{obj_score:.1f}/100`). "
+            f"Musculoskeletal and metabolic safety reserves are critically compromised. Traversal is strictly non-viable.\n\n"
+            f"**📖 NASA-STD-3001 COMPLIANCE (Sections 4.2 & 4.3):**\n"
+            f"*\"Crew members exhibiting acute physiological depletion are barred from EVA sortie authorization until full metabolic recovery is validated.\"*\n\n"
+            f"**🎯 AI ADVISORY RECOMMENDATIONS FOR COMMANDER:**\n"
+            f"1. **Schedule Rotation:** AI recommends Commander reassign tomorrow's lunar crater EVA to primary backup — **{recommended_replacement}**.\n"
+            f"2. **Prescribed Recovery Protocol for {crew_id}:** Mandatory rest, 40 min soleus pneumatic compression + isotonic electrolyte rehydration + minimum 8 hrs sleep.\n"
+            f"3. **Telemetry Downlink:** Flight telemetry burst queued for Ground Flight Surgeons (`Flight Surgeons Queue`).\n\n"
+            f"*Operational Note: Final decision and mission clearance rests with Mission Commander.*"
+        )
+    elif readiness_score < 85.0:
+        schedule_action = "REDUCE_EVA_DURATION"
+        recommended_replacement = "Crew_A (Restricted to near-habitat EVA)"
+        badge_text = "🟡 CAUTION: REDUCED MARGIN"
+        badge_color = "#F59E0B"
+
+        briefing_text = (
+            f"### 📋 AI FLIGHT SURGEON ADVISORY BRIEFING (Sol {sol})\n\n"
+            f"**Crewmember:** {crew_name}\n"
+            f"**Advisory Status:** 🟡 **CAUTION: BORDERLINE READINESS**\n"
+            f"**AI Recommendation:** ⚠️ **RECOMMEND EXTRA RECOVERY OR REASSIGN (РЕКОМЕНДУЮ НЕ ВЫПУСКАТЬ В КРАТЕР)**\n"
             f"**Readiness Score:** `{readiness_score:.1f}/100` (Borderline Zone: $60.0–84.9$)\n\n"
             f"**PHYSIOLOGICAL ASSESSMENT:**\n"
             f"No psychological masking detected; however, accumulated musculoskeletal fatigue lowers metabolic safety margins. "
             f"Under NASA-STD-3001 Section 4.2, a standard 120-minute crater sortie presents an elevated exhaustion hazard.\n\n"
-            f"**🎯 ACTIONABLE RECOMMENDATIONS:**\n"
-            f"1. Complete mandatory evening recovery quests (+35 pts).\n"
-            f"2. If EVA is operationally mandatory, restrict sortie radius to 500 m perimeter around habitat (max 60 min)."
+            f"**🎯 AI ADVISORY RECOMMENDATIONS FOR COMMANDER:**\n"
+            f"1. Complete mandatory evening recovery quests (+35 pts) to restore nominal readiness.\n"
+            f"2. If EVA is operationally mandatory, AI recommends restricting sortie radius to flat perimeter around habitat.\n\n"
+            f"*Operational Note: Final decision and mission clearance rests with Mission Commander.*"
         )
     else:
         schedule_action = "CLEARED_NOMINAL"
@@ -319,14 +346,16 @@ def generate_deterministic_fallback(
         badge_color = "#10B981"
 
         briefing_text = (
-            f"### 📋 MISSION COMMANDER OPERATIONAL BRIEFING (Sol {sol})\n\n"
+            f"### 📋 AI FLIGHT SURGEON ADVISORY BRIEFING (Sol {sol})\n\n"
             f"**Crewmember:** {crew_name}\n"
-            f"**Crater EVA Clearance:** 🟢 **CLEARED FOR EVA (Nominal Authorization)**\n"
+            f"**Advisory Status:** 🟢 **CLEARED: NOMINAL READINESS**\n"
+            f"**AI Recommendation:** ✅ **RECOMMEND NOMINAL EVA CLEARANCE (РЕКОМЕНДУЮ ДОПУСТИТЬ)**\n"
             f"**Readiness Score:** `{readiness_score:.1f}/100` (Compliant with NASA-STD-3001 $\\ge 85.0$)\n\n"
             f"**PHYSIOLOGICAL ASSESSMENT:**\n"
             f"All biometric indicators (circadian sleep rhythm, cardiovascular tone, calf $\\text{{SmO}}_2$ reserve, "
             f"metabolic blood glucose) remain within nominal thresholds. Subjective self-report aligns with telemetry. "
-            f"Nominal lunar surface sortie approved according to flight plan."
+            f"Nominal lunar surface sortie approved according to flight plan.\n\n"
+            f"*Operational Note: Final decision and mission clearance rests with Mission Commander.*"
         )
 
     return {
@@ -354,16 +383,19 @@ def generate_deterministic_fallback(
 def build_system_prompt() -> str:
     """Builds system prompt enforcing role, precision, and tone for Commander brief."""
     return (
-        "You are the Autonomous Flight Surgeon AI for Project A.E.G.I.S. (NASA Space Apps Challenge 2026).\n"
-        "Your task is to review an astronaut's Mode 3 evening check-in telemetry and provide an authoritative, "
-        "concise, 3-4 paragraph operational briefing for the Mission Commander regarding tomorrow's lunar EVA shift rotation.\n\n"
-        "STRICT CLINICAL & OPERATIONAL RULES:\n"
+        "You are the Autonomous Flight Surgeon AI Advisory System for Project A.E.G.I.S. (NASA Space Apps Challenge 2026).\n"
+        "Your role is strictly ADVISORY: you provide operational recommendations to the Mission Commander. "
+        "You NEVER issue direct orders or revoke clearances yourself; the Mission Commander holds 100% operational command authority and makes all decisions.\n\n"
+        "OPERATIONAL HIERARCHY & REASONING RULES:\n"
         "1. Temperature is locked at 0.0. Never hallucinate medical thresholds or facts.\n"
-        "2. According to NASA-STD-3001 Section 4.2, an astronaut CANNOT be cleared for EVA if Readiness < 85/100 "
-        "   or if psychological masking between subjective feelings and objective telemetry is detected.\n"
-        "3. If masking or critical fatigue is present, explicitly recommend swapping the schedule with Crew_B "
-        "   and prescribing specific recovery protocols (compression, isotonic hydration, sleep).\n"
-        "4. Tone: Professional, military-medical, concise, actionable. Respond strictly in professional English with precise NASA standard citations."
+        "2. If psychological masking between subjective feelings (e.g. 10/10) and poor objective telemetry is detected: "
+        "   Advisory status is 🟡 CAUTION (MISMATCH DETECTED). State clearly that the astronaut self-reports full capability, "
+        "   but objective base-layer sensors indicate acute physical depletion. Explicitly state your recommendation to the Commander: "
+        "   'AI Recommendation: Recommend not clearing for EVA / Recommend schedule swap to backup Crew_B (рекомендую не выпускать)'.\n"
+        "3. If both subjective and objective metrics are critically depleted (< 60): Status is 🔴 PROHIBITED. "
+        "   'AI Recommendation: Recommend complete rest / Recommend reassign to backup Crew_B (рекомендую не выпускать)'.\n"
+        "4. If readiness >= 85 and no masking: Status is 🟢 CLEARED. Recommend approving nominal sortie.\n"
+        "5. Conclude clearly with a note that the final decision belongs to the Mission Commander."
     )
 
 

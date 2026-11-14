@@ -84,14 +84,19 @@ function BodyMapOverview({ crew, events, connection }: { crew: CrewState | null;
   const [respHistory, setRespHistory] = useState<number[]>([14, 14, 15, 14, 15, 14, 14]);
 
   useEffect(() => {
-    if (vitals?.hr) {
-      setHrHistory(prev => [...prev.slice(-24), vitals.hr]);
+    // Physiological micro-variability (HRV & respiratory sinus arrhythmia) so the sparkline
+    // breathes realistically around the live phone slider value instead of turning into a dead flatline
+    if (vitals?.hr !== undefined) {
+      const hrv = Math.sin(Date.now() / 1200) * 0.8 + Math.cos(Date.now() / 700) * 0.4;
+      setHrHistory(prev => [...prev.slice(-24), Number((vitals.hr + hrv).toFixed(1))]);
     }
-    if (vitals?.spo2) {
-      setSpo2History(prev => [...prev.slice(-24), vitals.spo2]);
+    if (vitals?.spo2 !== undefined) {
+      const spo2Jitter = Math.sin(Date.now() / 2500) * 0.15;
+      setSpo2History(prev => [...prev.slice(-24), Number(Math.min(100, Math.max(70, vitals.spo2 + spo2Jitter)).toFixed(1))]);
     }
-    if (vitals?.resp) {
-      setRespHistory(prev => [...prev.slice(-24), vitals.resp]);
+    if (vitals?.resp !== undefined) {
+      const respWave = Math.sin(Date.now() / 1800) * 0.5;
+      setRespHistory(prev => [...prev.slice(-24), Number(Math.max(4, vitals.resp + respWave).toFixed(1))]);
     }
   }, [vitals?.t, vitals?.hr, vitals?.spo2, vitals?.resp]);
 
@@ -103,11 +108,25 @@ function BodyMapOverview({ crew, events, connection }: { crew: CrewState | null;
       <TelemetryCard label="RESPIRATORY RATE" value={resp.toFixed(0)} unit="BR/MIN" delta="LIVE 1 HZ TELEMETRY" values={respHistory} color="var(--blue-bright)" />
     </div>
     <div className={styles.lowerGrid}>
-      <Panel eyebrow="LRO LOLA / SITE 04" title="Crater route elevation profile" action={<StatusBadge tone="blue">TRAVERSE 62%</StatusBadge>}>
-        <div className={styles.routeHead}><span>RELATIVE ELEVATION TOPOGRAPHY</span><span>SHACKLETON RIM 5M/PX</span></div>
-        <ElevationProfile values={route} position={.62} turnaround={.77} />
-        <div className={styles.routeFoot}><span>LUNAR BASE / 0 M</span><span>TURN-BACK MARGIN</span><span>CRATER RIDGE / 143 M</span></div>
-      </Panel>
+      {(() => {
+        const walkBackMin = crew?.model_b?.walk_back_min ?? 45;
+        const distanceM = crew?.model_b?.distance_m ?? (vitals?.distance_m ?? 1850);
+        const totalRouteM = 4950;
+        const currentPosRatio = Math.max(0.08, Math.min(0.88, distanceM / totalRouteM));
+        const maxForwardMargin = 0.94 - currentPosRatio;
+        const walkBackFactor = Math.max(0, Math.min(1, walkBackMin / 90));
+        const turnaroundRatio = Math.max(
+          currentPosRatio,
+          Math.min(0.95, currentPosRatio + Math.max(0.02, maxForwardMargin * walkBackFactor))
+        );
+        return (
+          <Panel eyebrow="LRO LOLA / SITE 04" title="Crater route elevation profile" action={<StatusBadge tone="blue">TRAVERSE {Math.round(currentPosRatio * 100)}%</StatusBadge>}>
+            <div className={styles.routeHead}><span>RELATIVE ELEVATION TOPOGRAPHY</span><span>SHACKLETON RIM 5M/PX</span></div>
+            <ElevationProfile values={route} position={currentPosRatio} turnaround={turnaroundRatio} />
+            <div className={styles.routeFoot}><span>LUNAR BASE / 0 M</span><span>TURN-BACK MARGIN</span><span>CRATER RIDGE / 143 M</span></div>
+          </Panel>
+        );
+      })()}
       <Panel eyebrow="MISSION EVENTS / TIMELINE" title="Real-time event log" action={<StatusBadge tone="neutral">LIVE STREAM</StatusBadge>}>
         <div className={styles.eventSummary}>
           {recentEvents.length ? recentEvents.map((event, index) => <div className={styles.eventSummaryItem} key={`${event.ts}-${index}`}><time>{new Date(event.ts).toISOString().slice(11, 19)}</time><i /><span>Crew {event.crew} · {event.text}</span></div>) : <div className={styles.eventSummaryItem}><time>--:--:--</time><i /><span>Autonomous flight telemetry nominal</span></div>}

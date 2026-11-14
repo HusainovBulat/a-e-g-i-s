@@ -1,0 +1,217 @@
+{
+  "metadata": {
+    "project": "A.E.G.I.S. v4.0",
+    "source": "NASA-STD-3001 Vol. 1 & 2 (https://ntrs.nasa.gov/api/citations/20230015521/downloads/Human%20Health%20and%20Performance.pdf) / NASA OCHMO-TB-004 (https://www.nasa.gov/ochmo-tb-004-carbon-dioxide-2/) / NASA OSDR OSD-783 (https://osdr.nasa.gov/bio/repo/data/studies/OSD-783) & OSD-435 (https://osdr.nasa.gov/bio/repo/data/studies/OSD-435)",
+    "description": "Astronaut Health Monitoring Cards for 6 clickable body zones (preserving Chris's text verbatim with clean formatting for judges), plus Mode 2 & Mode 3 UI content."
+  },
+  "organ_cards": {
+    "cardiovascular": {
+      "id": "cardiovascular",
+      "title": "HEART & CIRCULATION (Cardiovascular System)",
+      "function": "Pumps blood throughout the body, delivering oxygen and nutrients to the brain, muscles, and other organs, and carries carbon dioxide and other waste products away from tissues.",
+      "how_measured": "A smart base-layer garment uses 3-lead ECG electrodes to monitor heart activity, while optical PPG sensors and cuffless blood-pressure monitoring track heart rate, pulse changes, and blood pressure (plus portable POCUS ultrasound).",
+      "space_hazard_danger": "Microgravity shifts body fluids toward the upper body and changes how the heart works, leading to cardiac deconditioning / myocardial atrophy (heart muscle shrinkage), myocardial ischemia (reduced blood flow to the heart), and cardiac arrhythmias / atrial fibrillation (irregular heartbeats). Upward fluid shifts also trigger spaceflight anemia / hypovolemia (a 10% to 15% drop in blood volume and red blood cells) and increase the risk of jugular venous thrombosis (blood clots in upper-body veins). When an astronaut develops an arrhythmia or weakened heart muscle in space, disrupted electrical signals can cause chest fluttering, dizziness, and shortness of breath. Upon returning to gravity, blood rushes back to the legs, causing orthostatic intolerance / orthostatic syncope (sudden blood pressure drops, tunnel vision, and fainting)."
+    },
+    "cns_brain": {
+      "id": "cns_brain",
+      "title": "BRAIN (Central Nervous System)",
+      "function": "Controls the body's movements, balance, coordination, sleep, mood, and responses to the environment.",
+      "how_measured": "A.E.G.I.S. tracks movement patterns and coordination using 3-axis IMU motion sensors, which help identify unusual gait patterns and neurological tremors, alongside daily sleep hours, mood (0..10), and optic nerve ultrasound.",
+      "space_hazard_danger": "Altered gravity disrupts the inner ear and nervous system, commonly triggering Space Adaptation Syndrome / Space Motion Sickness, neurovestibular dysfunction, and Spaceflight Associated Neuro-ocular Syndrome (SANS) (brain and optic nerve pressure). When affected, an astronaut experiences severe vertigo, nausea, disorientation, and spatial illusions where \"up\" and \"down\" feel confused. These symptoms impair hand-eye coordination and significantly increase the risk of stumbles or falls during lunar EVAs."
+    },
+    "respiratory": {
+      "id": "respiratory",
+      "title": "LUNGS (Respiratory System)",
+      "function": "Bring oxygen into the body and remove carbon dioxide through breathing.",
+      "how_measured": "Thoracic stretch sensors monitor breathing rate and patterns, while optical PPG sensors measure blood oxygen saturation (SpO₂). The spacesuit also provides CO₂ monitoring.",
+      "space_hazard_danger": "During strenuous lunar activities, astronauts can develop acute hypercapnia (carbon dioxide toxicity) if CO₂ builds up inside the helmet, alongside hypoxia / hypoxemia (low blood oxygen) or decompression sickness if oxygen or suit pressure drops. When hypercapnia or hypoxia occurs, the astronaut quickly develops throbbing headaches, rapid breathing, confusion, and impaired judgment. Without immediate correction, these conditions can cause panic and sudden loss of consciousness during an EVA."
+    },
+    "musculoskeletal": {
+      "id": "musculoskeletal",
+      "title": "MUSCLES & BONES (Muscular & Skeletal System)",
+      "function": "Allow the body to move, maintain posture, support the body, protect internal organs, and perform physical activities such as walking and lifting.",
+      "how_measured": "NIRS sensors measure local muscle oxygenation (SmO₂), while surface EMG (sEMG) sensors track muscle activity and fatigue. Motion sensors (3-axis IMU) also detect changes in walking patterns and track changes in estimated axial bone loading over time through daily physiological monitoring and 14-day bone-load trend analysis (NASA OSDR OSD-783).",
+      "space_hazard_danger": "Reduced gravity decreases the normal workload on muscles, causing spaceflight muscle atrophy / sarcopenia (wasting of postural and leg muscles) and localized muscle ischemia (oxygen depletion) during heavy exertion. Without Earth's gravity providing mechanical stress, astronauts also develop spaceflight-induced osteopenia / osteoporosis (accelerated bone density loss) and renal calculi / hypercalciuria (kidney stones) caused by excess calcium releasing into the bloodstream. As muscles weaken and lose oxygen, the astronaut suffers from painful cramps, tremors, and unstable walking patterns, while osteopenia leaves bones brittle and prone to fractures from minor falls."
+    },
+    "immune_thermo": {
+      "id": "immune_thermo",
+      "title": "IMMUNE & THERMOREGULATION (Immune System)",
+      "function": "Protects the body against infections, latent viral reactivation, and radiation-induced inflammation while regulating core body temperature.",
+      "how_measured": "Continuous core body temperature sensors (°C), onboard radiation dosimetry, and Smart Base-Layer resting heart rate and autonomic stress tracking.",
+      "space_hazard_danger": "Deep-space radiation and chronic isolation trigger spaceflight immune dysregulation / T-cell suppression and latent herpesvirus reactivation alongside thermoregulatory dysfunction inside pressurized spacesuits. When affected, astronauts experience low-grade fever, delayed wound healing, systemic fatigue, and rapid heat storage during strenuous lunar EVAs."
+    },
+    "metabolic_nutrition": {
+      "id": "metabolic_nutrition",
+      "title": "NUTRITION & METABOLISM (Metabolic System & Blood Sugar)",
+      "function": "Supplies cells with glucose energy, water, and electrolytes to sustain cognitive alertness and physical stamina.",
+      "how_measured": "Onboard capillary glucometer measuring blood sugar levels in mg/dL, daily hydration and nutrition check-in sliders (0..10), and PLSS metabolic energy expenditure tracking (Watts).",
+      "space_hazard_danger": "Microgravity and high EVA workloads frequently cause spaceflight caloric deficit / anorexia, isotonic dehydration, and spaceflight-induced insulin resistance / glycemic variability (blood sugar swings outside 75–115 mg/dL). When blood sugar or hydration drops, astronauts experience dizziness, slowed vestibular reaction speed, accelerated muscle cramping, and heightened risk of fainting."
+    }
+  },
+  "evening_checkin_cards": [
+    {
+      "step": 1,
+      "metric_key": "sleep",
+      "title": "Daily Sleep Duration & Quality (0..10 Slider + Hours)",
+      "how_to_measure": "Log total sleep hours from Smart Base-Layer actigraphy and rate restorative sleep quality from 0 to 10 upon waking.",
+      "why_it_matters": "Sleeping under 6.5 hours (NASA-STD-3001 Section 5.1) increases cognitive reaction latency (PVT > 2.0 SD) and vestibular stumble risk on crater slopes by 32%."
+    },
+    {
+      "step": 2,
+      "metric_key": "energy",
+      "title": "Self-Reported Energy & Readiness (0..10 Slider)",
+      "how_to_measure": "Rate perceived physical energy from 0 (exhausted) to 10 (peak vigor). Automatically cross-checked against objective Smart Base-Layer SmO2 and sEMG fatigue sensors.",
+      "why_it_matters": "Astronauts frequently mask exhaustion to avoid being pulled from an EVA. A >= 30-point gap between self-report and objective sensors triggers a Masking Alert to prevent a minute-110 collapse."
+    },
+    {
+      "step": 3,
+      "metric_key": "mood",
+      "title": "Mood, Stress & Isolation Stability (0..10 Slider)",
+      "how_to_measure": "Select current psychological stability from 0 (severe stress/irritability) to 10 (calm, focused) and optional 10-second webcam facial fatigue check.",
+      "why_it_matters": "High isolation and elevated cortisol degrade decision-making speed during suit emergencies and increase cardiovascular strain."
+    },
+    {
+      "step": 4,
+      "metric_key": "pain_free",
+      "title": "Muscle & Joint Comfort / Pain-Free Score (0..10 Slider + BP & Temp)",
+      "how_to_measure": "Rate physical comfort (10 = zero pain/cramps). Measure Blood Pressure (mmHg) with cuff at heart level in 1/6g and Core Temperature (°C).",
+      "why_it_matters": "Unreported calf soreness, low systolic BP (< 95 mmHg), or low-grade fever (> 37.3 °C) signals incomplete muscular recovery or early immune stress."
+    },
+    {
+      "step": 5,
+      "metric_key": "nutrition",
+      "title": "Nutrition, Hydration & Blood Sugar (0..10 Slider + mg/dL)",
+      "how_to_measure": "Perform a capillary finger-stick test on the onboard glucometer (enter value strictly in mg/dL, nominal 75–115 mg/dL) and rate daily hydration/meals (0..10).",
+      "why_it_matters": "Dehydration shrinks plasma volume and triggers orthostatic fainting, while abnormal blood glucose impairs both brain alertness and calf muscle endurance."
+    }
+  ],
+  "recovery_quests": {
+    "hydration": {
+      "id": "hydration",
+      "title": "Isotonic Electrolyte Hydration (400 mL)",
+      "bonus_points": 15,
+      "duration_min": 10,
+      "description": "Restores plasma volume and intracellular electrolytes to prevent orthostatic hypotension and calf cramping."
+    },
+    "compression": {
+      "id": "compression",
+      "title": "Pneumatic Calf Compression & FES Myostimulation",
+      "bonus_points": 18,
+      "duration_min": 25,
+      "description": "Clears lactic acid buildup and restores soleus microvascular oxygenation (SmO2) per NASA OSDR OSD-783 countermeasure protocol."
+    },
+    "breathing": {
+      "id": "breathing",
+      "title": "Guided Paced Respiration (6 breaths/min Cortisol Reset)",
+      "bonus_points": 20,
+      "duration_min": 10,
+      "description": "Activates vagal parasympathetic tone, lowers resting heart rate, and improves deep sleep architecture before tomorrow's EVA."
+    }
+  },
+  "triage_protocols": {
+    "Acute Coronary Ischemia": {
+      "diagnosis": "Acute Coronary Ischemia",
+      "severity": "CRITICAL",
+      "nitroglycerin_rule": "HARD-BLOCK IF SYSTOLIC BP < 90 mmHg (Risk of fatal cardiogenic shock)",
+      "steps": [
+        {
+          "step": 1,
+          "title": "Posture & High-Flow Oxygen (Bay B1)",
+          "instruction": "Place crewmate supine with legs elevated 30° on support cushion (if hypotensive) or semi-sitting. Attach 100% O2 mask at 4 L/min from Medical Bay B1."
+        },
+        {
+          "step": 2,
+          "title": "Medication Interlock Check (Bay B2, Red Slot #4)",
+          "instruction": "Give 300–325 mg chewable Aspirin immediately. IF Systolic BP < 90 mmHg: DO NOT GIVE NITROGLYCERIN! (Only administer 0.4 mg sublingual Nitroglycerin if Systolic BP >= 90 mmHg)."
+        },
+        {
+          "step": 3,
+          "title": "AED Pad Placement & Flight Surgeons Uplink",
+          "instruction": "Attach Automated External Defibrillator (AED) pads from Bay B2 (right upper chest & left lower ribs). Telemetry packet (ECG + POCUS + Vitals) automatically queued for Ground Flight Surgeons."
+        }
+      ]
+    },
+    "Orthostatic Syncope": {
+      "diagnosis": "Orthostatic Syncope",
+      "severity": "CAUTION_CRITICAL",
+      "nitroglycerin_rule": "CONTRAINDICATED (Hypotensive state)",
+      "steps": [
+        {
+          "step": 1,
+          "title": "Trendelenburg Leg Elevation (30°)",
+          "instruction": "Keep crewmate flat on their back and elevate legs 30° above heart level to restore venous blood return to the brain."
+        },
+        {
+          "step": 2,
+          "title": "Thigh/Calf Compression & Isotonic Fluid",
+          "instruction": "Activate lower-body compression garment and administer 500 mL oral isotonic electrolyte solution once fully conscious."
+        },
+        {
+          "step": 3,
+          "title": "Continuous Orthostatic BP Monitoring",
+          "instruction": "Monitor blood pressure and heart rate for 15 minutes before allowing the crewmate to sit upright."
+        }
+      ]
+    },
+    "Hypercapnia CO2": {
+      "diagnosis": "Hypercapnia CO2",
+      "severity": "CRITICAL",
+      "nitroglycerin_rule": "NOT APPLICABLE",
+      "steps": [
+        {
+          "step": 1,
+          "title": "Immediate Helmet / Cabin Purge",
+          "instruction": "Open primary emergency purge valve and boost helmet fan to maximum flow to flush trapped CO2 pocket (> 7.5 mmHg)."
+        },
+        {
+          "step": 2,
+          "title": "Switch Scrubber Canister",
+          "instruction": "Engage backup LiOH / Amine CO2 scrubber cartridge and connect buddy umbilical or 100% O2 mask."
+        },
+        {
+          "step": 3,
+          "title": "Abort Activity & Controlled Breathing",
+          "instruction": "Halt physical exertion immediately, slow breathing rate, and ingress to habitat airlock."
+        }
+      ]
+    },
+    "Decompression Barotrauma": {
+      "diagnosis": "Decompression Barotrauma",
+      "severity": "CRITICAL",
+      "nitroglycerin_rule": "NOT APPLICABLE",
+      "steps": [
+        {
+          "step": 1,
+          "title": "Emergency Suit / Cabin Repressurization",
+          "instruction": "Increase suit pressure to maximum safe operational margin (5.0 psi) or seal habitat airlock immediately."
+        },
+        {
+          "step": 2,
+          "title": "100% Normobaric Oxygen Washout",
+          "instruction": "Administer 100% pure oxygen via tight-seal mask to wash nitrogen microbubbles out of tissues."
+        },
+        {
+          "step": 3,
+          "title": "Hyperbaric Airlock Evacuation",
+          "instruction": "Immobilize crewmate, transport horizontally to the habitat hyperbaric chamber, and transmit alert to Flight Surgeons."
+        }
+      ]
+    }
+  },
+  "routine_prompts": [
+    {
+      "id": "prompt_glucose_temp",
+      "time": "14:00",
+      "type": "Take Measurement Prompt",
+      "message": "Mission Routine (14:00): Perform capillary blood sugar test (mg/dL) and core body temperature check.",
+      "why_needed": "Detects mid-sol glycemic dips and early radiation/immune thermal shifts before afternoon tasks."
+    },
+    {
+      "id": "prompt_hydration_breathing",
+      "time": "16:30",
+      "type": "Complete Action Prompt",
+      "message": "Mission Routine (16:30): Drink 300 mL water with electrolytes and complete 2-minute paced breathing reset.",
+      "why_needed": "Prevents plasma volume drop (orthostatic syncope risk) and lowers sympathetic cortisol accumulation."
+    }
+  ]
+}

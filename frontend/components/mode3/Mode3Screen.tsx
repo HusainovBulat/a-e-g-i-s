@@ -71,7 +71,7 @@ const RECOVERY_QUESTS = [
 ] as const;
 
 interface CommanderDecision {
-  action: 'reassign' | 'clear' | 'restricted';
+  action: 'reassign' | 'clear';
   title: string;
   desc: string;
   tone: 'green' | 'amber' | 'red';
@@ -307,18 +307,18 @@ export function Mode3Screen() {
     );
   };
 
-  // 3 Commander Directives
+  // Commander Directives (Decision rests solely with Commander)
   const handleReassign = async () => {
     const decision: CommanderDecision = {
       action: 'reassign',
-      title: 'SCHEDULE SWAP APPROVED · REASSIGNED TO REST',
-      desc: `Crew ${crew} is disqualified for tomorrow's EVA due to physical fatigue / masking. Standby replacement assigned.`,
+      title: 'COMMANDER DECISION: SCHEDULE SWAP APPROVED (REASSIGNED TO REST)',
+      desc: `Commander approved AI advisory: Crew ${crew} is reassigned to rest and recovery protocol. Backup crew assigned for next EVA.`,
       tone: 'red',
     };
     await api.postEvent({
       type: 'commander_decision',
       crew,
-      text: `COMMANDER DIRECTIVE: Crew ${crew} REASSIGNED TO REST. Alternative crew lead assigned for next EVA.`,
+      text: `COMMANDER DIRECTIVE: Crew ${crew} REASSIGNED TO REST. Standby backup assigned for next EVA.`,
     });
     setCrewDecisions(prev => ({ ...prev, [crew]: decision }));
   };
@@ -326,29 +326,14 @@ export function Mode3Screen() {
   const handleClearForEva = async () => {
     const decision: CommanderDecision = {
       action: 'clear',
-      title: 'EVA CLEARANCE GRANTED · CLEARED FOR SURFACE SORTIE',
-      desc: `Crew ${crew} is authorized by Commander to execute the planned lunar traverse sortie.`,
+      title: 'COMMANDER OVERRIDE: CLEARED FOR SURFACE SORTIE',
+      desc: `Commander exercised operational command authority to clear Crew ${crew} for planned lunar EVA traverse sortie.`,
       tone: 'green',
     };
     await api.postEvent({
       type: 'commander_decision',
       crew,
-      text: `COMMANDER DIRECTIVE: Crew ${crew} CLEARED FOR EVA SORTIE (AUTHORIZED BY COMMANDER).`,
-    });
-    setCrewDecisions(prev => ({ ...prev, [crew]: decision }));
-  };
-
-  const handleRestrictedSortie = async () => {
-    const decision: CommanderDecision = {
-      action: 'restricted',
-      title: 'RESTRICTED SORTIE · 60 MIN MAX DURATION',
-      desc: `Crew ${crew} permitted limited EVA: flat crater rim only, max 60 min, strict 15-minute telemetry intervals.`,
-      tone: 'amber',
-    };
-    await api.postEvent({
-      type: 'commander_decision',
-      crew,
-      text: `COMMANDER DIRECTIVE: Crew ${crew} RESTRICTED EVA (MAX 60 MIN DURATION & TRAVERSE LIMIT).`,
+      text: `COMMANDER DIRECTIVE: Crew ${crew} CLEARED FOR EVA SORTIE (COMMANDER OVERRIDE).`,
     });
     setCrewDecisions(prev => ({ ...prev, [crew]: decision }));
   };
@@ -666,7 +651,7 @@ export function Mode3Screen() {
           <div className={styles.commanderBox}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--blue-bright)', fontWeight: 700 }}>
-                COMMANDER OPERATIONAL DIRECTIVE // NASA-STD-3001
+                AI FLIGHT SURGEON ADVISORY BRIEFING // NASA-STD-3001
               </span>
               <StatusBadge tone="blue">RAG-LLM TEMP=0.0</StatusBadge>
             </div>
@@ -706,15 +691,12 @@ export function Mode3Screen() {
                 </Button>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                 <Button variant="danger" size="sm" onClick={handleReassign}>
-                  ⛔ REASSIGN // REST (ОТСТРАНИТЬ)
+                  ⛔ APPROVE SWAP // REASSIGN TO REST (ОТСТРАНИТЬ)
                 </Button>
                 <Button variant="primary" size="sm" onClick={handleClearForEva}>
-                  🚀 CLEAR // SEND (НА ЛУНУ)
-                </Button>
-                <Button variant="secondary" size="sm" onClick={handleRestrictedSortie}>
-                  ⚠️ RESTRICTED (ОГРАНИЧИТЬ)
+                  🚀 COMMANDER OVERRIDE // CLEAR (ДОПУСТИТЬ)
                 </Button>
               </div>
             )}

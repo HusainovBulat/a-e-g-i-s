@@ -92,8 +92,13 @@ export function Mode1Screen() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Icon name="warning" size={20} style={{ color: 'var(--red)' }} />
             <div className={styles.warningText}>
-              <strong>15-MINUTE EARLY WARNING // MODEL A:</strong> Muscle failure predicted in{' '}
-              <strong>{legsFailText}</strong> before suit CO₂ spikes. Recommendation: Halt for 60s micro-recovery.
+              <strong>15-MINUTE EARLY WARNING // MODEL A:</strong>{' '}
+              {legsFailMin !== null ? (
+                <>Muscle failure predicted in <strong>{legsFailText}</strong> before suit CO₂ spikes.</>
+              ) : (
+                <>Severe muscle exhaustion detected (<strong>{fatigueScore} / 100</strong>) with plateaued recovery.</>
+              )}{' '}
+              Recommendation: Halt for 60s micro-recovery.
             </div>
           </div>
           <Button variant="danger" size="sm" onClick={handleSendToVisor} disabled={sendingVisor}>
@@ -117,14 +122,27 @@ export function Mode1Screen() {
         >
           <div className={styles.walkBackHero}>
             <div className={styles.timerDisplay}>
-              <div
-                className={styles.timerNumber}
-                style={{ color: isCriticalWalkBack ? 'var(--red)' : walkBackMin < 30 ? 'var(--amber)' : 'var(--green)' }}
-              >
-                {Math.floor(walkBackMin).toString().padStart(2, '0')}:
-                {Math.floor((walkBackMin % 1) * 60).toString().padStart(2, '0')}
-              </div>
-              <span className={styles.timerUnit}>MINUTES REMAINING BEFORE POINT OF NO RETURN</span>
+              {vitals?.fall ? (
+                <>
+                  <div className={styles.timerNumber} style={{ color: 'var(--red)' }}>
+                    00:00
+                  </div>
+                  <span className={styles.timerUnit} style={{ color: 'var(--red)', fontWeight: 700 }}>
+                    EVA ABORTED // CREW DOWN · RESCUE IN PROGRESS
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div
+                    className={styles.timerNumber}
+                    style={{ color: isCriticalWalkBack ? 'var(--red)' : walkBackMin < 30 ? 'var(--amber)' : 'var(--green)' }}
+                  >
+                    {Math.floor(walkBackMin).toString().padStart(2, '0')}:
+                    {Math.floor((walkBackMin % 1) * 60).toString().padStart(2, '0')}
+                  </div>
+                  <span className={styles.timerUnit}>MINUTES REMAINING BEFORE POINT OF NO RETURN</span>
+                </>
+              )}
             </div>
 
             <div className={styles.timerBar}>
@@ -214,7 +232,18 @@ export function Mode1Screen() {
         title="Route topography & point of no return"
         action={<StatusBadge tone="blue">MAP SCALE 5M/PX</StatusBadge>}
       >
-        <ElevationProfile values={elevationArray} position={0.62} turnaround={0.76} />
+                {(() => {
+          const distanceM = currentCrew?.model_b?.distance_m ?? (vitals?.distance_m ?? 1850);
+          const totalRouteM = 4950;
+          const currentPosRatio = Math.max(0.08, Math.min(0.88, distanceM / totalRouteM));
+          const maxForwardMargin = 0.94 - currentPosRatio;
+          const walkBackFactor = Math.max(0, Math.min(1, walkBackMin / 90));
+          const turnaroundRatio = Math.max(
+            currentPosRatio,
+            Math.min(0.95, currentPosRatio + Math.max(0.02, maxForwardMargin * walkBackFactor))
+          );
+          return <ElevationProfile values={elevationArray} position={currentPosRatio} turnaround={turnaroundRatio} />;
+        })()}
         <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
           <span>LUNAR BASE (0 M)</span>
           <span>CRATER RIDGE (143 M)</span>

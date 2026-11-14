@@ -1,47 +1,67 @@
 import type { ProtocolStep, ZoneId } from '../../lib/api/types';
 
-export const zoneContent: Record<ZoneId, { title: string; function: string; space_measurements: string[]; nasa_threat: string; hazards: string[] }> = {
+export const zoneContent: Record<ZoneId, {
+  title: string;
+  function: string;
+  how_measured: string;
+  space_measurements: string[];
+  nasa_threat: string;
+  space_hazard_danger: string;
+  hazards: string[];
+}> = {
   cns: {
-    title: 'Central Nervous System & Sleep',
-    function: 'Maintains alertness, orientation, reaction time and sleep-wake regulation during mission operations.',
-    space_measurements: ['PVT reaction time', 'Sleep duration / quality', 'Gait tremor', 'SANS symptom check'],
-    nasa_threat: 'Fluid shifts and circadian disruption can affect vigilance and sensorimotor performance.',
-    hazards: ['Microgravity fluid shift', 'Sleep debt', 'CO₂ exposure', 'Radiation dose', 'Isolation stress'],
+    title: "BRAIN (Central Nervous System)",
+    function: "Controls the body's movements, balance, coordination, sleep, mood, and responses to the environment.",
+    how_measured: "A.E.G.I.S. tracks movement patterns and coordination using 3-axis IMU motion sensors, which help identify unusual gait patterns and neurological tremors, alongside daily sleep hours, mood (0..10), and optic nerve ultrasound.",
+    space_measurements: ["3-axis IMU tremor & gait", "Sleep duration / quality", "Mood (0..10) & PVT latency", "Optic nerve ultrasound (SANS)"],
+    nasa_threat: "Altered gravity disrupts the inner ear and nervous system, commonly triggering Space Adaptation Syndrome / Space Motion Sickness, neurovestibular dysfunction, and Spaceflight Associated Neuro-ocular Syndrome (SANS) (brain and optic nerve pressure).",
+    space_hazard_danger: "Altered gravity disrupts the inner ear and nervous system, commonly triggering Space Adaptation Syndrome / Space Motion Sickness, neurovestibular dysfunction, and Spaceflight Associated Neuro-ocular Syndrome (SANS) (brain and optic nerve pressure). When affected, an astronaut experiences severe vertigo, nausea, disorientation, and spatial illusions where \"up\" and \"down\" feel confused. These symptoms impair hand-eye coordination and significantly increase the risk of stumbles or falls during lunar EVAs.",
+    hazards: ["Neurovestibular disorientation", "Sleep debt & fatigue", "SANS optic nerve edema", "Impaired motor coordination", "Lunar crater fall risk"],
   },
   cardio: {
-    title: 'Cardiovascular & Hemodynamics',
-    function: 'Tracks cardiac workload, blood pressure and perfusion during rest and EVA exertion.',
-    space_measurements: ['Heart rate / HRV', 'Systolic and diastolic BP', 'ECG ST trend', 'Perfusion response'],
-    nasa_threat: 'A sudden pressure or ECG change can reduce crew capability and requires clinical review.',
-    hazards: ['Orthostatic intolerance', 'Deconditioning', 'EVA workload', 'Dehydration', 'Thermal stress'],
+    title: "HEART & CIRCULATION (Cardiovascular System)",
+    function: "Pumps blood throughout the body, delivering oxygen and nutrients to the brain, muscles, and other organs, and carries carbon dioxide and other waste products away from tissues.",
+    how_measured: "A smart base-layer garment uses 3-lead ECG electrodes to monitor heart activity, while optical PPG sensors and cuffless blood-pressure monitoring track heart rate, pulse changes, and blood pressure (plus portable POCUS ultrasound).",
+    space_measurements: ["3-lead Smart Base-Layer ECG", "Continuous BP (sys / dia)", "Optical PPG pulse rate & HRV", "POCUS cardiac ultrasound"],
+    nasa_threat: "Microgravity shifts body fluids toward the upper body and changes how the heart works, leading to cardiac deconditioning / myocardial atrophy (heart muscle shrinkage), myocardial ischemia (reduced blood flow to the heart), and cardiac arrhythmias / atrial fibrillation (irregular heartbeats).",
+    space_hazard_danger: "Microgravity shifts body fluids toward the upper body and changes how the heart works, leading to cardiac deconditioning / myocardial atrophy (heart muscle shrinkage), myocardial ischemia (reduced blood flow to the heart), and cardiac arrhythmias / atrial fibrillation (irregular heartbeats). Upward fluid shifts also trigger spaceflight anemia / hypovolemia (a 10% to 15% drop in blood volume and red blood cells) and increase the risk of jugular venous thrombosis (blood clots in upper-body veins). When an astronaut develops an arrhythmia or weakened heart muscle in space, disrupted electrical signals can cause chest fluttering, dizziness, and shortness of breath. Upon returning to gravity, blood rushes back to the legs, causing orthostatic intolerance / orthostatic syncope (sudden blood pressure drops, tunnel vision, and fainting).",
+    hazards: ["Orthostatic intolerance / syncope", "Myocardial deconditioning", "Myocardial ischemia risk", "Spaceflight hypovolemia (-15%)", "Jugular thrombosis risk"],
   },
   resp: {
-    title: 'Respiratory & Gas Exchange',
-    function: 'Monitors oxygenation, respiratory effort and suit-loop reserve for safe crew activity.',
-    space_measurements: ['SpO₂', 'Respiratory rate', 'Suit CO₂ partial pressure', 'O₂ reserve / burn'],
-    nasa_threat: 'Hypoxemia or elevated in-suit CO₂ can impair cognition and requires prompt protocol action.',
-    hazards: ['Suit leak', 'Scrubber saturation', 'High workload', 'Dust exposure', 'Low O₂ reserve'],
+    title: "LUNGS (Respiratory System)",
+    function: "Bring oxygen into the body and remove carbon dioxide through breathing.",
+    how_measured: "Thoracic stretch sensors monitor breathing rate and patterns, while optical PPG sensors measure blood oxygen saturation (SpO\u2082). The spacesuit also provides CO\u2082 monitoring.",
+    space_measurements: ["Thoracic stretch respiratory rate", "Optical PPG pulse oximetry (SpO\u2082)", "In-suit CO\u2082 partial pressure", "PLSS O\u2082 burn & reserve"],
+    nasa_threat: "During strenuous lunar activities, astronauts can develop acute hypercapnia (carbon dioxide toxicity) if CO\u2082 builds up inside the helmet, alongside hypoxia / hypoxemia (low blood oxygen) or decompression sickness if oxygen or suit pressure drops.",
+    space_hazard_danger: "During strenuous lunar activities, astronauts can develop acute hypercapnia (carbon dioxide toxicity) if CO\u2082 builds up inside the helmet, alongside hypoxia / hypoxemia (low blood oxygen) or decompression sickness if oxygen or suit pressure drops. When hypercapnia or hypoxia occurs, the astronaut quickly develops throbbing headaches, rapid breathing, confusion, and impaired judgment. Without immediate correction, these conditions can cause panic and sudden loss of consciousness during an EVA.",
+    hazards: ["Acute hypercapnia (helmet CO\u2082)", "Hypoxemia / suit leak", "Decompression sickness", "Scrubber saturation", "High metabolic workload"],
   },
   thermo: {
-    title: 'Immune, Thermal & Radiation',
-    function: 'Observes core temperature, thermal balance and radiation exposure trends.',
-    space_measurements: ['Core / skin temperature', 'Radiation dosimeter', 'LCVG flow', 'Inflammatory trend'],
-    nasa_threat: 'Thermal extremes and cumulative radiation can affect performance and recovery.',
-    hazards: ['Solar particle event', 'Thermal extremes', 'Cooling-loop fault', 'Regolith dust', 'Inflammation'],
+    title: "IMMUNE & THERMOREGULATION (Immune System)",
+    function: "Protects the body against infections, latent viral reactivation, and radiation-induced inflammation while regulating core body temperature.",
+    how_measured: "Continuous core body temperature sensors (\u00b0C), onboard radiation dosimetry, and Smart Base-Layer resting heart rate and autonomic stress tracking.",
+    space_measurements: ["Continuous core temperature (\u00b0C)", "Onboard radiation dosimeter", "LCVG water cooling loop", "Smart Base-Layer stress markers"],
+    nasa_threat: "Deep-space radiation and chronic isolation trigger spaceflight immune dysregulation / T-cell suppression and latent herpesvirus reactivation alongside thermoregulatory dysfunction inside pressurized spacesuits.",
+    space_hazard_danger: "Deep-space radiation and chronic isolation trigger spaceflight immune dysregulation / T-cell suppression and latent herpesvirus reactivation alongside thermoregulatory dysfunction inside pressurized spacesuits. When affected, astronauts experience low-grade fever, delayed wound healing, systemic fatigue, and rapid heat storage during strenuous lunar EVAs.",
+    hazards: ["Solar particle events (radiation)", "Immune dysregulation (T-cell)", "Latent viral reactivation", "Spacesuit heat storage", "Regolith toxic dust"],
   },
   metabolic: {
-    title: 'Metabolic & Fluid Balance',
-    function: 'Tracks glucose, hydration and energy balance that support sustained mission performance.',
-    space_measurements: ['Blood glucose', 'Fluid intake / output', 'Electrolyte trend', 'Metabolic workload'],
-    nasa_threat: 'Glucose or hydration excursions may increase fatigue and compromise EVA readiness.',
-    hazards: ['Dehydration', 'Meal timing', 'Glucose excursion', 'High energy demand', 'Electrolyte loss'],
+    title: "NUTRITION & METABOLISM (Metabolic System & Blood Sugar)",
+    function: "Supplies cells with glucose energy, water, and electrolytes to sustain cognitive alertness and physical stamina.",
+    how_measured: "Onboard capillary glucometer measuring blood sugar levels in mg/dL, daily hydration and nutrition check-in sliders (0..10), and PLSS metabolic energy expenditure tracking (Watts).",
+    space_measurements: ["Capillary blood sugar (mg/dL)", "PLSS metabolic rate (Watts)", "Hydration / electrolyte intake", "Daily nutrition check-in (0..10)"],
+    nasa_threat: "Microgravity and high EVA workloads frequently cause spaceflight caloric deficit / anorexia, isotonic dehydration, and spaceflight-induced insulin resistance / glycemic variability (blood sugar swings outside 75\u2013115 mg/dL).",
+    space_hazard_danger: "Microgravity and high EVA workloads frequently cause spaceflight caloric deficit / anorexia, isotonic dehydration, and spaceflight-induced insulin resistance / glycemic variability (blood sugar swings outside 75\u2013115 mg/dL). When blood sugar or hydration drops, astronauts experience dizziness, slowed vestibular reaction speed, accelerated muscle cramping, and heightened risk of fainting.",
+    hazards: ["Isotonic dehydration", "Glycemic variability (<75 / >115)", "High caloric expenditure", "Electrolyte imbalance", "Orthostatic fainting risk"],
   },
   musculo: {
-    title: 'Musculoskeletal & NIRS Fatigue',
-    function: 'Estimates lower-limb fatigue and gait stability using muscle oxygenation and movement signals.',
-    space_measurements: ['Calf SmO₂', 'NIRS desaturation slope', 'sEMG frequency shift', 'Gait asymmetry'],
-    nasa_threat: 'Muscle fatigue may reduce mobility and increase fall risk during surface operations.',
-    hazards: ['Steep slope', 'Cumulative EVA load', 'NIRS sensor fog', 'Suit joint resistance', 'Loose regolith'],
+    title: "MUSCLES & BONES (Muscular & Skeletal System)",
+    function: "Allow the body to move, maintain posture, support the body, protect internal organs, and perform physical activities such as walking and lifting.",
+    how_measured: "NIRS sensors measure local muscle oxygenation (SmO\u2082), while surface EMG (sEMG) sensors track muscle activity and fatigue. Motion sensors (3-axis IMU) also detect changes in walking patterns and track changes in estimated axial bone loading over time through daily physiological monitoring and 14-day bone-load trend analysis (NASA OSDR OSD-783).",
+    space_measurements: ["Calf NIRS SmO\u2082 oxygenation", "Surface EMG (sEMG) frequency shift", "3-axis IMU gait tremor & asymmetry", "14-day axial bone load (OSDR OSD-783)"],
+    nasa_threat: "Reduced gravity decreases the normal workload on muscles, causing spaceflight muscle atrophy / sarcopenia (wasting of postural and leg muscles) and localized muscle ischemia (oxygen depletion) during heavy exertion.",
+    space_hazard_danger: "Reduced gravity decreases the normal workload on muscles, causing spaceflight muscle atrophy / sarcopenia (wasting of postural and leg muscles) and localized muscle ischemia (oxygen depletion) during heavy exertion. Without Earth's gravity providing mechanical stress, astronauts also develop spaceflight-induced osteopenia / osteoporosis (accelerated bone density loss) and renal calculi / hypercalciuria (kidney stones) caused by excess calcium releasing into the bloodstream. As muscles weaken and lose oxygen, the astronaut suffers from painful cramps, tremors, and unstable walking patterns, while osteopenia leaves bones brittle and prone to fractures from minor falls.",
+    hazards: ["Soleus / calf muscle atrophy", "Localized muscle ischemia", "Accelerated osteopenia / bone loss", "Hypercalciuria / kidney stones", "Crater slope fall & fracture"],
   },
 };
 

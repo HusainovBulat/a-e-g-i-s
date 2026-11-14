@@ -47,6 +47,7 @@ export interface ModelBState {
   o2_burn_l_min: number;
   o2_left_pct: number;
   walk_back_min: number;
+  distance_m?: number;
 }
 
 export interface CrewState {

@@ -159,6 +159,7 @@ function createInitialCrewState(crew: CrewId): CrewState {
       o2_burn_l_min: 0.88,
       o2_left_pct: 90.7,
       walk_back_min: 45.2,
+      distance_m: 1850,
     },
   };
 }
@@ -211,6 +212,7 @@ function parseCrewState(raw: any, crewId: CrewId): CrewState {
         ? raw.walk_back.minutes
         : (raw.model_b?.walk_back_limit_min ?? raw.model_b?.walk_back_min ?? 45)
     ),
+    distance_m: Number(raw.walk_back?.distance_from_base_m ?? raw.route_position?.distance_m ?? v.distance_m ?? 1850),
   };
 
   return {

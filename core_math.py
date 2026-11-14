@@ -471,7 +471,8 @@ def detect_masking(
     if masking_detected:
         escalation_level = "CREW_COMMANDER_ATTENTION"
         eva_auto_clearance = False
-        status_band = "red" if obj_score < 60.0 else "yellow"
+        # Masking discrepancy: status band is strictly yellow (caution) to flag contradiction
+        status_band = "yellow"
         if primary_trigger:
             reason = (
                 f"Subjective report ({subjective_score:.1f}/100) exceeds objective sensors "
@@ -561,17 +562,23 @@ def calculate_eva_readiness_score(
     final_readiness = clamp(effective_base + total_quest_bonus, 0.0, 100.0)
 
     # Classify EVA status
-    if final_readiness >= 85.0 and not is_masking:
+    if is_masking:
+        # Masking detected: User spec says status is YELLOW (CAUTION / MISMATCH),
+        # alerting Commander: recommend reassign to rest (не выпускать).
+        eva_status = "CAUTION"
+        badge = "🟡 CAUTION: MISMATCH DETECTED (RECOMMEND REASSIGN)"
+        status_color = "#F59E0B"
+    elif final_readiness >= 85.0:
         eva_status = "CLEARED"
         badge = "🟢 CLEARED FOR EVA"
         status_color = "#10B981"
-    elif final_readiness >= 60.0 or (final_readiness >= 85.0 and is_masking):
+    elif final_readiness >= 60.0:
         eva_status = "CAUTION"
-        badge = "🟡 CAUTION: CREW ACTION" if not is_masking else "🟡 PENDING COMMANDER CLEARANCE"
+        badge = "🟡 CAUTION: CREW ACTION"
         status_color = "#F59E0B"
     else:
         eva_status = "PROHIBITED"
-        badge = "🔴 PROHIBITED: SWAP SCHEDULE"
+        badge = "🔴 PROHIBITED: SEVERE EXHAUSTION"
         status_color = "#EF4444"
 
     return {

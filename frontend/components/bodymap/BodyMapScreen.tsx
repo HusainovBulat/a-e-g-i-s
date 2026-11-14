@@ -58,10 +58,37 @@ export function BodyMapScreen({ crew, connection }: { crew: CrewState | null; co
                 <div><span>ORGAN INDEX</span><strong>{selectedScore}<small> / 100</small></strong></div>
                 <StatusBadge tone={selectedScore >= 80 ? 'green' : selectedScore >= 60 ? 'amber' : 'red'} dot>{selectedScore >= 80 ? 'NOMINAL' : selectedScore >= 60 ? 'CAUTION' : 'CRITICAL'}</StatusBadge>
               </div>
-              <section className={styles.organSection}><h4>ITS FUNCTION</h4><p>{selectedDetails.function}</p></section>
-              <section className={styles.organSection}><h4>SPACE MEASUREMENTS</h4><div className={styles.readoutGrid}>{getZoneReadouts(selectedZone, crew).map(readout => <div className={styles.readout} key={readout.label}><span>{readout.label}</span><strong>{readout.value}</strong></div>)}</div></section>
-              <section className={styles.organSection}><h4>NASA THREAT</h4><p>{selectedDetails.nasa_threat}</p></section>
-              <section className={styles.organSection}><h4>HAZARD INFLUENCE / 5</h4><div className={styles.hazardList}>{selectedDetails.hazards.map((hazard, index) => <span key={hazard}><i>{String(index + 1).padStart(2, '0')}</i>{hazard}</span>)}</div></section>
+              <section className={styles.organSection}>
+                <h4>BIOLOGICAL FUNCTION</h4>
+                <p>{selectedDetails.function}</p>
+              </section>
+              <section className={styles.organSection}>
+                <h4>HOW IT IS MEASURED IN SPACE</h4>
+                <p style={{ marginBottom: '8px', color: '#c5d3e2' }}>{selectedDetails.how_measured}</p>
+                <div className={styles.readoutGrid}>
+                  {getZoneReadouts(selectedZone, crew).map(readout => (
+                    <div className={styles.readout} key={readout.label}>
+                      <span>{readout.label}</span>
+                      <strong>{readout.value}</strong>
+                    </div>
+                  ))}
+                </div>
+              </section>
+              <section className={styles.organSection}>
+                <h4>SPACE HAZARD & CLINICAL DANGER</h4>
+                <p style={{ lineHeight: 1.6 }}>{selectedDetails.space_hazard_danger}</p>
+              </section>
+              <section className={styles.organSection}>
+                <h4>MISSION HAZARDS / 5</h4>
+                <div className={styles.hazardList}>
+                  {selectedDetails.hazards.map((hazard, index) => (
+                    <span key={hazard}>
+                      <i>{String(index + 1).padStart(2, '0')}</i>
+                      {hazard}
+                    </span>
+                  ))}
+                </div>
+              </section>
             </motion.aside>}
           </AnimatePresence>
         </div>

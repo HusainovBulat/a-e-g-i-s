@@ -23,20 +23,99 @@ export function LineChart({ values, labels, color = 'var(--blue-bright)', label,
   );
 }
 
-export function ElevationProfile({ values, position = 0.62, turnaround = 0.76 }: { values: number[]; position?: number; turnaround?: number }) {
+function getElevationPointAtRatio(
+  values: number[],
+  ratio: number,
+  width = 700,
+  height = 190,
+  insetX = 10,
+  insetY = 10
+): { x: number; y: number } {
+  const clampedRatio = Math.max(0, Math.min(1, ratio));
+  const x = insetX + clampedRatio * (width - insetX * 2);
+  if (values.length === 0) return { x, y: height / 2 };
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  const rawIdx = clampedRatio * (values.length - 1);
+  const idx0 = Math.floor(rawIdx);
+  const idx1 = Math.min(values.length - 1, Math.ceil(rawIdx));
+  const weight = rawIdx - idx0;
+
+  const elevation = values[idx0] * (1 - weight) + values[idx1] * weight;
+  const y = height - insetY - ((elevation - min) / range) * (height - insetY * 2);
+  return { x, y };
+}
+
+export function ElevationProfile({
+  values,
+  position = 0.62,
+  turnaround = 0.76,
+}: {
+  values: number[];
+  position?: number;
+  turnaround?: number;
+}) {
   const points = chartPoints(values, 700, 190, 10, 10);
-  const x = 10 + Math.max(0, Math.min(1, position)) * 680;
-  const returnX = 10 + Math.max(0, Math.min(1, turnaround)) * 680;
+  const posCurrent = getElevationPointAtRatio(values, position, 700, 190, 10, 10);
+  const posTurn = getElevationPointAtRatio(values, turnaround, 700, 190, 10, 10);
+
   return (
-    <svg className={styles.elevation} viewBox="0 0 700 190" role="img" aria-label="Lunar route elevation profile with current position and walk-back turn-around point">
-      {[0, 1, 2, 3].map(i => <line key={i} x1="10" x2="690" y1={24 + i * 48} y2={24 + i * 48} className={styles.gridLine} />)}
+    <svg
+      className={styles.elevation}
+      viewBox="0 0 700 190"
+      role="img"
+      aria-label="Lunar route elevation profile with current position and walk-back turn-around point"
+    >
+      {[0, 1, 2, 3].map(i => (
+        <line
+          key={i}
+          x1="10"
+          x2="690"
+          y1={24 + i * 48}
+          y2={24 + i * 48}
+          className={styles.gridLine}
+        />
+      ))}
       <polyline points={`10,180 ${points} 690,180`} fill="rgba(76,141,255,.12)" stroke="none" />
-      <polyline points={points} fill="none" stroke="var(--blue-bright)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-      <line x1={returnX} x2={returnX} y1="10" y2="180" className={styles.turnaroundLine} />
-      <line x1={x} x2={x} y1="10" y2="180" className={styles.positionLine} />
-      <circle cx={x} cy="93" r="5" fill="var(--green)" />
-      <text x={Math.min(returnX + 6, 600)} y="18" className={styles.annotation}>TURN BACK</text>
-      <text x={Math.min(x + 6, 640)} y="37" className={styles.annotation}>YOU ARE HERE</text>
+      <polyline
+        points={points}
+        fill="none"
+        stroke="var(--blue-bright)"
+        strokeWidth="2"
+        vectorEffect="non-scaling-stroke"
+      />
+      <line x1={posTurn.x} x2={posTurn.x} y1="10" y2="180" className={styles.turnaroundLine} />
+      <line x1={posCurrent.x} x2={posCurrent.x} y1="10" y2="180" className={styles.positionLine} />
+
+      {/* ORANGE DOT: Turn Back / Point of No Return EXACTLY ON RELIEF LINE */}
+      <circle
+        cx={posTurn.x}
+        cy={posTurn.y}
+        r="5.5"
+        fill="var(--amber)"
+        stroke="#fff"
+        strokeWidth="1.8"
+      />
+
+      {/* GREEN DOT: You Are Here EXACTLY ON RELIEF LINE */}
+      <circle
+        cx={posCurrent.x}
+        cy={posCurrent.y}
+        r="5.5"
+        fill="var(--green)"
+        stroke="#fff"
+        strokeWidth="1.8"
+      />
+
+      <text x={Math.max(10, Math.min(posTurn.x - 25, 620))} y="18" className={styles.annotation}>
+        TURN BACK
+      </text>
+      <text x={Math.max(10, Math.min(posCurrent.x - 30, 620))} y="34" className={styles.annotation}>
+        YOU ARE HERE
+      </text>
     </svg>
   );
 }
