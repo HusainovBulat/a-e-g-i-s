@@ -28,6 +28,7 @@ export interface SensorPacket {
   fall: boolean;
   nirs_ok: boolean;
   dizzy: boolean;
+  distance_m?: number;
 }
 
 export type SensorInput = Partial<Omit<SensorPacket, 'crew'>> & {
