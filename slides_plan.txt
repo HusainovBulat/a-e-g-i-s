@@ -1,0 +1,69 @@
+Mandatory Deliverables & Links
+
+You cannot upload videos or documents directly to the NASA website (only images up to 10MB are supported). Everything else must be hosted externally on platforms like GitHub, YouTube, or Google Drive with public, unrestricted access (no passwords, logins, or permission requests).
+• Project Summary: A 50 to 200-word overview explaining what you built, how it solves your chosen challenge, and why it matters.
+• Project Demo (Strict Limits): You must link to a high-level summary and demonstration of your work in one of two formats:
+ • Video: Maximum 30 seconds long.
+ • Slide Deck: Maximum 7 slides total (this includes your title and intro slides).
+• Final Project Link: A direct, public link to your working prototype, live website, app, or open-source code repository.
+• NASA Data & Resources: To be eligible for Global Judging, you must incorporate and explicitly link to at least one official NASA resource or dataset (alongside citations for any third-party data).
+• Project Details: A written breakdown covering how your solution works, the tools/languages/hardware used, its intended impact, and what makes it creative.
+
+Tips to Make Your Presentation Feel Like a True Demo
+
+Because judges are not watching a video, your slides need to visually show that your teammates' technical work actually runs.
+• Ask for Screenshots: Have your teammates send you clear screenshots of the app, website, data visualizations, or code output they are building.
+• Include Diagrams: If the technical part is backend code or data analysis without a pretty interface, ask your teammates to explain the workflow so you can draw a simple flowchart showing how data goes in and results come out.
+• Check Permissions: Make sure the public link you paste into the NASA submission form opens directly to your slides without requiring a login or permission request.
+
+Slide 1: Title & Team. Include your project name, your chosen challenge name, and your team name.
+Slide 2: The Problem. Briefly explain the specific issue from the challenge prompt that you are solving.
+Slide 3: Your Solution. Introduce what your team built in simple terms and explain how it solves the problem.
+Slide 4: The Demo (Proof it Works). Show screenshots, screen recordings (GIFs), or diagrams of your actual app, website, or hardware in action.
+Slide 5: How It Works & NASA Data. Explain the tech stack your teammates used and highlight the exact NASA datasets or resources integrated into the project.
+Slide 6: Impact & Creativity. Describe who benefits from your project, why it matters in the real world, and what makes your approach unique.
+Slide 7: Future Vision & Links. Share what you would add next if you had more time, and include a clear link to your working prototype or GitHub repository.
+
+Константин:
+Problems it solves:
+
+No doctor in space and no real-time communication with Earth. In an acute emergency (such as chest pain or fainting halfway to Mars or inside a lunar crater), a crew of non-physicians is left alone to deal with a critical condition.
+
+Hidden fatigue and sensor lag. The CO₂ gas sensor inside a spacesuit lags by 5–10 minutes, and astronauts often fail to notice—or deliberately hide—overexertion, increasing the risk of not making it back to base before running out of oxygen.
+
+Gradual physiological deconditioning. In microgravity and low gravity (0g / 1/6g), bone density drops rapidly, muscles atrophy, and the cardiovascular system, immunity, and mental health suffer.
+
+How it solves them (in brief):
+
+Prevents crises during spacewalks (Mode 1 · EVA): tracks leg muscle fatigue and oxygen consumption while accounting for actual crater slope, calculates the "point of no return" countdown (Walk-Back Limit) in advance, and displays a short command on the visor and wrist display.
+
+Guides a non-physician step-by-step in an emergency (Mode 2 · Emergency): automatically activates emergency triage when an alarm is triggered or a fall occurs—identifies the diagnosis using 4 visual symptom cards and voice, strictly blocks dangerous mistakes (such as prohibiting nitroglycerin when blood pressure is low, BP < 90), reads out step-by-step first aid instructions, and queues a report for Flight Surgeons on Earth.
+
+Catches hidden exhaustion in the evening (Mode 3 · Evening): compares the astronaut's self-assessment against actual biometrics (Mismatch detector), assigns recovery quests, monitors 6 body systems via a clickable body figure, and prepares a summary for the commander to adjust the schedule.
+
+Slide 5: How It Works and What Data It Is Trained On
+How the system works (3 simple steps):
+
+Collecting data from the astronaut: sensors in the base layer garment and spacesuit read heart rate, blood pressure, breathing, muscle oxygen, and gait stability every second.
+Smart onboard analysis (without a connection to Earth): the base's onboard computer runs this data through our algorithms and NASA standards:
+Fatigue and oxygen forecast: warns in advance how many minutes until the legs get tired and calculates how much time is left before the "point of no return" so the astronaut is guaranteed to make it back to the base.
+Emergency assistant: if a medical episode or a fall occurs, the system automatically identifies the cause, prevents dangerous mistakes (for example, it won't allow administering a medication that causes a sharp drop in blood pressure), and dictates simple rescue steps out loud to the crew.
+Evening check-in: compares how the astronaut feels subjectively with what the instruments show—if they are hiding fatigue, the system will notice and suggest the commander adjust the EVA schedule.
+Clear screen and visor: everything is displayed on the base console as a traffic light (green / yellow / red), a clickable body map, and short prompts directly on the helmet visor and wristwatch.
+What real data it is trained and calibrated on:
+
+Lunar terrain and NASA standards:
+NASA LRO LOLA Moon maps (Site04) — real elevations and slopes of Shackleton Crater to calculate climbing exertion.
+NASA Health Standard (Human Health and Performance) — official health norms, fatigue thresholds, and EVA clearance rules.
+Apollo EVA archives and the Lunar EVA 2023 study — real benchmarks for heart rate and energy expenditure in lunar gravity (1/6 g).
+Space biology (NASA OSDR):
+Study OSD-783 — data on muscle weakening and atrophy without gravity.
+Study OSD-435 — data on the effects of space radiation on the heart and blood vessels.
+Medical databases (PhysioNet and PLOS ONE) for model training:
+Muscle fatigue: PhysioNet sEMG and the PLOS ONE muscle endurance study — drop in oxygen and strength in the legs under load.
+Energy expenditure and respiration: PhysioNet Treadmill and PhysioNet ACTES — how heart rate and oxygen consumption rise during uphill walking and intense work.
+Emergency medicine: PhysioNet BIDMC and PhysioNet Pulse Transit Time — real clinical recordings of heart rate, blood pressure, respiration, and blood oxygen to recognize acute conditions.
+Slide 7: What's Next (Future Vision) and References
+Connecting to real spacesuit sensors: transitioning the system from test data directly to real biometric base layers and the life support systems of new lunar spacesuits (AxEMU).
+Testing on real AR visors and sleeve displays: checking how readable the prompts are on the helmet glass and how convenient it is to control the system in thick gloves or by voice.
+Fully autonomous AI for missions to Mars: running an embedded neural network directly on the lunar base or spacecraft computer so the crew receives medical recommendations even during a complete loss of communication with Earth.

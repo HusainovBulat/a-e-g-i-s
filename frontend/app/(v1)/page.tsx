@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Sparkline } from '../components/charts/Charts';
-import { BodyMapScreen } from '../components/bodymap/BodyMapScreen';
-import { Mode1Screen } from '../components/mode1/Mode1Screen';
-import { Mode2Screen } from '../components/mode2/Mode2Screen';
-import { Mode3Screen } from '../components/mode3/Mode3Screen';
-import { ModeTabs, TopBar } from '../components/shell/TopBar';
-import { Panel } from '../components/ui/Panel';
-import { NumberTicker } from '../components/ui/NumberTicker';
-import { StatusBadge } from '../components/ui/StatusBadge';
-import { ConsoleProvider, useConsole } from '../lib/ConsoleProvider';
-import type { CrewState } from '../lib/api/types';
+import { Sparkline } from '../../components/charts/Charts';
+import { BodyMapScreen } from '../../components/bodymap/BodyMapScreen';
+import { Mode1Screen } from '../../components/mode1/Mode1Screen';
+import { Mode2Screen } from '../../components/mode2/Mode2Screen';
+import { Mode3Screen } from '../../components/mode3/Mode3Screen';
+import { ModeTabs, TopBar } from '../../components/shell/TopBar';
+import { Panel } from '../../components/ui/Panel';
+import { NumberTicker } from '../../components/ui/NumberTicker';
+import { StatusBadge } from '../../components/ui/StatusBadge';
+import { ConsoleProvider, useConsole } from '../../lib/ConsoleProvider';
+import type { CrewState } from '../../lib/api/types';
 import styles from './page.module.css';
 
 export default function Home() {

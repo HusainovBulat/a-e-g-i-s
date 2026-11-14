@@ -1,0 +1,96 @@
+/* ---------- Top bar ---------- */
+.topbar { position: sticky; z-index: 20; top: 0; display: flex; align-items: center; gap: 12px 28px; padding: 0 28px; border-bottom: 1px solid var(--border); background: rgba(14, 19, 26, .94); backdrop-filter: blur(8px); }
+.brand { display: flex; flex-shrink: 0; align-items: center; gap: 12px; padding: 12px 0; }
+.brand strong { display: block; font-size: 16px; letter-spacing: .04em; }
+.brand span { display: block; color: var(--text-3); font-size: 12.5px; }
+.logo { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 10px; background: var(--blue-bg); color: var(--blue); box-shadow: inset 0 0 0 1px rgba(91,156,255,.4); }
+.tabs { display: flex; flex: 1; align-self: stretch; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { position: relative; display: flex; flex-shrink: 0; align-items: center; gap: 8px; padding: 0 16px; border: 0; background: transparent; color: var(--text-2); font-size: 15px; font-weight: 500; }
+.tab::after { position: absolute; right: 10px; bottom: -1px; left: 10px; height: 3px; border-radius: 3px 3px 0 0; content: ''; }
+.tab:hover { color: var(--text); }
+.tabActive { color: var(--text); font-weight: 600; }
+.tabActive::after { background: var(--blue); }
+.tabAlarm { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 4px var(--red-bg); animation: blink 1.2s infinite; }
+.topMeta { display: flex; flex-shrink: 0; align-items: center; gap: 10px; }
+.clock { color: var(--text-2); font-size: 14px; }
+
+/* ---------- Crew tabs (left column) ---------- */
+.crewTabs { position: sticky; top: 68px; display: flex; flex-direction: column; gap: 6px; height: calc(100vh - 68px); overflow-y: auto; padding: 20px 12px; border-right: 1px solid var(--border); background: #0e131a; }
+.crewTab { position: relative; flex-shrink: 0; border: 1px solid transparent; border-radius: 12px; }
+.crewTab:hover { background: var(--surface); }
+.crewTabHead { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border: 0; background: transparent; color: var(--text-2); text-align: left; }
+.crewTabActive { border-color: var(--border-strong); background: var(--raised) !important; color: var(--text); }
+.crewTabActive::before { position: absolute; top: 12px; bottom: 12px; left: -13px; width: 3px; border-radius: 0 3px 3px 0; background: var(--blue); content: ""; }
+.crewTabAlarm { border-color: rgba(240, 82, 79, .55); }
+.crewTabText { display: flex; min-width: 0; flex: 1; flex-direction: column; line-height: 1.3; }
+.crewTabText strong { color: var(--text); font-size: 15px; font-weight: 600; }
+.crewTabText span, .crewTabText small { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.crewTabText span { color: var(--text-2); }
+.crewTabText small { color: var(--text-3); }
+.crewTabScore { font-size: 18px; font-weight: 600; }
+.crewAvatar { display: grid; width: 40px; height: 40px; flex-shrink: 0; place-items: center; border: 2px solid; border-radius: 50%; font-size: 16px; font-weight: 700; }
+.avatar_green { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+.avatar_amber { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+.avatar_red { border-color: var(--red); background: var(--red-bg); color: var(--red); animation: ring 1.4s infinite; }
+
+/* expanded tab: live sensor readings */
+.sensors { display: grid; gap: 2px; margin: 0 12px 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+.sensorsTitle { margin-bottom: 4px; color: var(--text-3); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.sensorRow { display: grid; grid-template-columns: minmax(0, 1fr) 46px auto; align-items: center; gap: 8px; min-height: 30px; font-size: 13.5px; }
+.sensorRow > span:first-child { overflow: hidden; color: var(--text-2); text-overflow: ellipsis; white-space: nowrap; }
+.sensorSpark { height: 18px; }
+.sensorRow strong { font-size: 16px; font-weight: 600; text-align: right; white-space: nowrap; }
+.sensorRow small { margin-left: 3px; color: var(--text-3); font-size: 11.5px; font-weight: 400; }
+
+/* ---------- Alert strip ---------- */
+.alertStrip { display: flex; align-items: center; gap: 16px; margin: 16px 28px 0; padding: 14px 18px; border: 1px solid var(--red); border-radius: var(--radius-lg); background: var(--red-bg); animation: glow 1.6s ease-in-out infinite; }
+.alertStrip > div { display: flex; min-width: 0; flex: 1; flex-direction: column; }
+.alertStrip strong { color: #ffb4b2; font-size: 16px; }
+.alertStrip > div > span { color: var(--text-2); font-size: 14px; }
+.alertIcon { display: grid; width: 34px; height: 34px; flex-shrink: 0; place-items: center; border-radius: 50%; background: var(--red); color: #fff; font-size: 19px; font-weight: 800; }
+
+@media (max-width: 1100px) {
+  .topbar { flex-wrap: wrap; padding: 0 16px; }
+  .tabs { order: 3; flex-basis: 100%; height: 48px; margin: 0 -16px; padding: 0 8px; border-top: 1px solid var(--border); }
+  .topMeta { margin-left: auto; }
+  .alertStrip { flex-wrap: wrap; margin: 12px 16px 0; }
+}
+@media (max-width: 900px) {
+  .crewTabs { position: static; flex-direction: row; align-items: flex-start; height: auto; overflow-x: auto; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--border); }
+  .crewTab { width: auto; min-width: 220px; }
+  .crewTabActive::before { display: none; }
+}
+@media (max-width: 640px) { .clock, .brand span { display: none; } }
+
+/* ---------- Demo drawer ---------- */
+.drawerStack { display: grid; gap: 28px; }
+.drawerTitle { margin-bottom: 10px; color: var(--text-2); font-size: 13px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.drawerNote { margin-top: 8px; color: var(--text-3); font-size: 13.5px; }
+.scenarioList, .envList { display: grid; gap: 6px; }
+.scenarioItem, .envItem { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); text-align: left; }
+.scenarioItem:hover:not(:disabled), .envItem:hover { border-color: var(--border-strong); background: var(--raised); }
+.scenarioItem strong, .envItem strong { display: block; font-size: 14.5px; font-weight: 600; }
+.scenarioItem small, .envItem small { display: block; color: var(--text-3); font-size: 13px; }
+.envItem { display: block; }
+.envActive { border-color: var(--blue); background: var(--blue-bg); }
+.scenarioRun { flex-shrink: 0; color: var(--blue); font-size: 13.5px; font-weight: 600; }
+.pairBox { display: flex; gap: 16px; align-items: flex-start; }
+.pairBox p { color: var(--text-2); font-size: 14px; }
+.pairBox code { display: block; margin: 8px 0; color: var(--text-3); font: 12px var(--font-mono); word-break: break-all; }
+.pairBox a { font-size: 14px; font-weight: 600; text-decoration: none; }
+.qr { display: grid; width: 148px; height: 148px; flex-shrink: 0; place-items: center; border-radius: var(--radius); background: #fff; color: #333; font-size: 13px; }
+.plainList, .eventList { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.plainList li { display: flex; gap: 12px; color: var(--text-2); }
+.plainList li .num, .eventList li .num { color: var(--text-3); font-size: 13px; }
+.eventList li { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 10px; color: var(--text-2); font-size: 13.5px; }
+
+@keyframes blink { 50% { opacity: .3; } }
+@keyframes ring { 50% { box-shadow: 0 0 0 5px var(--red-bg); } }
+@keyframes glow { 50% { box-shadow: 0 0 0 4px rgba(240,82,79,.15); } }
+
+
+/* Drawer compaction: long backend descriptions are clamped (full text in the tooltip). */
+.scenarioItem small { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.envList { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.envItem { padding: 10px 12px; }

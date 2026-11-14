@@ -1,0 +1,49 @@
+/* Sizes are relative to the HUD box (cqh/cqw), so the same layout works full-screen and as a small preview. */
+.hud { --hud: #8fd3ff; position: relative; width: 100%; height: 100%; overflow: hidden; container-type: size; background: #020306; color: var(--hud); font-family: var(--font-sans); }
+.view { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* helmet rim: the glass is an ellipse, the frame darkens the corners */
+.rim { position: absolute; inset: 0; background: radial-gradient(ellipse 72% 78% at 50% 50%, transparent 62%, rgba(0, 0, 0, .55) 80%, rgba(0, 0, 0, .9) 100%); pointer-events: none; }
+.alert_red .rim { background: radial-gradient(ellipse 72% 78% at 50% 50%, transparent 58%, rgba(240, 82, 79, .28) 80%, rgba(80, 0, 0, .85) 100%); animation: edge 1.2s ease-in-out infinite; }
+.alert_amber .rim { background: radial-gradient(ellipse 72% 78% at 50% 50%, transparent 60%, rgba(242, 179, 61, .2) 82%, rgba(40, 25, 0, .85) 100%); }
+
+.corner { position: absolute; display: flex; flex-direction: column; gap: .6cqh; text-shadow: 0 0 1.2cqh rgba(0, 0, 0, .9); }
+.tl { top: 7cqh; left: 6cqw; }
+.tr { top: 7cqh; right: 6cqw; flex-direction: row; gap: 4cqw; text-align: right; }
+.bl { bottom: 7cqh; left: 6cqw; }
+.br { right: 6cqw; bottom: 7cqh; flex-direction: row; gap: 4cqw; text-align: right; }
+.pair { display: flex; flex-direction: column; gap: .4cqh; }
+
+.label { color: rgba(143, 211, 255, .75); font-size: max(7px, 2.4cqh); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.big { font-size: max(16px, 8.5cqh); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -.02em; }
+.mid { font-size: max(11px, 5cqh); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+.mid small { margin-left: .2em; font-size: .55em; }
+.compass { color: rgba(143, 211, 255, .6); font-size: max(7px, 2.2cqh); letter-spacing: .1em; }
+.bar { display: block; width: 18cqw; height: max(2px, .7cqh); overflow: hidden; border-radius: 9px; background: rgba(143, 211, 255, .2); }
+.bar i { display: block; height: 100%; border-radius: inherit; }
+
+.t_neutral { color: #d8eeff; }
+.t_blue { color: var(--hud); }
+.t_green { color: #6ff0a8; }
+.t_amber { color: #ffc95a; }
+.t_red { color: #ff6b66; }
+.b_neutral, .b_blue { background: var(--hud); }
+.b_green { background: #6ff0a8; }
+.b_amber { background: #ffc95a; }
+.b_red { background: #ff6b66; }
+
+/* lower-edge order: small, out of the line of sight */
+.command { position: absolute; bottom: 7cqh; left: 50%; max-width: 40cqw; overflow: hidden; padding: .9cqh 2cqw; transform: translateX(-50%); border: 1px solid currentColor; border-radius: 99px; background: rgba(0, 0, 0, .45); font-size: max(7px, min(2.8cqh, 1.6cqw)); text-overflow: ellipsis; font-weight: 700; letter-spacing: .1em; text-align: center; white-space: nowrap; }
+.c_neutral { color: rgba(143, 211, 255, .8); }
+.c_amber { color: #ffc95a; }
+.c_red { color: #ff6b66; animation: blink 1s steps(2) infinite; }
+
+/* right edge: where to go */
+.beacon { position: absolute; top: 50%; right: 3cqw; display: flex; flex-direction: column; align-items: flex-end; gap: .5cqh; transform: translateY(-50%); color: #ff6b66; text-align: right; }
+.beacon span { font-size: max(10px, 2.4cqh); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.beacon strong { font-size: max(16px, 6cqh); font-weight: 700; }
+
+@keyframes edge { 50% { opacity: .65; } }
+@keyframes blink { 50% { opacity: .55; } }
+
+/* top edge: whose helmet this is (small, above the line of sight) */
+.tag { position: absolute; top: 3cqh; left: 50%; transform: translateX(-50%); color: rgba(143, 211, 255, .7); font-size: max(7px, 2.1cqh); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; text-shadow: 0 0 1cqh #000; }

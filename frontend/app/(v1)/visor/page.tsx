@@ -2,8 +2,8 @@
 
 import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ConsoleProvider, useConsole } from '../../lib/ConsoleProvider';
-import type { CrewId } from '../../lib/api/types';
+import { ConsoleProvider, useConsole } from '../../../lib/ConsoleProvider';
+import type { CrewId } from '../../../lib/api/types';
 
 export default function VisorStandalonePage() {
   return (

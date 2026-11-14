@@ -1,0 +1,51 @@
+.screen { display: grid; gap: 16px; }
+
+/* fall countdown */
+.countdown { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px; padding: 22px 26px; border: 2px solid var(--red); border-radius: var(--radius-lg); background: var(--red-bg); }
+.countdownText { display: grid; min-width: 260px; flex: 1; gap: 6px; }
+.countdownText > span { color: #ffb4b2; font-size: 15px; font-weight: 600; }
+.countdownText strong { color: var(--red); font-size: 72px; font-weight: 500; line-height: 1; }
+.countdownText strong small { margin-left: 4px; font-size: 28px; }
+.countdownText p { margin-bottom: 6px; color: var(--text-2); font-size: 15px; }
+
+.top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; }
+
+/* symptoms */
+.symptoms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.symptom { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 132px; padding: 16px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); text-align: left; transition: border-color .15s, background .15s; }
+.symptom:hover { border-color: var(--border-strong); background: var(--raised); }
+.symptom strong { margin-top: 6px; font-size: 17px; font-weight: 600; }
+.symptom small { color: var(--text-3); font-size: 13.5px; line-height: 1.4; }
+.symptomIcon { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 10px; background: var(--raised); color: var(--text-2); }
+.symptomOn { border-color: var(--red); background: var(--red-bg); }
+.symptomOn .symptomIcon { background: var(--red); color: #fff; }
+.check { position: absolute; top: 12px; right: 12px; display: grid; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: var(--red); color: #fff; }
+.inputs { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
+.heard { width: 100%; color: var(--text-2); font-size: 14px; font-style: italic; }
+
+/* diagnosis */
+.diagnosis { display: grid; gap: 8px; }
+.diagnosis > strong { font-size: 28px; font-weight: 600; line-height: 1.2; }
+.confidence { color: var(--text-2); font-size: 14px; }
+.why { padding: 10px 12px; border-radius: var(--radius); background: var(--raised); color: var(--text-2); font-size: 13.5px; }
+.why b { color: var(--text); font-weight: 600; }
+
+/* do-not-give */
+.dontGive { display: flex; align-items: flex-start; gap: 18px; padding: 20px 24px; border: 2px solid var(--red); border-radius: var(--radius-lg); background: var(--red-bg); }
+.dontGive h3 { color: #ffb4b2; font-size: 22px; font-weight: 700; }
+.dontGive p { margin-top: 4px; color: var(--text); font-size: 15.5px; }
+.dontGive b { font-weight: 600; }
+.otherDont { color: var(--text-2) !important; }
+.stopSign { display: grid; width: 48px; height: 48px; flex-shrink: 0; place-items: center; border-radius: 50%; background: var(--red); color: #fff; font-size: 24px; font-weight: 800; }
+
+/* steps */
+.steps { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.steps li { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 16px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+.steps strong { font-size: 17px; font-weight: 600; }
+.steps p { margin-top: 2px; color: var(--text-2); font-size: 15px; }
+.stepNum { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 50%; background: var(--blue); color: #06101f; font-size: 19px; font-weight: 700; }
+.stepIcon { color: var(--text-3); }
+.empty { color: var(--text-3); }
+
+@media (max-width: 1100px) { .top { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .symptoms { grid-template-columns: 1fr; } .steps li { grid-template-columns: 36px 1fr; } .stepIcon { display: none; } }
