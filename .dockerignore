@@ -5,3 +5,7 @@ __pycache__
 certs
 data.zip
 *.markdown
+frontend
+node_modules
+.next
+astronaut_3d_preview.html

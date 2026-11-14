@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title A.E.G.I.S. Base Server
+title A.E.G.I.S. Mission Control
 
 if not exist ".env" copy ".env.example" ".env" >nul
 
@@ -24,11 +24,11 @@ if errorlevel 1 (
   goto :python
 )
 :docker_up
-echo Building and starting A.E.G.I.S. (first run takes ~1-2 min)...
+echo Building and starting A.E.G.I.S. backend + console (first run takes ~3-5 min)...
 docker compose up -d --build || goto :fail
-echo Waiting for the server...
-for /l %%i in (1,1,90) do (
-  curl -s http://localhost:8000/health >nul 2>nul && goto :ready
+echo Waiting for the services...
+for /l %%i in (1,1,120) do (
+  curl -sf http://localhost:3000 >nul 2>nul && curl -sf http://localhost:8000/health >nul 2>nul && goto :ready
   ping -n 2 127.0.0.1 >nul
 )
 goto :fail
@@ -36,7 +36,7 @@ goto :fail
 :ready
 call :urls
 echo  Stop with stop.bat   ^|   Logs: docker compose logs -f
-start "" http://localhost:8000/docs
+start "" http://localhost:3000
 pause
 exit /b 0
 
@@ -45,6 +45,14 @@ where python >nul 2>nul || (echo Install Docker Desktop or Python 3.11+ first. &
 if not exist ".venv" python -m venv .venv
 call .venv\Scripts\activate.bat
 pip install -q -r requirements.txt || goto :fail
+where npm >nul 2>nul || (echo Install Node.js 20+ for the web console. & pause & exit /b 1)
+if not exist "frontend
+ode_modules" (
+  echo Installing web console dependencies...
+  pushd frontend
+  call npm ci --no-audit --no-fund || (popd & goto :fail)
+  popd
+)
 call :urls
 
 echo Starting A.E.G.I.S. Backend (port 8000)...
@@ -69,9 +77,10 @@ exit /b 0
 
 :urls
 echo.
-echo  A.E.G.I.S. is running:  http://localhost:8000/docs
-echo  Phone / console on the same Wi-Fi:
-if defined AEGIS_PUBLIC_HOSTS for %%h in (%AEGIS_PUBLIC_HOSTS:,= %) do echo    http://%%h:8000   ws://%%h:8000/ws/sensors
+echo  Web console:   http://localhost:3000
+echo  API / Swagger: http://localhost:8000/docs
+echo  Phone sensor simulator (same Wi-Fi):
+if defined AEGIS_PUBLIC_HOSTS for %%h in (%AEGIS_PUBLIC_HOSTS:,= %) do echo    http://%%h:3000/phone
 echo.
 exit /b 0
 

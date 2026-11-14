@@ -4,7 +4,7 @@ services:
     image: aegis-backend
     container_name: aegis-backend
     ports:
-      - "${AEGIS_PORT:-8000}:8000"
+      - "8000:8000"
     env_file:
       - path: .env
         required: false
@@ -15,4 +15,15 @@ services:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 5s
       timeout: 3s
-      retries: 20
+      retries: 30
+
+  console:
+    build: ./frontend
+    image: aegis-console
+    container_name: aegis-console
+    ports:
+      - "3000:3000"
+    depends_on:
+      aegis:
+        condition: service_healthy
+    restart: unless-stopped
