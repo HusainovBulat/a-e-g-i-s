@@ -213,6 +213,7 @@ function parseCrewState(raw: any, crewId: CrewId): CrewState {
         : (raw.model_b?.walk_back_limit_min ?? raw.model_b?.walk_back_min ?? 45)
     ),
     distance_m: Number(raw.walk_back?.distance_from_base_m ?? raw.route_position?.distance_m ?? v.distance_m ?? 1850),
+    return_time_min: Number(raw.walk_back?.return_time_min ?? raw.model_b?.return_time_min ?? 44.4),
   };
 
   return {

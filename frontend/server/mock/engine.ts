@@ -26,7 +26,12 @@ export function deriveCrewState(vitals: SensorPacket): CrewState {
   };
   const metabolicW = Math.round(clamp(95 + vitals.hr * 1.45 + vitals.slope * 5.5 + vitals.speed * 13, 80, 900));
   const o2Burn = round(clamp(0.55 + metabolicW / 365, 0.6, 3.5), 2);
-  const walkBack = clamp((vitals.o2_left - 150) / (o2Burn * (4 + Math.max(0, vitals.slope) / 10)), 0, 120);
+  const returnSpeed = Math.max(1.2, 2.5 * (1.0 - 0.3 * fatigue / 100.0));
+  const distanceM = 1850;
+  const returnTimeMin = round(distanceM / (returnSpeed * 1000.0 / 60.0), 1);
+  const returnO2 = round(returnTimeMin * 0.9, 1);
+  const rawWalkBack = Math.max(0, (vitals.o2_left - 150 - returnO2) / Math.max(o2Burn, 0.1));
+  const walkBack = round(rawWalkBack, 1);
   const organScores: Record<ZoneId, number> = {
     cns: score(100 - Math.max(0, vitals.hr - 90) * 0.45 - Number(vitals.dizzy) * 18 - Math.max(0, vitals.resp - 24) * 1.2),
     cardio: score(100 - Math.abs(vitals.sys - 115) * 0.28 - Math.max(0, vitals.hr - 100) * 0.38 - Math.abs(vitals.st) * 55),
@@ -47,6 +52,8 @@ export function deriveCrewState(vitals: SensorPacket): CrewState {
       o2_burn_l_min: o2Burn,
       o2_left_pct: round(clamp(vitals.o2_left / thresholdSeed.eva_spacesuit_plss.tank_capacity_liters * 100, 0, 100), 1),
       walk_back_min: round(walkBack, 1),
+      distance_m: distanceM,
+      return_time_min: returnTimeMin,
     },
   };
 }

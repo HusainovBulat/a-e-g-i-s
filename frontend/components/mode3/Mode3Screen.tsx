@@ -55,18 +55,21 @@ const RECOVERY_QUESTS = [
     title: 'Electrolyte Saline Hydration',
     desc: 'Drink 500 mL water with electrolytes to restore blood volume and prevent dizziness (+15 PTS)',
     bonus: 15,
+    image: '/images/3_1_quest1_electrolyte_rehydration.png',
   },
   {
     id: 'compression',
     title: 'Pneumatic Calf Compression',
     desc: 'Wear leg compression sleeves for 40 min to flush lactic acid and relax sore calves (+18 PTS)',
     bonus: 18,
+    image: '/images/3_2_quest2_leg_compression.png',
   },
   {
     id: 'breathing',
     title: 'Guided Breathing & Cortisol Reset',
     desc: 'Do 10 min of slow deep breathing (6 breaths/min) to lower stress and heart rate before sleep (+20 PTS)',
     bonus: 20,
+    image: '/images/3_3_quest3_resonant_breathing.png',
   },
 ] as const;
 
@@ -635,6 +638,9 @@ export function Mode3Screen() {
                           }}
                         >
                           {isChecked ? '✓' : ''}
+                        </div>
+                        <div className={styles.questThumbWrap}>
+                          <img src={q.image} alt={q.title} className={styles.questThumb} />
                         </div>
                         <div>
                           <div style={{ fontSize: '12px', fontWeight: 600, color: isChecked ? 'var(--green)' : 'var(--text-strong)' }}>

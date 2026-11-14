@@ -366,3 +366,20 @@
   gap: 12px;
   flex-wrap: wrap;
 }
+
+.questThumbWrap {
+  width: 58px;
+  height: 42px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-subtle);
+  background: #020509;
+  border-radius: 2px;
+}
+
+.questThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

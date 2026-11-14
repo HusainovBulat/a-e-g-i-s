@@ -44,7 +44,11 @@ export function Mode1Screen() {
 
   // Defaults if loading
   const rawWalkBackMin = modelB?.walk_back_min ?? 24.5;
-  const walkBackMin = Math.min(120, Math.max(0, rawWalkBackMin));
+  // NASA Apollo/Artemis operational cap: 180 min (3.0 hours) max stay before turn-around
+  const walkBackMin = Math.max(0, rawWalkBackMin);
+  const distanceM = currentCrew?.model_b?.distance_m ?? (vitals?.distance_m ?? 1850);
+  const returnSpeedKmh = Math.max(1.2, 2.5 * (1.0 - 0.3 * ((modelA?.fatigue_score ?? 42) / 100)));
+  const returnTimeMin = currentCrew?.model_b?.return_time_min ?? (distanceM / (returnSpeedKmh * 1000 / 60));
   const o2LeftPct = modelB?.o2_left_pct ?? 78.4;
   const o2Burn = modelB?.o2_burn_l_min ?? 1.45;
   const metabolicW = modelB?.metabolic_w ?? 265;
@@ -102,7 +106,13 @@ export function Mode1Screen() {
       {/* Early Warning Banner */}
       {isWarningFatigue && (
         <div className={styles.warningBanner}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <img
+              src="/images/4_2_micro_rest_crater.png"
+              alt="60s Crater Micro-Recovery Pose"
+              className={styles.restPoseThumb}
+              title="60-second micro-recovery posture"
+            />
             <Icon name="warning" size={20} style={{ color: 'var(--red)' }} />
             <div className={styles.warningText}>
               <strong>15-MINUTE EARLY WARNING // MODEL A:</strong>{' '}
@@ -162,7 +172,7 @@ export function Mode1Screen() {
               <div
                 className={styles.timerBarFill}
                 style={{
-                  width: `${Math.min(100, (walkBackMin / 60) * 100)}%`,
+                  width: `${Math.min(100, (walkBackMin / 90) * 100)}%`,
                   backgroundColor: isCriticalWalkBack ? 'var(--red)' : walkBackMin < 30 ? 'var(--amber)' : 'var(--green)',
                 }}
               />
@@ -172,6 +182,22 @@ export function Mode1Screen() {
               <span>METABOLIC EXPENDITURE: {metabolicW} W</span>
               <span>O₂ BURN RATE: {o2Burn.toFixed(2)} L/MIN</span>
               <span>PLSS RESERVE: {o2LeftPct.toFixed(1)}%</span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '6px 12px',
+              marginTop: '10px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid var(--line-subtle)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '11px',
+              color: 'var(--text-muted)',
+            }}>
+              <span>🚶 <strong>RETURN TREK ON FOOT:</strong> ~{Math.round(returnTimeMin)} MIN ({(distanceM / 1000).toFixed(2)} KM @ {returnSpeedKmh.toFixed(1)} KM/H)</span>
+              <span style={{ color: 'var(--blue-bright)', letterSpacing: '0.05em' }}>NASA APOLLO / ARTEMIS CONSTRAINT</span>
             </div>
 
             {/* Plain-English explanation box for non-doctors */}
@@ -403,6 +429,9 @@ export function Mode1Screen() {
             <div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>
                 PROJECTED IN UPPER-RIGHT HELMET VISOR (HUD):
+              </div>
+              <div className={styles.visorPhotoWrap}>
+                <img src="/images/4_1_eva_ar_visor_warning.png" alt="AR Visor HUD Real View" className={styles.visorPhoto} />
               </div>
               <div className={styles.visorStrip}>
                 <div className={styles.visorReticle}>
