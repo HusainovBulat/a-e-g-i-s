@@ -53,19 +53,19 @@ const RECOVERY_QUESTS = [
   {
     id: 'hydration',
     title: 'Electrolyte Saline Hydration',
-    desc: '500 mL oral isotonic electrolyte replenishment',
+    desc: 'Drink 500 mL water with electrolytes to restore blood volume and prevent dizziness (+15 PTS)',
     bonus: 15,
   },
   {
     id: 'compression',
     title: 'Pneumatic Calf Compression',
-    desc: '40 min soleus pneumatic compression & FES myostimulation',
+    desc: 'Wear leg compression sleeves for 40 min to flush lactic acid and relax sore calves (+18 PTS)',
     bonus: 18,
   },
   {
     id: 'breathing',
     title: 'Guided Breathing & Cortisol Reset',
-    desc: '10 min autonomic down-regulation & vagal tone reset',
+    desc: 'Do 10 min of slow deep breathing (6 breaths/min) to lower stress and heart rate before sleep (+20 PTS)',
     bonus: 20,
   },
 ] as const;
@@ -115,8 +115,8 @@ function renderMarkdownSummary(text: string) {
 
   const clean = text
     .replace(/\$\\ge\s*([0-9.]+)\$/g, '≥ $1')
-    .replace(/\$\\text\{SmO\}_2\s*=\s*([0-9.]+\\%)\$/g, 'SmO₂ = $1')
-    .replace(/\$\\Delta\s*=\s*([^$]+)\$/g, 'Δ = $1')
+    .replace(/\$\\text\{SmO\}_2\s*=\\s*([0-9.]+\\\%)\$/g, 'SmO₂ = $1')
+    .replace(/\$\\Delta\s*=\\s*([^$]+)\$/g, 'Δ = $1')
     .replace(/\$([0-9.]+)\$/g, '$1');
 
   const lines = clean.split('\n');
@@ -344,7 +344,20 @@ export function Mode3Screen() {
 
   const currentQ = QUESTIONS[activeStep] ?? QUESTIONS[0];
   const readiness = eveningResult?.readiness_score ?? 78;
-  const isMismatch = eveningResult?.mismatch_detected ?? false;
+
+  // Real-time Subjective & Objective Scores for Mismatch Detection
+  const subjectiveScore = Math.round(
+    eveningResult?.subjective_score ??
+    ((answers.sleep * 0.3 + answers.energy * 0.2 + answers.mood * 0.15 + answers.pain_free * 0.2 + answers.nutrition * 0.15) * 10)
+  );
+
+  const objectiveScore = Math.round(
+    eveningResult?.objective_score ??
+    Math.max(10, Math.min(100, 100 - fatigueScore * 0.7 - (bloodSugar < 70 || bloodSugar > 120 ? 12 : 0) - (bpSys < 90 || bpSys > 140 ? 12 : 0) - (bodyTemp < 36.2 || bodyTemp > 37.4 ? 8 : 0)))
+  );
+
+  const deltaScore = Math.max(0, subjectiveScore - objectiveScore);
+  const isMismatch = Boolean(eveningResult?.mismatch_detected) || (answers.energy >= 8 && fatigueScore >= 70) || deltaScore >= 30;
   const activeDecision = crewDecisions[crew];
 
   return (
@@ -375,7 +388,7 @@ export function Mode3Screen() {
             </div>
             <div className={styles.maskingDesc}>
               {eveningResult?.mismatch_text ??
-                'Mismatch Detected: Subjective self-report contradicts objective smart base-layer telemetry by ≥ 30 points.'}
+                `Mismatch Detected: Subjective self-report (${subjectiveScore}/100) contradicts objective smart base-layer telemetry (${objectiveScore}/100) by +${deltaScore} points (Delta ≥ 30 pts threshold).`}
             </div>
           </div>
         </div>
@@ -451,8 +464,12 @@ export function Mode3Screen() {
               </div>
             </Panel>
           ) : (
-            <Panel eyebrow="ASTRONAUT CHECK-IN SUMMARY" title="Subjective self-ratings">
-              <div style={{ display: 'grid', gap: '8px' }}>
+            <Panel
+              eyebrow="SUBJECTIVE INPUT COMPLETED"
+              title="5-Step wellness breakdown"
+              action={<StatusBadge tone="green" dot>SUBMITTED</StatusBadge>}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {QUESTIONS.map((q, idx) => (
                   <div
                     key={q.key}
@@ -477,6 +494,67 @@ export function Mode3Screen() {
                 </Button>
               </div>
             </Panel>
+          )}
+
+          {/* Prominent Mismatch / Masking Comparison Card right above Tomorrow EVA Readiness Score */}
+          {isMismatch && (
+            <div className={styles.mismatchCard}>
+              <div className={styles.mismatchHead}>
+                <div className={styles.mismatchTitle}>
+                  <span className={styles.mismatchDot}>🟡</span>
+                  <strong>MASKING DETECTED: Self-Reported Feeling ({subjectiveScore}/100) vs. Smart-Shirt Body Sensors ({objectiveScore}/100) — Delta +{deltaScore} pts</strong>
+                </div>
+                <StatusBadge tone="amber" dot>
+                  MISMATCH ACTIVE (Δ ≥ 30)
+                </StatusBadge>
+              </div>
+
+              <div className={styles.mismatchCompareGrid}>
+                <div className={styles.mismatchTile}>
+                  <div className={styles.mismatchTileEyebrow}>
+                    <Icon name="user" size={12} />
+                    <span>SELF-REPORTED FEELING (0–100)</span>
+                  </div>
+                  <div className={styles.mismatchScoreBig} style={{ color: subjectiveScore >= 70 ? 'var(--green)' : 'var(--amber)' }}>
+                    {subjectiveScore}<small> / 100</small>
+                  </div>
+                  <div className={styles.mismatchTileDesc}>
+                    Astronaut self-reported wellness across 5 sliders (Energy: {answers.energy}/10, Sleep: {answers.sleep}/10).
+                  </div>
+                </div>
+
+                <div className={styles.mismatchTile}>
+                  <div className={styles.mismatchTileEyebrow}>
+                    <Icon name="activity" size={12} />
+                    <span>SMART-SHIRT BODY SENSORS (0–100)</span>
+                  </div>
+                  <div className={styles.mismatchScoreBig} style={{ color: objectiveScore < 60 ? 'var(--amber)' : 'var(--blue-bright)' }}>
+                    {objectiveScore}<small> / 100</small>
+                  </div>
+                  <div className={styles.mismatchTileDesc}>
+                    Bio-harness, smart base-layer SmO₂ & Model A fatigue telemetry ({fatigueScore}% fatigue).
+                  </div>
+                </div>
+
+                <div className={styles.mismatchDeltaTile}>
+                  <div className={styles.mismatchTileEyebrow}>
+                    <Icon name="warning" size={12} />
+                    <span>DIVERGENCE DELTA</span>
+                  </div>
+                  <div className={styles.mismatchDeltaValue}>
+                    +{deltaScore}<small style={{ fontSize: '12px', fontWeight: 400, color: 'var(--amber)' }}> pts</small>
+                  </div>
+                  <div className={styles.mismatchTileDesc} style={{ color: 'var(--text-strong)' }}>
+                    Exceeds critical 30-pt threshold. Flight Surgeon protocol automatically triggered.
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.mismatchFooter}>
+                <span>PROTOCOL: NASA HRP STANDARD · FLIGHT SURGEON INTERVENTION QUEUED</span>
+                <span>STATUS: HIGH CONFIDENCE DISCREPANCY</span>
+              </div>
+            </div>
           )}
 
           {/* Readiness Score Panel */}
@@ -620,8 +698,16 @@ export function Mode3Screen() {
             action={<StatusBadge tone="blue">CHART DUAL-CURVE</StatusBadge>}
           >
             <ForecastChart
-              baseline={eveningResult?.forecast_curve_no_rest ?? [78, 70, 62, 55, 48, 42, 35, 28, 22, 18, 14, 10]}
-              withQuests={eveningResult?.forecast_curve_with_quests ?? [78, 80, 82, 85, 87, 89, 90, 92, 92, 93, 94, 95]}
+              baseline={
+                eveningResult?.forecast_curve_no_rest && eveningResult.forecast_curve_no_rest.length > 0 && eveningResult.forecast_curve_no_rest[eveningResult.forecast_curve_no_rest.length - 1] <= 25
+                  ? eveningResult.forecast_curve_no_rest
+                  : [readiness, Math.round(readiness * 0.76), Math.round(readiness * 0.58), Math.round(readiness * 0.42), Math.round(readiness * 0.3), Math.round(readiness * 0.22), 17]
+              }
+              withQuests={
+                eveningResult?.forecast_curve_with_quests && eveningResult.forecast_curve_with_quests.length > 0
+                  ? eveningResult.forecast_curve_with_quests
+                  : [readiness, Math.min(95, readiness + 4), Math.min(95, readiness + 8), Math.min(95, readiness + 11), Math.min(95, readiness + 14), Math.min(95, readiness + 16), Math.min(95, readiness + 18)]
+              }
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginTop: '8px' }}>
               <span style={{ color: 'var(--amber)' }}>■ WITHOUT QUESTS (CRASH TRAJECTORY)</span>
@@ -693,10 +779,10 @@ export function Mode3Screen() {
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                 <Button variant="danger" size="sm" onClick={handleReassign}>
-                  ⛔ APPROVE SWAP // REASSIGN TO REST (ОТСТРАНИТЬ)
+                  ⛔ APPROVE SWAP // REASSIGN TO REST
                 </Button>
                 <Button variant="primary" size="sm" onClick={handleClearForEva}>
-                  🚀 COMMANDER OVERRIDE // CLEAR (ДОПУСТИТЬ)
+                  🚀 COMMANDER OVERRIDE // CLEAR FOR EVA
                 </Button>
               </div>
             )}

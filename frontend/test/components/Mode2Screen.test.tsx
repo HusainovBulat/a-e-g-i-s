@@ -49,7 +49,7 @@ describe('Mode2Screen', () => {
       FakeWebSocket.latest().receive(backend.hello);
       await flushMicrotasks();
     });
-    await waitFor(() => expect(screen.getByText(/TRIAGE READY/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/FLIGHT SURGEONS: STANDBY|TRIAGE READY/)).toBeTruthy());
     expect(screen.queryByText(NITRO)).toBeNull();
   });
 

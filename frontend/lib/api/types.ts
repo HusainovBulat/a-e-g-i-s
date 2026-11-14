@@ -180,6 +180,8 @@ export interface EveningResponse {
   band: Band;
   mismatch_detected: boolean;
   mismatch_text: string | null;
+  subjective_score?: number;
+  objective_score?: number;
   forecast_curve_no_rest: number[];
   forecast_curve_with_quests: number[];
   organ_scores_6: Record<ZoneId, number>;

@@ -1,5 +1,48 @@
 'use client';
 
+function formatHumanDecisionPath(rawPath: string | null | undefined, vitals: any, isNominal: boolean, primaryClass: string): string {
+  const hr = vitals?.hr ?? 74;
+  const sys = vitals?.sys ?? 118;
+  const dia = vitals?.dia ?? 76;
+  const resp = vitals?.resp ?? 15;
+  const st = vitals?.st !== undefined ? vitals.st.toFixed(3) : '0.005';
+  const spo2 = vitals?.spo2 !== undefined ? vitals.spo2.toFixed(1) : '98.4';
+
+  if (isNominal || primaryClass.toLowerCase() === 'nominal') {
+    return `Why: Breathing rate is normal (${resp}/min), ECG heart wave is normal, and blood pressure is stable (${sys} mmHg) → Healthy / Nominal`;
+  }
+
+  const pLower = primaryClass.toLowerCase();
+  if (pLower.includes('ischemia') || pLower.includes('coronary') || pLower.includes('infarction') || pLower.includes('heart')) {
+    return `Why: Crushing chest pain reported, ECG ST elevation (${st} mV) exceeds safe limits, and blood pressure is critically low (${sys}/${dia} mmHg < 90 mmHg) → Heart Attack (Acute Coronary Ischemia)`;
+  }
+
+  if (pLower.includes('barotrauma') || pLower.includes('hypox') || pLower.includes('dyspnea') || Number(spo2) < 92) {
+    return `Why: Blood oxygen (${spo2}% < 92%) is dangerously low and breathing rate is rapid (${resp}/min) → Severe Oxygen Deprivation / Decompression Risk`;
+  }
+
+  if (pLower.includes('syncope') || pLower.includes('dizz') || pLower.includes('orthostatic')) {
+    return `Why: Severe dizziness with acute drop in blood pressure (${sys}/${dia} mmHg) → Fainting / Orthostatic Collapse`;
+  }
+
+  if (pLower.includes('heat') || pLower.includes('thermo')) {
+    return `Why: Core body temperature is high with elevated pulse (${hr} bpm) → Heat Exhaustion / Cooling Loop Active`;
+  }
+
+  if (rawPath) {
+    return 'Why: ' + rawPath
+      .replace(/Resp rate\s*([\d.]+)\s*<=\s*([\d.]+)/gi, 'Breathing rate is $1/min (limit $2)')
+      .replace(/ST elevation\s*\(?mV\)?\s*([\d.]+)\s*<=\s*([\d.]+)/gi, 'ECG heart wave $1 mV (limit $2)')
+      .replace(/Systolic BP\s*([\d.]+)\s*<=\s*([\d.]+)/gi, 'Blood pressure $1 mmHg (limit $2)')
+      .replace(/SpO2\s*([\d.]+)\s*<=\s*([\d.]+)/gi, 'Oxygen level $1% (limit $2)')
+      .replace(/<=\s*/g, 'is under ')
+      .replace(/>=\s*/g, 'exceeds ')
+      .replace(/->/g, '→');
+  }
+
+  return `Why: Vitals recorded at ${hr} BPM, ${sys}/${dia} mmHg, SpO₂ ${spo2}% → ${primaryClass}`;
+}
+
 import React, { useState, useEffect, useCallback, useTransition } from 'react';
 import { Panel } from '../ui/Panel';
 import { Button } from '../ui/Button';
@@ -234,6 +277,9 @@ export function Mode2Screen() {
   const sysBp = hasChestPain ? 82 : (vitals?.sys ?? 118);
   const isNitroBlocked = sysBp < 90 || (triageResult?.dont_give_list.some(d => d.toLowerCase().includes('nitroglycerin')) ?? false);
 
+  const primaryClass = triageResult?.primary_class ?? (selectedSymptoms.length > 0 || isFallDetected ? 'Acute Coronary Ischemia' : 'Nominal');
+  const isNominal = primaryClass.toLowerCase() === 'nominal';
+
   const handleSpeakAllSteps = () => {
     if (!triageResult?.protocol_steps) return;
     const text = triageResult.protocol_steps.map(s => `${s.title}. ${s.instruction}`).join('. ');
@@ -243,21 +289,21 @@ export function Mode2Screen() {
   return (
     <div className={styles.screen}>
       
-      {/* Top Alarm Bar */}
-      <div className={styles.alarmBar}>
-        <div className={styles.alarmTitle}>
-          <Icon name="warning" size={18} />
-          <span>MODE 02 // AUTONOMOUS EMERGENCY MEDICAL TRIAGE · CREW {crew}</span>
+      {/* Top Status Bar (Nominal: subtle line, Emergency: flashing red) */}
+      <div className={isNominal ? styles.nominalBar : styles.alarmBar}>
+        <div className={isNominal ? styles.nominalTitle : styles.alarmTitle}>
+          <Icon name={isNominal ? "activity" : "warning"} size={18} />
+          <span>MODE 02 // AUTONOMOUS EMERGENCY MEDICAL TRIAGE · CREW {crew}{isNominal ? ' · MONITORING' : ''}</span>
         </div>
-        <StatusBadge tone="red" dot>
-          NASA-STD-3001 VOL 1 PROTOCOL ARMED
+        <StatusBadge tone={isNominal ? "green" : "red"} dot>
+          {isNominal ? "NASA-STD-3001 VOL 1 STANDBY" : "NASA-STD-3001 VOL 1 PROTOCOL ARMED"}
         </StatusBadge>
       </div>
 
       {/* QUICK PRESET SCENARIO BUTTONS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
         <Button variant={hasChestPain ? 'danger' : 'secondary'} size="sm" onClick={triggerChestPainScenario}>
-          💔 CHEST PAIN (STEMI + HYPOTENSION)
+          💔 CHEST PAIN (HEART ATTACK + LOW BP)
         </Button>
         <Button variant={isFallDetected ? 'danger' : 'secondary'} size="sm" onClick={triggerFallScenario}>
           ⚠️ FALL IN CRATER (30S COUNTDOWN)
@@ -305,11 +351,15 @@ export function Mode2Screen() {
       <div className={styles.autoSystemGrid}>
         <div className={styles.autoSystemCard}>
           <span>100% O₂ BLAST</span>
-          <strong>ARMED (HYPERBARIC PURGE)</strong>
+          <strong style={{ color: isNominal ? 'var(--text-muted)' : 'var(--green)' }}>
+            {isNominal ? 'STANDBY' : 'ARMED (HYPERBARIC PURGE)'}
+          </strong>
         </div>
         <div className={styles.autoSystemCard}>
           <span>EMERGENCY CORE HEATING</span>
-          <strong>ACTIVE (+3.5°C LCVG LOOP)</strong>
+          <strong style={{ color: isNominal ? 'var(--text-muted)' : 'var(--green)' }}>
+            {isNominal ? 'STANDBY' : 'ACTIVE (+3.5°C LCVG LOOP)'}
+          </strong>
         </div>
         <div className={styles.autoSystemCard}>
           <span>BASE BURST TELEMETRY</span>
@@ -317,7 +367,9 @@ export function Mode2Screen() {
         </div>
         <div className={styles.autoSystemCard}>
           <span>EVACUATION BEACON</span>
-          <strong>↗ 34 M BEARING 042°</strong>
+          <strong style={{ color: isNominal ? 'var(--text-muted)' : 'var(--green)' }}>
+            {isNominal ? 'STANDBY' : '↗ 34 M BEARING 042°'}
+          </strong>
         </div>
       </div>
 
@@ -353,8 +405,8 @@ export function Mode2Screen() {
             onClick={() => toggleSymptom('chest_pain')}
           >
             <Icon name="heart" size={24} style={{ color: 'var(--red)' }} />
-            <div className={styles.symptomCardTitle}>CHEST PAIN / TIGHTNESS</div>
-            <div className={styles.symptomCardDesc}>Crushing retro-sternal pressure, radiation to arm or jaw.</div>
+            <div className={styles.symptomCardTitle}>CLUTCHING CHEST / CHEST PAIN</div>
+            <div className={styles.symptomCardDesc}>Holding chest, squeezing pain spreading to left arm, neck, or jaw.</div>
           </div>
 
           <div
@@ -362,8 +414,8 @@ export function Mode2Screen() {
             onClick={() => toggleSymptom('shortness_of_breath')}
           >
             <Icon name="activity" size={24} style={{ color: 'var(--blue-bright)' }} />
-            <div className={styles.symptomCardTitle}>SEVERE DYSPNEA</div>
-            <div className={styles.symptomCardDesc}>Acute shortness of breath, gasping, air hunger.</div>
+            <div className={styles.symptomCardTitle}>GASPING FOR AIR / SHORT OF BREATH</div>
+            <div className={styles.symptomCardDesc}>Breathing very fast, struggling to catch breath, or blue lips.</div>
           </div>
 
           <div
@@ -371,8 +423,8 @@ export function Mode2Screen() {
             onClick={() => toggleSymptom('dizziness')}
           >
             <Icon name="spark" size={24} style={{ color: 'var(--amber)' }} />
-            <div className={styles.symptomCardTitle}>DIZZINESS / SYNCOPE</div>
-            <div className={styles.symptomCardDesc}>Lightheadedness, orthostatic instability, disorientation.</div>
+            <div className={styles.symptomCardTitle}>DIZZY / COLD SWEAT / CONFUSED</div>
+            <div className={styles.symptomCardDesc}>Pale sweaty forehead, lightheaded, blurred vision, or about to faint.</div>
           </div>
 
           <div
@@ -380,8 +432,8 @@ export function Mode2Screen() {
             onClick={() => toggleSymptom('fall')}
           >
             <Icon name="warning" size={24} style={{ color: 'var(--red)' }} />
-            <div className={styles.symptomCardTitle}>FALL / COLLAPSE</div>
-            <div className={styles.symptomCardDesc}>Loss of postural control or surface impact.</div>
+            <div className={styles.symptomCardTitle}>FELL DOWN / LEG CRAMPS</div>
+            <div className={styles.symptomCardDesc}>Collapsed on the floor/ground, unable to stand, or shaking legs.</div>
           </div>
 
         </div>
@@ -417,21 +469,25 @@ export function Mode2Screen() {
         eyebrow="MODEL C // CLINICAL TRIAGE DECISION TREE"
         title="Diagnostic classification"
         action={
-          <StatusBadge tone={triageResult?.primary_class === 'Nominal' ? 'green' : 'red'} dot>
-            {triageResult?.flight_surgeons_queued ? 'FLIGHT SURGEONS ALERT QUEUED' : 'TRIAGE READY'}
+          <StatusBadge tone={isNominal ? 'green' : 'red'} dot>
+            {isNominal
+              ? 'FLIGHT SURGEONS: STANDBY'
+              : triageResult?.flight_surgeons_queued
+              ? 'FLIGHT SURGEONS ALERT QUEUED'
+              : 'TRIAGE READY'}
           </StatusBadge>
         }
       >
         <div className={styles.verdictBox}>
           <div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>PRIMARY CLASSIFICATION</div>
-            <div className={styles.verdictClass} style={{ color: triageResult?.primary_class === 'Nominal' ? 'var(--green)' : 'var(--red)' }}>
-              {triageResult?.primary_class ?? 'Acute Coronary Ischemia'}
+            <div className={styles.verdictClass} style={{ color: isNominal ? 'var(--green)' : 'var(--red)' }}>
+              {primaryClass}
             </div>
           </div>
 
           <div className={styles.treePath}>
-            DECISION PATH: {triageResult?.tree_path_why ?? 'Root -> ST-Elevation > 0.12 mV & Hypotension -> Hard blocked Nitro'}
+            {formatHumanDecisionPath(triageResult?.tree_path_why, vitals, isNominal, primaryClass)}
           </div>
 
           {/* Ranked other classes */}
@@ -475,48 +531,44 @@ export function Mode2Screen() {
                 <div className={styles.stepTitle}>{step.title}</div>
                 <p className={styles.stepInst}>{step.instruction}</p>
 
-                {/* Illustrated SVG Diagram */}
-                <div className={styles.diagramSvg}>
-                  {step.diagram === 'position' && (
-                    <svg viewBox="0 0 240 70" width="100%" height="100%">
-                      <line x1="20" y1="55" x2="220" y2="55" stroke="var(--line-subtle)" strokeWidth="2" />
-                      <polygon points="40,55 140,55 90,20" fill="rgba(76,141,255,0.15)" stroke="var(--blue-bright)" strokeWidth="1.5" />
-                      <circle cx="85" cy="15" r="8" fill="var(--blue-bright)" />
-                      <text x="150" y="38" fill="var(--text-muted)" fontSize="9" fontFamily="var(--font-mono)">30° ELEVATED</text>
-                    </svg>
-                  )}
-                  {step.diagram === 'oxygen' && (
-                    <svg viewBox="0 0 240 70" width="100%" height="100%">
-                      <rect x="30" y="15" width="45" height="40" rx="0" fill="rgba(46,204,113,0.15)" stroke="var(--green)" strokeWidth="1.5" />
-                      <path d="M75,35 L140,35" stroke="var(--green)" strokeWidth="2" strokeDasharray="4,3" />
-                      <circle cx="170" cy="35" r="16" fill="rgba(76,141,255,0.2)" stroke="var(--blue-bright)" strokeWidth="1.5" />
-                      <text x="162" y="39" fill="#fff" fontSize="11" fontFamily="var(--font-mono)" fontWeight="700">O₂</text>
-                    </svg>
-                  )}
-                  {step.diagram === 'bay' && (
-                    <svg viewBox="0 0 240 70" width="100%" height="100%">
-                      <rect x="40" y="15" width="70" height="40" fill="#0b1018" stroke="var(--amber)" strokeWidth="1.5" />
-                      <text x="48" y="38" fill="var(--amber)" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">BAY B2</text>
-                      <path d="M125,35 L170,35" stroke="var(--line-bright)" strokeWidth="1.5" />
-                      <circle cx="190" cy="35" r="12" fill="rgba(245,179,1,0.2)" stroke="var(--amber)" strokeWidth="1.5" />
-                      <text x="183" y="39" fill="var(--amber)" fontSize="10" fontFamily="var(--font-mono)">AED</text>
-                    </svg>
-                  )}
-                  {step.diagram === 'aed' && (
-                    <svg viewBox="0 0 240 70" width="100%" height="100%">
-                      <ellipse cx="120" cy="35" rx="35" ry="24" fill="rgba(255,255,255,0.02)" stroke="var(--line-subtle)" strokeWidth="1.5" />
-                      <rect x="100" y="18" width="12" height="12" fill="var(--red)" />
-                      <rect x="130" y="38" width="12" height="12" fill="var(--red)" />
-                      <text x="30" y="38" fill="var(--text-muted)" fontSize="9" fontFamily="var(--font-mono)">PAD PLACEMENT</text>
-                    </svg>
-                  )}
-                  {step.diagram === 'none' && (
-                    <svg viewBox="0 0 240 70" width="100%" height="100%">
-                      <rect x="20" y="20" width="200" height="30" fill="rgba(255,255,255,0.02)" stroke="var(--line-subtle)" strokeWidth="1" />
-                      <text x="60" y="38" fill="var(--text-muted)" fontSize="9" fontFamily="var(--font-mono)">CLINICAL PROTOCOL ACTIVE</text>
-                    </svg>
-                  )}
-                </div>
+                {/* Illustrated SVG Diagram - ONLY rendered if an actual illustration exists */}
+                {step.diagram && step.diagram !== 'none' && (
+                  <div className={styles.diagramSvg}>
+                    {step.diagram === 'position' && (
+                      <svg viewBox="0 0 240 70" width="100%" height="100%">
+                        <line x1="20" y1="55" x2="220" y2="55" stroke="var(--line-subtle)" strokeWidth="2" />
+                        <polygon points="40,55 140,55 90,20" fill="rgba(76,141,255,0.15)" stroke="var(--blue-bright)" strokeWidth="1.5" />
+                        <circle cx="85" cy="15" r="8" fill="var(--blue-bright)" />
+                        <text x="150" y="38" fill="var(--text-muted)" fontSize="9" fontFamily="var(--font-mono)">30° ELEVATED</text>
+                      </svg>
+                    )}
+                    {step.diagram === 'oxygen' && (
+                      <svg viewBox="0 0 240 70" width="100%" height="100%">
+                        <rect x="30" y="15" width="45" height="40" rx="0" fill="rgba(46,204,113,0.15)" stroke="var(--green)" strokeWidth="1.5" />
+                        <path d="M75,35 L140,35" stroke="var(--green)" strokeWidth="2" strokeDasharray="4,3" />
+                        <circle cx="170" cy="35" r="16" fill="rgba(76,141,255,0.2)" stroke="var(--blue-bright)" strokeWidth="1.5" />
+                        <text x="162" y="39" fill="#fff" fontSize="11" fontFamily="var(--font-mono)" fontWeight="700">O₂</text>
+                      </svg>
+                    )}
+                    {step.diagram === 'bay' && (
+                      <svg viewBox="0 0 240 70" width="100%" height="100%">
+                        <rect x="40" y="15" width="70" height="40" fill="#0b1018" stroke="var(--amber)" strokeWidth="1.5" />
+                        <text x="48" y="38" fill="var(--amber)" fontSize="10" fontFamily="var(--font-mono)" fontWeight="700">BAY B2</text>
+                        <path d="M125,35 L170,35" stroke="var(--line-bright)" strokeWidth="1.5" />
+                        <circle cx="190" cy="35" r="12" fill="rgba(245,179,1,0.2)" stroke="var(--amber)" strokeWidth="1.5" />
+                        <text x="183" y="39" fill="var(--amber)" fontSize="10" fontFamily="var(--font-mono)">AED</text>
+                      </svg>
+                    )}
+                    {step.diagram === 'aed' && (
+                      <svg viewBox="0 0 240 70" width="100%" height="100%">
+                        <ellipse cx="120" cy="35" rx="35" ry="24" fill="rgba(255,255,255,0.02)" stroke="var(--line-subtle)" strokeWidth="1.5" />
+                        <rect x="100" y="18" width="12" height="12" fill="var(--red)" />
+                        <rect x="130" y="38" width="12" height="12" fill="var(--red)" />
+                        <text x="30" y="38" fill="var(--text-muted)" fontSize="9" fontFamily="var(--font-mono)">PAD PLACEMENT</text>
+                      </svg>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           ) : (

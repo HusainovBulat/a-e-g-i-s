@@ -2,13 +2,12 @@
 
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import { useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { zoneContent } from '../../server/mock/content';
 import type { CrewState, ZoneId } from '../../lib/api/types';
 import { Panel } from '../ui/Panel';
 import { SegmentBar, StatusBadge } from '../ui/StatusBadge';
-import { Modal } from '../ui/Controls';
-import { bodyZones, zoneTitles } from './zones';
+import { bodyZones, zoneTitles, zonePlainSubtitles } from './zones';
 import styles from './BodyMap.module.css';
 
 const SuitScene = dynamic(() => import('./SuitScene'), {
@@ -34,6 +33,9 @@ export function BodyMapScreen({ crew, connection }: { crew: CrewState | null; co
           className={styles.scenePanel}
           bodyClassName={styles.sceneBody}
         >
+          <div className={styles.bodyMapHintBanner}>
+            👆 Click any body zone (01–06) to view what that organ does in plain English, how the suit measures it, and spaceflight risks.
+          </div>
           <div className={styles.sceneStage}>
             <div className={styles.sceneHudTop}>
               <span>EMU · EXTRAVEHICULAR MOBILITY UNIT</span>
@@ -55,6 +57,82 @@ export function BodyMapScreen({ crew, connection }: { crew: CrewState | null; co
                 RESET VIEW <span aria-hidden="true">↺</span>
               </button>
             </div>
+
+            <AnimatePresence>
+              {selectedZone && selectedDetails && (
+                <motion.aside
+                  key={selectedZone}
+                  className={styles.organCard}
+                  initial={reducedMotion ? false : { opacity: 0, x: 22 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={reducedMotion ? undefined : { opacity: 0, x: 16 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' }}
+                  aria-labelledby="organ-card-title"
+                >
+                  <div className={styles.organCardHead}>
+                    <div>
+                      <span className={styles.kicker}>
+                        ZONE {bodyZones.find(zone => zone.id === selectedZone)?.code}
+                      </span>
+                      <h3 id="organ-card-title">{selectedDetails.title}</h3>
+                    </div>
+                    <button
+                      className={styles.closeButton}
+                      type="button"
+                      aria-label="Close system detail"
+                      onClick={() => setSelectedZone(null)}
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div className={styles.organScore}>
+                    <div>
+                      <span>ORGAN INDEX</span>
+                      <strong>{selectedScore}<small> / 100</small></strong>
+                    </div>
+                    <StatusBadge tone={selectedScore >= 80 ? 'green' : selectedScore >= 60 ? 'amber' : 'red'} dot>
+                      {selectedScore >= 80 ? 'NOMINAL' : selectedScore >= 60 ? 'CAUTION' : 'CRITICAL'}
+                    </StatusBadge>
+                  </div>
+
+                  <section className={styles.organSection}>
+                    <h4>BIOLOGICAL FUNCTION</h4>
+                    <p>{selectedDetails.function}</p>
+                  </section>
+
+                  <section className={styles.organSection}>
+                    <h4>HOW IT IS MEASURED IN SPACE</h4>
+                    <p style={{ marginBottom: '8px', color: '#c5d3e2' }}>{selectedDetails.how_measured}</p>
+                    <div className={styles.readoutGrid}>
+                      {getZoneReadouts(selectedZone, crew).map(readout => (
+                        <div className={styles.readout} key={readout.label}>
+                          <span>{readout.label}</span>
+                          <strong>{readout.value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className={styles.organSection}>
+                    <h4>SPACE HAZARD & CLINICAL DANGER</h4>
+                    <p style={{ lineHeight: 1.6 }}>{selectedDetails.space_hazard_danger}</p>
+                  </section>
+
+                  <section className={styles.organSection}>
+                    <h4>MISSION HAZARDS / 5</h4>
+                    <div className={styles.hazardList}>
+                      {selectedDetails.hazards.map((hazard, index) => (
+                        <span key={hazard}>
+                          <i>{String(index + 1).padStart(2, '0')}</i>
+                          {hazard}
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+                </motion.aside>
+              )}
+            </AnimatePresence>
           </div>
         </Panel>
 
@@ -76,6 +154,9 @@ export function BodyMapScreen({ crew, connection }: { crew: CrewState | null; co
                     <span className={styles.systemName}>
                       {zoneTitles[zone.id]}
                       <StatusBadge tone={tone}>{tone === 'green' ? 'NOMINAL' : tone === 'amber' ? 'CAUTION' : 'CRITICAL'}</StatusBadge>
+                    </span>
+                    <span className={styles.systemSubtitle}>
+                      {zonePlainSubtitles[zone.id]}
                     </span>
                     <span className={styles.systemBar}>
                       <SegmentBar value={score} tone={tone} label={`${zoneTitles[zone.id]} index`} />
@@ -103,64 +184,6 @@ export function BodyMapScreen({ crew, connection }: { crew: CrewState | null; co
         Rotatable 3D suit model · health-system volumes are telemetry overlays · click any organ to inspect
       </div>
 
-      <Modal
-        open={Boolean(selectedZone && selectedDetails)}
-        onClose={() => setSelectedZone(null)}
-        title={selectedDetails?.title ?? ''}
-        eyebrow={`ZONE ${selectedZone ? bodyZones.find(z => z.id === selectedZone)?.code : ''} · PHYSIOLOGICAL SYSTEM`}
-        className={styles.organModal}
-      >
-        {selectedDetails && (
-          <div className={styles.modalContent}>
-            <div className={styles.modalScoreHeader}>
-              <div>
-                <span className={styles.modalScoreKicker}>SYSTEM HEALTH SCORE</span>
-                <div className={styles.modalScoreValue}>
-                  {selectedScore} <small>/ 100</small>
-                </div>
-              </div>
-              <StatusBadge tone={selectedScore >= 80 ? 'green' : selectedScore >= 60 ? 'amber' : 'red'} dot>
-                {selectedScore >= 80 ? 'NOMINAL STATUS' : selectedScore >= 60 ? 'CAUTION REQUIRED' : 'CRITICAL LEVEL'}
-              </StatusBadge>
-            </div>
-
-            <div className={styles.modalSection}>
-              <h4>1. BIOLOGICAL FUNCTION</h4>
-              <p>{selectedDetails.function}</p>
-            </div>
-
-            <div className={styles.modalSection}>
-              <h4>2. HOW IT IS MEASURED IN SPACE</h4>
-              <p className={styles.modalMeasureDesc}>{selectedDetails.how_measured}</p>
-              <div className={styles.modalReadoutGrid}>
-                {getZoneReadouts(selectedZone!, crew).map(readout => (
-                  <div key={readout.label} className={styles.modalReadoutItem}>
-                    <span>{readout.label}</span>
-                    <strong>{readout.value}</strong>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.modalSectionDanger}>
-              <h4>3. SPACE HAZARD & CLINICAL DANGER</h4>
-              <p>{selectedDetails.space_hazard_danger}</p>
-            </div>
-
-            <div className={styles.modalSection}>
-              <h4>MISSION HAZARDS / 5</h4>
-              <div className={styles.modalHazards}>
-                {selectedDetails.hazards.map((hazard, index) => (
-                  <span key={hazard} className={styles.modalHazardTag}>
-                    <i>{String(index + 1).padStart(2, '0')}</i>
-                    {hazard}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }

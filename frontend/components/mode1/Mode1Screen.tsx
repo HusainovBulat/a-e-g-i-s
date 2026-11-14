@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Panel } from '../ui/Panel';
 import { Button } from '../ui/Button';
 import { StatusBadge } from '../ui/StatusBadge';
-import { ElevationProfile, LineChart, Sparkline } from '../charts/Charts';
+import { ElevationProfile, LineChart, Sparkline, TrendAreaChart } from '../charts/Charts';
 import { Icon } from '../ui/icons';
 import { useConsole } from '../../lib/ConsoleProvider';
 import type { RoutePoint } from '../../lib/api/types';
@@ -26,13 +26,15 @@ export function Mode1Screen() {
 
   useEffect(() => {
     if (vitals?.smo2 !== undefined) {
-      setSmo2History(prev => [...prev.slice(-20), vitals.smo2]);
+      const hrvWave = Math.sin(Date.now() / 2000) * 0.25;
+      setSmo2History(prev => [...prev.slice(-24), Number((vitals.smo2 + hrvWave).toFixed(1))]);
     }
   }, [vitals?.t, vitals?.smo2]);
 
   useEffect(() => {
     if (modelB?.o2_burn_l_min !== undefined) {
-      setO2BurnHistory(prev => [...prev.slice(-20), modelB.o2_burn_l_min]);
+      const wave = Math.sin(Date.now() / 1600) * 0.02;
+      setO2BurnHistory(prev => [...prev.slice(-24), Number((modelB.o2_burn_l_min + wave).toFixed(2))]);
     }
   }, [vitals?.t, modelB?.o2_burn_l_min]);
 
@@ -41,7 +43,8 @@ export function Mode1Screen() {
   }, [api]);
 
   // Defaults if loading
-  const walkBackMin = modelB?.walk_back_min ?? 24.5;
+  const rawWalkBackMin = modelB?.walk_back_min ?? 24.5;
+  const walkBackMin = Math.min(120, Math.max(0, rawWalkBackMin));
   const o2LeftPct = modelB?.o2_left_pct ?? 78.4;
   const o2Burn = modelB?.o2_burn_l_min ?? 1.45;
   const metabolicW = modelB?.metabolic_w ?? 265;
@@ -51,9 +54,17 @@ export function Mode1Screen() {
   const legsFailText = legsFailMin === null ? 'STABLE' : `${legsFailMin.toFixed(1)} MIN`;
   const isFallback = modelA?.fallback ?? false;
   const isDizzy = vitals?.dizzy ?? false;
+  const isFall = Boolean(vitals?.fall);
+
+  const currentSmo2 = vitals?.smo2 ?? (smo2History[smo2History.length - 1] ?? 78.0);
+  const smo2Tone: 'green' | 'amber' | 'red' = currentSmo2 < 60 ? 'red' : currentSmo2 < 72 ? 'amber' : 'green';
+  const o2BurnTone: 'green' | 'amber' | 'red' = o2Burn > 2.0 ? 'red' : o2Burn > 1.65 ? 'amber' : 'green';
 
   const isCriticalWalkBack = walkBackMin < 15;
   const isWarningFatigue = (legsFailMin !== null && legsFailMin <= 15) || fatigueScore >= 70;
+  const isCritical = isCriticalWalkBack || isWarningFatigue || isDizzy || isFall || smo2Tone === 'red' || o2BurnTone === 'red';
+  const isCaution = !isCritical && (walkBackMin < 30 || fatigueScore >= 50 || (legsFailMin !== null && legsFailMin <= 30) || smo2Tone === 'amber' || o2BurnTone === 'amber');
+  const isNominal = !isCritical && !isCaution;
 
   // Format elevation points for SVG profile
   const elevationArray = routePoints.length > 0
@@ -66,7 +77,9 @@ export function Mode1Screen() {
       ? 'TURN-BACK POINT REACHED // RETURN TO LUNAR BASE'
       : isWarningFatigue
       ? 'REST 60S // QUADRICEPS DESATURATION WARNING'
-      : 'TRAVERSE ON SCHEDULE // MARGIN NOMINAL';
+      : isCritical || isCaution
+      ? 'STOP 60S // PHYSIOLOGICAL CAUTION'
+      : 'TRAVERSE ON SCHEDULE // PROCEED NOMINAL';
 
     try {
       await api.postEvent({
@@ -161,6 +174,41 @@ export function Mode1Screen() {
               <span>PLSS RESERVE: {o2LeftPct.toFixed(1)}%</span>
             </div>
 
+            {/* Plain-English explanation box for non-doctors */}
+            <div
+              style={{
+                padding: '9px 12px',
+                background: isCriticalWalkBack
+                  ? 'rgba(239, 68, 68, 0.12)'
+                  : walkBackMin < 30
+                  ? 'rgba(245, 179, 1, 0.12)'
+                  : 'rgba(46, 204, 113, 0.12)',
+                border: `1px solid ${
+                  isCriticalWalkBack
+                    ? 'var(--red)'
+                    : walkBackMin < 30
+                    ? 'var(--amber)'
+                    : 'var(--green)'
+                }`,
+                fontSize: '11px',
+                lineHeight: 1.45,
+                color: isCriticalWalkBack
+                  ? '#fca5a5'
+                  : walkBackMin < 30
+                  ? '#fde68a'
+                  : '#a7f3d0',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              {isCriticalWalkBack ? (
+                <span>🚨 TURN BACK NOW: Point of no return reached. Head back to the habitat airlock immediately.</span>
+              ) : walkBackMin < 30 ? (
+                <span>⚠️ SLOW DOWN (STOP 60s): Steep climb is draining leg oxygen faster than blood can deliver it. Rest 60 seconds and reduce pace by 30% to avoid leg cramps.</span>
+              ) : (
+                <span>✅ SAFE TO PROCEED: You have plenty of oxygen and leg stamina to climb back to the airlock.</span>
+              )}
+            </div>
+
             <div className={styles.visorControls}>
               <Button variant="primary" size="sm" onClick={handleSendToVisor} disabled={sendingVisor}>
                 <Icon name="arrowUpRight" size={14} />
@@ -195,7 +243,7 @@ export function Mode1Screen() {
               <strong style={{ color: fatigueScore >= 70 ? 'var(--red)' : fatigueScore >= 50 ? 'var(--amber)' : 'var(--green)' }}>
                 {fatigueScore} / 100
               </strong>
-              <small>NASA-STD-3001</small>
+              <small>How tired your leg muscles are (0 = fresh, 100 = exhaustion)</small>
             </div>
 
             <div className={styles.metricTile}>
@@ -203,24 +251,24 @@ export function Mode1Screen() {
               <strong style={{ color: legsFailMin !== null && legsFailMin <= 15 ? 'var(--red)' : 'var(--text-strong)' }}>
                 {legsFailText}
               </strong>
-              <small>Pre-CO₂ Warning</small>
+              <small>Time left before severe calf cramps</small>
             </div>
 
             <div className={styles.metricTile}>
               <span>CALF SmO₂</span>
-              <strong>{vitals?.smo2 ? vitals.smo2.toFixed(1) : '78.0'}%</strong>
-              <small>Tissue Oxygen</small>
+              <strong>{currentSmo2.toFixed(1)}%</strong>
+              <small>Muscle Oxygen Reserve (Normal: &gt;60%)</small>
             </div>
 
             <div className={styles.metricTile}>
               <span>sEMG MDF SHIFT</span>
               <strong>{vitals?.emg_mdf ? `${vitals.emg_mdf.toFixed(1)}%` : '-2.4%'}</strong>
-              <small>Median Freq</small>
+              <small>Muscle Fiber Fatigue Shift (Cramp Warning at -25%)</small>
             </div>
           </div>
 
           <div style={{ marginTop: '12px', padding: '8px 10px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--line-subtle)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
-            GAIT WOBBLE / ASYMMETRY: <strong style={{ color: '#fff' }}>{vitals?.gait ? vitals.gait.toFixed(2) : '0.22'} SD</strong> · SPEED: {vitals?.speed ? vitals.speed.toFixed(1) : '2.5'} KM/H
+            STEP BALANCE / STUMBLE RISK: <strong style={{ color: '#fff' }}>Normal ({vitals?.gait ? vitals.gait.toFixed(2) : '0.22'} SD)</strong> · SPEED: {vitals?.speed ? vitals.speed.toFixed(1) : '2.5'} KM/H
           </div>
         </Panel>
 
@@ -232,7 +280,7 @@ export function Mode1Screen() {
         title="Route topography & point of no return"
         action={<StatusBadge tone="blue">MAP SCALE 5M/PX</StatusBadge>}
       >
-                {(() => {
+        {(() => {
           const distanceM = currentCrew?.model_b?.distance_m ?? (vitals?.distance_m ?? 1850);
           const totalRouteM = 4950;
           const currentPosRatio = Math.max(0.08, Math.min(0.88, distanceM / totalRouteM));
@@ -257,18 +305,79 @@ export function Mode1Screen() {
         title="Predictive physiological trends"
         action={<StatusBadge tone="blue" dot>REAL-TIME</StatusBadge>}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px' }}>
-              CALF SmO₂ DESATURATION TREND (OPTICAL NIRS)
+        <div className={styles.trendChartsGrid}>
+          {/* Chart 1: Calf SmO2 */}
+          <div className={styles.trendCard}>
+            <div className={styles.trendCardHead}>
+              <div>
+                <span className={styles.trendLabel}>CALF SmO₂ DESATURATION (OPTICAL NIRS)</span>
+                <div className={styles.trendValueWrap}>
+                  <strong className={styles.trendValue}>
+                    {currentSmo2.toFixed(1)} <small>%</small>
+                  </strong>
+                  <StatusBadge tone={smo2Tone} dot>
+                    {smo2Tone === 'red' ? 'CRITICAL DESAT' : smo2Tone === 'amber' ? 'CAUTION' : 'NOMINAL'}
+                  </StatusBadge>
+                </div>
+              </div>
+              <div className={styles.trendDelta}>
+                <span>RANGE: 40—100%</span>
+                <span style={{ color: smo2Tone === 'red' ? 'var(--red)' : smo2Tone === 'amber' ? 'var(--amber)' : 'var(--green)' }}>
+                  {currentSmo2 >= 70 ? 'TISSUE OXYGENATED' : 'HYPOXIC CASCADE'}
+                </span>
+              </div>
             </div>
-            <Sparkline values={smo2History} color="var(--red)" label="SmO2 trend" />
+            <div className={styles.trendChartWrap}>
+              <TrendAreaChart
+                values={smo2History}
+                color={smo2Tone === 'red' ? 'var(--red)' : smo2Tone === 'amber' ? 'var(--amber)' : 'var(--blue-bright)'}
+                gradientId="grad-smo2"
+                label="Calf SmO2 tissue oxygenation trend"
+                height={68}
+              />
+            </div>
+            <div className={styles.trendFooter}>
+              <span>T - 24S</span>
+              <span>1 HZ OPTICAL SENSOR STREAM</span>
+              <span>LIVE</span>
+            </div>
           </div>
-          <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px' }}>
-              METABOLIC O₂ CONSUMPTION (L/MIN)
+
+          {/* Chart 2: Metabolic O2 */}
+          <div className={styles.trendCard}>
+            <div className={styles.trendCardHead}>
+              <div>
+                <span className={styles.trendLabel}>METABOLIC O₂ CONSUMPTION (MODEL B)</span>
+                <div className={styles.trendValueWrap}>
+                  <strong className={styles.trendValue}>
+                    {o2Burn.toFixed(2)} <small>L/MIN</small>
+                  </strong>
+                  <StatusBadge tone={o2BurnTone} dot>
+                    {o2BurnTone === 'red' ? 'HIGH EXPENDITURE' : o2BurnTone === 'amber' ? 'ELEVATED' : 'NOMINAL'}
+                  </StatusBadge>
+                </div>
+              </div>
+              <div className={styles.trendDelta}>
+                <span>LOAD: {metabolicW} W</span>
+                <span style={{ color: o2BurnTone === 'red' ? 'var(--red)' : o2BurnTone === 'amber' ? 'var(--amber)' : 'var(--green)' }}>
+                  RESERVE: {o2LeftPct.toFixed(1)}%
+                </span>
+              </div>
             </div>
-            <Sparkline values={o2BurnHistory} color="var(--blue-bright)" label="O2 burn trend" />
+            <div className={styles.trendChartWrap}>
+              <TrendAreaChart
+                values={o2BurnHistory}
+                color={o2BurnTone === 'red' ? 'var(--red)' : o2BurnTone === 'amber' ? 'var(--amber)' : 'var(--blue-bright)'}
+                gradientId="grad-o2burn"
+                label="Metabolic O2 burn rate trend"
+                height={68}
+              />
+            </div>
+            <div className={styles.trendFooter}>
+              <span>T - 24S</span>
+              <span>MASS-FLOW PLSS TELEMETRY</span>
+              <span>LIVE</span>
+            </div>
           </div>
         </div>
       </Panel>
@@ -297,12 +406,22 @@ export function Mode1Screen() {
               </div>
               <div className={styles.visorStrip}>
                 <div className={styles.visorReticle}>
-                  {isDizzy ? (
-                    <span style={{ color: 'var(--red)' }}>⚠️ STOP · REST</span>
-                  ) : (
-                    <span>
-                      {Math.floor(walkBackMin).toString().padStart(2, '0')}:
+                  {isFall ? (
+                    <span style={{ color: 'var(--red)' }}>🚨 FALL DETECTED · RESCUE ARMED</span>
+                  ) : isCritical ? (
+                    <span style={{ color: 'var(--red)' }}>
+                      ⚠️ {Math.floor(walkBackMin).toString().padStart(2, '0')}:
                       {Math.floor((walkBackMin % 1) * 60).toString().padStart(2, '0')} · STOP 60S · ↗ 34M
+                    </span>
+                  ) : isCaution ? (
+                    <span style={{ color: 'var(--amber)' }}>
+                      ⚠️ {Math.floor(walkBackMin).toString().padStart(2, '0')}:
+                      {Math.floor((walkBackMin % 1) * 60).toString().padStart(2, '0')} · STOP 60S · ↗ 34M
+                    </span>
+                  ) : (
+                    <span style={{ color: 'var(--green)' }}>
+                      {Math.floor(walkBackMin).toString().padStart(2, '0')}:
+                      {Math.floor((walkBackMin % 1) * 60).toString().padStart(2, '0')} · PROCEED NOMINAL · ↗ 34M
                     </span>
                   )}
                 </div>

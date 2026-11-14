@@ -98,21 +98,27 @@
 
 .readinessScoreRow {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
+  gap: 8px;
 }
 
-.readinessNumber {
+.readinessScore {
   font-family: var(--font-mono);
-  font-size: 48px;
+  font-size: 52px;
   font-weight: 700;
+  line-height: 1;
+}
+
+.readinessScore small {
+  font-size: 14px;
+  color: var(--text-muted);
 }
 
 .readinessBar {
   width: 100%;
   height: 8px;
   background: var(--line-subtle);
-  position: relative;
+  overflow: hidden;
 }
 
 .readinessBarFill {
@@ -126,27 +132,39 @@
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-muted);
-  margin-top: 4px;
 }
 
-.mismatchAlert {
-  background: rgba(245, 179, 1, 0.15);
-  border: 1px solid var(--amber);
-  padding: 12px 16px;
+.organGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media (max-width: 800px) {
+  .organGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.organCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line-subtle);
+  padding: 10px;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.mismatchAlertTitle {
+.organCard span {
   font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--amber);
+  font-size: 9px;
+  color: var(--text-muted);
 }
 
-.mismatchAlertDesc {
-  font-size: 12px;
+.organCard strong {
+  font-family: var(--font-mono);
+  font-size: 14px;
   color: var(--text-strong);
   margin-top: 2px;
 }
@@ -207,4 +225,144 @@
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-muted);
+}
+
+/* Masking Banner at top */
+.maskingBanner {
+  background: rgba(245, 179, 1, 0.1);
+  border: 1px solid var(--amber);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.maskingTitle {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.maskingDesc {
+  font-size: 12px;
+  color: var(--text-strong);
+  line-height: 1.4;
+}
+
+/* Prominent Mismatch / Masking Comparison Card right above Tomorrow EVA Readiness Score */
+.mismatchCard {
+  background: rgba(245, 179, 1, 0.08);
+  border: 2px solid var(--amber);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 0 25px rgba(245, 179, 1, 0.15);
+}
+
+.mismatchHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mismatchTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--amber);
+  letter-spacing: 0.04em;
+}
+
+.mismatchDot {
+  font-size: 16px;
+}
+
+.mismatchCompareGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .mismatchCompareGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mismatchTile {
+  background: rgba(10, 18, 28, 0.7);
+  border: 1px solid rgba(245, 179, 1, 0.3);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mismatchDeltaTile {
+  background: rgba(245, 179, 1, 0.12);
+  border: 1px solid var(--amber);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mismatchTileEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
+.mismatchScoreBig {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  margin: 4px 0 2px;
+}
+
+.mismatchScoreBig small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.mismatchDeltaValue {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--amber);
+  line-height: 1;
+  margin: 4px 0 2px;
+}
+
+.mismatchTileDesc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.mismatchFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  padding-top: 10px;
+  border-top: 1px solid rgba(245, 179, 1, 0.25);
+  gap: 12px;
+  flex-wrap: wrap;
 }

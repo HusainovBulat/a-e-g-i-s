@@ -27,7 +27,7 @@ export const bodyZones: BodyZone[] = [
 ];
 
 export const zoneTitles: Record<ZoneId, string> = {
-  cns: 'CNS / SLEEP',
+  cns: 'CNS / BRAIN',
   cardio: 'CARDIOVASCULAR',
   resp: 'RESPIRATORY',
   thermo: 'IMMUNE / THERMO',
@@ -40,3 +40,12 @@ export function scoreColor(score: number) {
   if (score >= 60) return '#f5b301';
   return '#fc3d21';
 }
+
+export const zonePlainSubtitles: Record<ZoneId, string> = {
+  cns: 'Sleep, balance, reaction speed & eye pressure',
+  cardio: 'Heart rhythm, blood pressure & blood flow to brain',
+  resp: 'Blood oxygen (SpO2), breathing rate & helmet CO2',
+  thermo: 'Body temperature (36.3–37.2°C) & radiation stress',
+  metabolic: 'Blood sugar energy (mg/dL) & hydration balance',
+  musculo: 'Leg muscle stamina (SmO2) & 14-day bone load',
+};

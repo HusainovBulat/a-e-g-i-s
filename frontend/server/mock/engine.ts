@@ -99,8 +99,13 @@ export function runEvening(request: EveningRequest): EveningResponse {
   const pressurePenalty = request.bp_sys < 90 || request.bp_sys > 150 || request.bp_dia > 100 ? 8 : 0;
   const temperaturePenalty = request.body_temp_c < 36 || request.body_temp_c > 37.5 ? 6 : 0;
   const fatigue = clamp(request.fatigue_score ?? 0, 0, 100);
-  const mismatch = answers.energy >= 8 && fatigue >= 70;
-  const mismatchText = mismatch ? 'Mismatch detected: reported energy is high while objective muscle fatigue is elevated. Hold EVA auto-clearance for commander review.' : null;
+  const subjectiveScore = Math.round(weightedInput * 10);
+  const objectiveScore = Math.round(clamp(100 - fatigue * 0.7 - glucosePenalty * 2 - pressurePenalty * 1.5 - temperaturePenalty * 1.5, 0, 100));
+  const deltaScore = Math.max(0, subjectiveScore - objectiveScore);
+  const mismatch = (answers.energy >= 8 && fatigue >= 70) || deltaScore >= 30;
+  const mismatchText = mismatch
+    ? 'MISMATCH / MASKING DETECTED: Subjective ' + subjectiveScore + '/100 vs. Objective Sensors ' + objectiveScore + '/100 — Delta +' + deltaScore + ' pts'
+    : null;
   const baseReadiness = clamp(weightedInput * 10 - glucosePenalty - pressurePenalty - temperaturePenalty - Math.max(0, fatigue - 55) * 0.12, 0, 100);
   const appliedQuests = quests.filter(quest => request.quest_ids?.includes(quest.id)).map(quest => quest.id);
   const questBonus = quests.filter(quest => appliedQuests.includes(quest.id)).reduce((sum, quest) => sum + quest.bonus, 0);
@@ -113,13 +118,22 @@ export function runEvening(request: EveningRequest): EveningResponse {
     metabolic: score(100 - glucosePenalty * 4),
     musculo: score(100 - fatigue * 0.65),
   };
-  const forecastNoRest = Array.from({ length: 7 }, (_, index) => score(baseReadiness - index * (mismatch ? 2.4 : 1.1)));
-  const forecastWithQuests = Array.from({ length: 7 }, (_, index) => score(baseReadiness + questBonus * (1 - index * 0.1) - index * 0.65));
+  const forecastNoRest = Array.from({ length: 7 }, (_, index) => {
+    const progress = index / 6;
+    const decayed = baseReadiness * Math.pow(0.22, progress);
+    return score(Math.max(16, Math.min(baseReadiness, decayed)));
+  });
+  const forecastWithQuests = Array.from({ length: 7 }, (_, index) => {
+    const progress = index / 6;
+    return score(Math.min(96, baseReadiness + questBonus * Math.min(1, 0.4 + progress * 0.6)));
+  });
   return {
     readiness_score: readiness,
     band: classifyBand(readiness),
     mismatch_detected: mismatch,
     mismatch_text: mismatchText,
+    subjective_score: subjectiveScore,
+    objective_score: objectiveScore,
     forecast_curve_no_rest: forecastNoRest,
     forecast_curve_with_quests: forecastWithQuests,
     organ_scores_6: organScores,

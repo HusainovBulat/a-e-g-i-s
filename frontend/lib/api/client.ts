@@ -287,6 +287,8 @@ function normalizeEvening(raw: any, crewId?: CrewId): EveningResponse {
     band: (raw.band ?? 'green') as Band,
     mismatch_detected: Boolean(raw.mismatch_detected ?? raw.masking_detected),
     mismatch_text: raw.mismatch_text ?? null,
+    subjective_score: raw.subjective_score !== undefined ? Number(raw.subjective_score) : undefined,
+    objective_score: raw.objective_score !== undefined ? Number(raw.objective_score) : undefined,
     forecast_curve_no_rest: Array.isArray(raw.forecast_curve_no_rest) ? raw.forecast_curve_no_rest : [],
     forecast_curve_with_quests: Array.isArray(raw.forecast_curve_with_quests) ? raw.forecast_curve_with_quests : [],
     organ_scores_6: organScores,

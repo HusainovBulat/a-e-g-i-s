@@ -23,14 +23,80 @@ export function Sparkline({ values, color = 'var(--blue-bright)', label }: { val
   );
 }
 
+export function TrendAreaChart({
+  values,
+  color = 'var(--blue-bright)',
+  gradientId,
+  label,
+  height = 68,
+}: {
+  values: number[];
+  color?: string;
+  gradientId: string;
+  label: string;
+  height?: number;
+}) {
+  const width = 600;
+  const insetX = 6;
+  const insetY = 8;
+  const chartVals = values.length === 0 ? [50, 50] : values.length === 1 ? [values[0], values[0]] : values;
+  const points = chartPoints(chartVals, width, height, insetX, insetY);
+  const pairs = points.trim().split(' ');
+  const firstPt = pairs[0].split(',');
+  const lastPt = pairs[pairs.length - 1].split(',').map(Number);
+  const areaPoints = `${firstPt[0]},${height - insetY} ${points} ${lastPt[0]},${height - insetY}`;
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="none"
+      role="img"
+      aria-label={label}
+      style={{ display: 'block', width: '100%', height: `${height}px`, overflow: 'visible' }}
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.32" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+
+      <line x1={insetX} x2={width - insetX} y1={insetY} y2={insetY} stroke="var(--line-dim)" strokeWidth="1" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
+      <line x1={insetX} x2={width - insetX} y1={height / 2} y2={height / 2} stroke="var(--line-dim)" strokeWidth="1" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
+      <line x1={insetX} x2={width - insetX} y1={height - insetY} y2={height - insetY} stroke="var(--line-dim)" strokeWidth="1" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
+
+      <polygon points={areaPoints} fill={`url(#${gradientId})`} />
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth="2.2"
+        vectorEffect="non-scaling-stroke"
+      />
+      <circle
+        cx={lastPt[0]}
+        cy={lastPt[1]}
+        r="4"
+        fill={color}
+        stroke="#ffffff"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
 export function LineChart({ values, labels, color = 'var(--blue-bright)', label, secondaryValues }: { values: number[]; labels?: string[]; color?: string; label: string; secondaryValues?: number[] }) {
-  const primaryPoints = chartPoints(values, 600, 180, 16, 10);
-  const secondaryPoints = secondaryValues ? chartPoints(secondaryValues, 600, 180, 16, 10) : undefined;
+  const combined = secondaryValues && secondaryValues.length > 0 ? [...values, ...secondaryValues] : values;
+  const jointMin = Math.min(...combined);
+  const jointMax = Math.max(...combined);
+  const primaryPoints = chartPoints(values, 600, 180, 16, 10, jointMin, jointMax);
+  const secondaryPoints = secondaryValues && secondaryValues.length > 0 ? chartPoints(secondaryValues, 600, 180, 16, 10, jointMin, jointMax) : undefined;
   return (
     <div className={styles.chart}>
       <svg viewBox="0 0 600 180" role="img" aria-label={label} preserveAspectRatio="none">
         {[0, 1, 2, 3].map(i => <line key={i} x1="16" x2="590" y1={18 + i * 48} y2={18 + i * 48} className={styles.gridLine} />)}
-        {secondaryPoints && <polyline points={secondaryPoints} fill="none" stroke="var(--amber)" strokeWidth="2" vectorEffect="non-scaling-stroke" />}
+        {secondaryPoints && <polyline points={secondaryPoints} fill="none" stroke="var(--amber)" strokeWidth="2.2" strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />}
+        {secondaryValues && secondaryValues.length > 0 && secondaryPoints && <circle cx={lastPoint(secondaryPoints).x} cy={lastPoint(secondaryPoints).y} r="4" fill="var(--amber)" />}
         <polyline points={primaryPoints} fill="none" stroke={color} strokeWidth="2.4" vectorEffect="non-scaling-stroke" />
         {values.length > 0 && <circle cx={lastPoint(primaryPoints).x} cy={lastPoint(primaryPoints).y} r="4" fill={color} />}
       </svg>
@@ -140,10 +206,10 @@ export function ForecastChart({ baseline, withQuests }: { baseline: number[]; wi
   return <LineChart values={withQuests} secondaryValues={baseline} label="EVA readiness forecast with and without selected quests" labels={['NOW', '+4 H', '+8 H', '+12 H']} />;
 }
 
-function chartPoints(values: number[], width: number, height: number, insetX = 0, insetY = 0) {
+function chartPoints(values: number[], width: number, height: number, insetX = 0, insetY = 0, forcedMin?: number, forcedMax?: number) {
   if (values.length === 0) return '';
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  const min = forcedMin !== undefined ? forcedMin : Math.min(...values);
+  const max = forcedMax !== undefined ? forcedMax : Math.max(...values);
   const range = max - min || 1;
   const step = (width - insetX * 2) / Math.max(values.length - 1, 1);
   return values.map((val, idx) => {

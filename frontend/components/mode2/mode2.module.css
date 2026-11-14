@@ -15,6 +15,15 @@
   animation: alarmPulse 1.8s infinite ease-in-out;
 }
 
+.nominalBar {
+  background: rgba(10, 20, 32, 0.65);
+  border: 1px solid var(--line-subtle);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 @keyframes alarmPulse {
   0%, 100% {
     box-shadow: 0 0 10px rgba(252, 61, 33, 0.2);
@@ -29,6 +38,17 @@
   font-size: 13px;
   font-weight: 700;
   color: var(--red);
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nominalTitle {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
   letter-spacing: 0.1em;
   display: flex;
   align-items: center;
@@ -119,7 +139,6 @@
 .symptomCardActive {
   background: rgba(252, 61, 33, 0.12);
   border-color: var(--red);
-  box-shadow: 0 0 15px rgba(252, 61, 33, 0.2);
 }
 
 .symptomCardTitle {
@@ -132,15 +151,16 @@
 .symptomCardDesc {
   font-size: 11px;
   color: var(--text-muted);
+  line-height: 1.4;
 }
 
 .voiceRow {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 14px;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--line-subtle);
+  padding: 8px 12px;
 }
 
 .voiceStatus {
@@ -153,30 +173,36 @@
 .nitroBlockBanner {
   background: rgba(252, 61, 33, 0.2);
   border: 2px solid var(--red);
-  padding: 16px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  box-shadow: 0 0 25px rgba(252, 61, 33, 0.35);
+  gap: 16px;
+  box-shadow: 0 0 30px rgba(252, 61, 33, 0.35);
 }
 
 .nitroTitle {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--red);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
 }
 
 .nitroDesc {
-  font-size: 12px;
-  color: var(--text-strong);
-  margin-top: 4px;
+  font-size: 13px;
+  color: #fff;
+  line-height: 1.4;
+}
+
+.nitroDesc strong {
+  color: var(--amber);
+  text-decoration: underline;
 }
 
 .verdictBox {
-  background: var(--panel-bg);
-  border: 1px solid var(--line-bright);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line-subtle);
   padding: 16px;
   display: flex;
   flex-direction: column;
