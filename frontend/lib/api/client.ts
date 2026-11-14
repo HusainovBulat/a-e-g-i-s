@@ -16,6 +16,7 @@ import type {
   ModelAState,
   ModelBState,
   PairingResponse,
+  PredictAllResponse,
   ProtocolStep,
   RoutePoint,
   Scenario,
@@ -206,8 +207,8 @@ function normalizeTriage(raw: any): TriageResponse {
   }));
 
   const steps: ProtocolStep[] = (raw.protocol_steps ?? []).map((s: any, idx: number) => {
-    const title = String(s.title ?? '');
-    const action = String(s.action ?? s.instruction ?? '');
+    const title = String(s.title ?? (typeof s === 'string' ? s.slice(0, 40) : ''));
+    const action = String(s.action ?? s.instruction ?? (typeof s === 'string' ? s : ''));
     let diagram: ProtocolStep['diagram'] = 'none';
     const textLower = `${title} ${action}`.toLowerCase();
     if (textLower.includes('position') || textLower.includes('sitting') || textLower.includes('elevat') || textLower.includes('posture')) {
@@ -616,5 +617,22 @@ export const aegisApi: AegisTransport = {
       url: `http://${host}${port ? `:${port}` : ''}/phone?crew=${crew}`,
       crew,
     };
+  },
+
+  async predictAll(telemetry: Partial<SensorPacket>): Promise<PredictAllResponse> {
+    const payload: any = {
+      crew: telemetry.crew ? `Crew_${telemetry.crew}` : 'Crew_A',
+      ...telemetry,
+      fall: telemetry.fall ? 1 : 0,
+      nirs_ok: telemetry.nirs_ok !== false ? 1 : 0,
+      dizzy: telemetry.dizzy ? 1 : 0,
+    };
+    if (telemetry.env) {
+      payload.env = toBackendEnv(telemetry.env);
+    }
+    return requestJson<PredictAllResponse>('/api/predict_all', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 };

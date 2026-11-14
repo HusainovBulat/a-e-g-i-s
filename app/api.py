@@ -14,6 +14,7 @@ from .engine import match_symptom_keywords
 from .hub import envelope
 from .schemas import EveningRequest, EventRequest, ScenarioPlayRequest, SummaryRequest, TriageRequest
 from .service import AegisService, ServiceError, normalize_crew
+from .ml.predict_all import predict_all as run_predict_all
 
 log = logging.getLogger("aegis.api")
 router = APIRouter()
@@ -207,6 +208,15 @@ async def evening(request: Request, body: EveningRequest) -> Dict[str, Any]:
 @router.post("/summary", tags=["mode3"])
 async def summary(request: Request, body: SummaryRequest) -> Dict[str, Any]:
     return await svc(request).summary(body.model_dump())
+
+
+@router.post("/predict_all", tags=["ml"])
+async def predict_all_endpoint(body: Dict[str, Any] | None = None) -> Dict[str, Any]:
+    """
+    Master 1 Hz ML endpoint executing Model A (fatigue), Model B (metabolic + walk-back),
+    and Model C (clinical triage + tree explainability) in a single unified pipeline.
+    """
+    return run_predict_all(body or {})
 
 
 @router.post("/events", tags=["events"])

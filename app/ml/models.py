@@ -262,7 +262,7 @@ def train_model_c() -> LoadedModel:
         rng = np.random.default_rng(RANDOM_SEED)
         Xd = Xa.copy()
         for i in sym_idx:
-            Xd[rng.random(len(Xd)) < 0.35, i] = 0.0
+            Xd[rng.random(len(Xd)) < 0.65, i] = 0.0
         return np.vstack([Xa, Xd]), np.concatenate([ya, ya])
 
     Xtr_aug, ytr_aug = augment(Xtr, ytr)
@@ -296,7 +296,7 @@ def train_model_c() -> LoadedModel:
     est.fit(X_full_aug, y_full_aug)
 
     # Attach surrogate explainability tree for tree-path rule attribution
-    surrogate = DecisionTreeClassifier(max_depth=5, min_samples_leaf=10, random_state=RANDOM_SEED)
+    surrogate = DecisionTreeClassifier(max_depth=5, min_samples_leaf=15, random_state=RANDOM_SEED)
     surrogate.fit(X_full_aug, y_full_aug)
     est.tree_ = surrogate.tree_
 

@@ -125,3 +125,44 @@ def test_fall_countdown_and_ack(client):
         wait_for(console, "fall_countdown")
         esc = wait_for(console, "sos_auto_escalated")  # FALL_ACK_WINDOW_S=0.5 in tests
         assert esc["crew"] == "Crew_C"
+
+
+def test_predict_all_endpoint_nominal_and_emergency(client):
+    # 1. Test POST /predict_all with nominal telemetry
+    nominal_body = {
+        "crew": "Crew_A", "t": 0, "env": "surface_eva_spacesuit",
+        "hr": 74.0, "sys": 118.0, "dia": 76.0, "spo2": 98.4, "resp": 15.0,
+        "st": 0.005, "temp": 36.7, "smo2": 78.5, "emg_mdf": -2.0, "gait": 0.12,
+        "slope": 3.0, "speed": 2.5, "o2_left": 680.0, "fall": 0, "nirs_ok": 1, "dizzy": 0,
+    }
+    r_nom = client.post("/predict_all", json=nominal_body)
+    assert r_nom.status_code == 200
+    d_nom = r_nom.json()
+    assert d_nom["crew_id"] == "Crew_A"
+    assert d_nom["health_score"] >= 80.0
+    assert d_nom["band"] == "GREEN"
+    assert d_nom["traffic_light"] == "green"
+    assert "fatigue_score" in d_nom["model_a"]
+    assert "muscle_fatigue_score" in d_nom["model_a"]
+    assert "metabolic_rate_watts" in d_nom["model_b"]
+    assert "walk_back_limit_min" in d_nom["model_b"]
+    assert d_nom["model_c"]["primary_class"] == "Nominal"
+
+    # 2. Test POST /api/predict_all with emergency chest pain
+    emergency_body = {
+        "crew": "Crew_B", "t": 15, "env": "surface_eva_spacesuit",
+        "hr": 118.0, "sys": 82.0, "dia": 54.0, "spo2": 94.5, "resp": 24.0,
+        "st": 0.286, "temp": 36.8, "smo2": 52.0, "emg_mdf": -18.0, "gait": 0.25,
+        "slope": 4.0, "speed": 1.8, "o2_left": 550.0, "fall": 0, "nirs_ok": 1, "dizzy": 1,
+        "chest_pain": 1, "cold_sweat": 1, "short_breath": 1,
+    }
+    r_em = client.post("/api/predict_all", json=emergency_body)
+    assert r_em.status_code == 200
+    d_em = r_em.json()
+    assert d_em["crew_id"] == "Crew_B"
+    assert d_em["band"] == "RED"
+    assert d_em["traffic_light"] == "red"
+    assert d_em["model_c"]["primary_class"] == "Acute Coronary Ischemia"
+    assert d_em["model_c"]["dont_give_nitro"] is True
+    assert len(d_em["model_c"]["dont_give_list"]) > 0
+    assert d_em["model_c"]["flight_surgeons_alert"] is True

@@ -81,15 +81,15 @@ def build_table_c():
         has_hypotension = np.random.rand() < 0.35
         bp_s = float(np.random.uniform(74.0, 88.0)) if has_hypotension else float(np.random.uniform(94.0, 155.0))
         bp_d = round(bp_s * float(np.random.uniform(0.62, 0.70)), 1)
-        st_shift = float(np.random.uniform(0.18, 0.48)) # Diagnostic ST elevation
+        st_shift = float(np.random.uniform(0.14, 0.48)) # Diagnostic ST elevation >= 0.14 mV
         core_temp = round(float(np.random.normal(36.5, 0.35)), 1)
         
         ischemia_rows.append({
             "hr": round(float(b["HR"]) + float(np.random.normal(15.0, 5.0)), 1),
             "bp_sys": round(bp_s, 1),
             "bp_dia": bp_d,
-            "spo2": round(float(np.clip(b["SpO2"] - np.random.uniform(2.0, 6.0), 88.0, 97.0)), 1),
-            "resp_rate": round(float(np.clip(b["RESP"] + np.random.uniform(4.0, 10.0), 18.0, 36.0)), 1),
+            "spo2": round(float(np.clip(b["SpO2"] - np.random.uniform(1.0, 4.0), 92.0, 98.0)), 1),
+            "resp_rate": round(float(np.clip(b["RESP"] + np.random.uniform(2.0, 8.0), 16.0, 26.0)), 1),
             "st_elevation_mv": round(st_shift, 3),
             "temp": core_temp,
             "chest_pain": 1,
@@ -108,7 +108,7 @@ def build_table_c():
     syncope_rows = []
     bidmc_sample_2 = bidmc_all.sample(n=n_per_class, replace=True, random_state=202).reset_index(drop=True)
     for _, b in bidmc_sample_2.iterrows():
-        bp_s = float(np.random.uniform(70.0, 88.0)) # Profound hypotension < 90
+        bp_s = float(np.random.uniform(70.0, 88.0)) # Profound hypotension < 90 mmHg
         bp_d = round(bp_s * float(np.random.uniform(0.58, 0.68)), 1)
         core_temp = round(float(np.random.normal(36.4, 0.25)), 1)
         
@@ -144,15 +144,15 @@ def build_table_c():
             "hr": round(float(b["HR"]) + float(np.random.uniform(22.0, 42.0)), 1),
             "bp_sys": round(bp_s, 1),
             "bp_dia": bp_d,
-            "spo2": round(float(np.clip(b["SpO2"] - np.random.uniform(3.0, 7.0), 88.0, 94.0)), 1),
-            "resp_rate": round(float(np.random.uniform(28.0, 44.0)), 1), # Severe hyperventilation
+            "spo2": round(float(np.clip(b["SpO2"], 93.0, 98.5)), 1), # Realistic: suit still delivers O2, CO2 accumulates
+            "resp_rate": round(float(np.random.uniform(28.0, 44.0)), 1), # Severe hyperventilation > 26 bpm
             "st_elevation_mv": round(float(np.random.normal(0.02, 0.015)), 3),
             "temp": core_temp,
-            "chest_pain": int(np.random.rand() < 0.2),
+            "chest_pain": 0,
             "dizzy": 1,
             "short_breath": 1,
             "cold_sweat": 0,
-            "fall_event": int(np.random.rand() < 0.3),
+            "fall_event": int(np.random.rand() < 0.2),
             "triage_class": "Hypercapnia CO2",
             "class_id": 3,
             "dont_give_nitro": 0
@@ -172,8 +172,8 @@ def build_table_c():
             "hr": round(float(np.random.uniform(125.0, 168.0)), 1),
             "bp_sys": round(bp_s, 1),
             "bp_dia": bp_d,
-            "spo2": round(float(np.random.uniform(72.0, 86.5)), 1), # Critical hypoxemia
-            "resp_rate": round(float(np.random.uniform(32.0, 48.0)), 1),
+            "spo2": round(float(np.random.uniform(70.0, 86.5)), 1), # Critical hypoxemia < 88%
+            "resp_rate": round(float(np.random.uniform(30.0, 48.0)), 1),
             "st_elevation_mv": round(float(np.random.normal(0.01, 0.015)), 3),
             "temp": core_temp,
             "chest_pain": 1, # Acute pleuritic pain

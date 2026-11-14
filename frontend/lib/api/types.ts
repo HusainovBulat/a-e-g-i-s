@@ -211,4 +211,49 @@ export interface AegisTransport {
   getCrewHistory(id: CrewId): Promise<CrewHistory>;
   getRouteProfile(): Promise<RoutePoint[]>;
   getPairing(crew: CrewId): Promise<PairingResponse>;
+  predictAll(telemetry: Partial<SensorPacket>): Promise<PredictAllResponse>;
 }
+export interface PredictAllResponse {
+  crew_id: string;
+  t: number;
+  env: string;
+  health_score: number;
+  band: Band | string;
+  traffic_light?: Band;
+  composite_band?: Band;
+  status_label: string;
+  model_a: {
+    muscle_fatigue_score: number;
+    fatigue_score: number;
+    time_to_failure_min: number;
+    legs_fail_min: number;
+    legs_fail_in_min?: number;
+    model_used: string;
+    nirs_active: boolean;
+    fallback: boolean;
+  };
+  model_b: {
+    metabolic_rate_watts: number;
+    metabolic_w: number;
+    o2_burn_rate_l_min: number;
+    o2_burn_l_min: number;
+    walk_back_limit_min: number;
+    walk_back_min: number;
+    o2_tank_remaining_l: number;
+    o2_left_pct: number;
+    model_used: string;
+    point_of_no_return_warning: boolean;
+  };
+  model_c: TriageResponse & {
+    confidence: number;
+    ranked: Array<{ class: string; probability: number }>;
+    tree_path: string;
+    dont_give_nitro: boolean;
+    nitroglycerin_alert: string | null;
+    oxygen_surge: boolean;
+    oxygen_alert: string | null;
+    flight_surgeons_alert: boolean;
+    model: string;
+  };
+}
+
