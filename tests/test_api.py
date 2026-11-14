@@ -166,3 +166,13 @@ def test_predict_all_endpoint_nominal_and_emergency(client):
     assert d_em["model_c"]["dont_give_nitro"] is True
     assert len(d_em["model_c"]["dont_give_list"]) > 0
     assert d_em["model_c"]["flight_surgeons_alert"] is True
+
+
+def test_shaking_phone_does_not_restart_fall_countdown(client):
+    # Shake -> fall=1, tilt packet in between -> fall=0, shake again -> fall=1: still ONE countdown
+    client.post("/reset")
+    client.post("/sensors", json={"type": "telemetry", "crew": "Crew_B", "fall": 1})
+    client.post("/sensors", json={"type": "telemetry", "crew": "Crew_B", "fall": 0, "slope": 10})
+    client.post("/sensors", json={"type": "telemetry", "crew": "Crew_B", "fall": 1})
+    falls = [e for e in client.get("/events").json()["events"] if e["type"] == "fall" and e["crew"] == "Crew_B"]
+    assert len(falls) == 1

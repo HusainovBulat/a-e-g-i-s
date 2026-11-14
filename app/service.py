@@ -300,7 +300,10 @@ class AegisService:
         rt = self.crews[crew]
         packet = rt.telemetry.packet
         reasons = self.engine.emergency_reasons(packet)
-        if bool(packet.get("fall")) and not prev_fall:
+        countdown_running = rt.fall_task is not None and not rt.fall_task.done()
+        # A shaking phone reports the same fall many times: only a wrist OK / reset ends the
+        # countdown, repeated fall edges must not restart the 30 s window.
+        if bool(packet.get("fall")) and not prev_fall and not countdown_running:
             self._start_fall_countdown(crew)
             await self.add_event("fall", f"{crew_label(crew)} fall detected — {int(config.FALL_ACK_WINDOW_S)} s wrist OK countdown", crew)
         newly = bool(reasons) and not rt.emergency_active

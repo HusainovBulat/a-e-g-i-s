@@ -539,15 +539,17 @@ export const aegisApi: AegisTransport = {
     if (packet.scenario === 'reset_all') {
       return requestJson('/api/reset', { method: 'POST' }).then(() => undefined);
     }
+    // Partial packets (e.g. phone tilt {crew, slope}) must stay partial: defaulting the flags here
+    // sent fall=0 between shakes, so every shake looked like a new fall and restarted the countdown.
     const payload: any = {
       type: packet.scenario ? 'scenario' : 'telemetry',
       crew: `Crew_${packet.crew ?? 'A'}`,
       scenario: packet.scenario,
       ...packet,
-      fall: packet.fall ? 1 : 0,
-      nirs_ok: packet.nirs_ok !== false ? 1 : 0,
-      dizzy: packet.dizzy ? 1 : 0,
     };
+    if (packet.fall !== undefined) payload.fall = packet.fall ? 1 : 0;
+    if (packet.nirs_ok !== undefined) payload.nirs_ok = packet.nirs_ok ? 1 : 0;
+    if (packet.dizzy !== undefined) payload.dizzy = packet.dizzy ? 1 : 0;
     if (packet.env) {
       payload.env = toBackendEnv(packet.env);
     }

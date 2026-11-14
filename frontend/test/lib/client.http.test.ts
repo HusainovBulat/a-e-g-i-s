@@ -167,8 +167,17 @@ describe('REST transport', () => {
   it('sendSensors: a scenario key starts server playback for Crew_X', async () => {
     const { calls } = mockFetch({ '/api/sensors': { ok: true } });
     await aegisApi.sendSensors({ crew: 'C', scenario: 'chest_pain' });
-    expect(calls[0].body).toMatchObject({ type: 'scenario', scenario: 'chest_pain', fall: 0, nirs_ok: 1, dizzy: 0 });
+    expect(calls[0].body).toMatchObject({ type: 'scenario', scenario: 'chest_pain' });
     expect(['C', 'Crew_C']).toContain(calls[0].body.crew);
+  });
+
+  it('sendSensors: a partial packet (phone tilt) does not reset fall / nirs_ok / dizzy', async () => {
+    const { calls } = mockFetch({ '/api/sensors': { ok: true } });
+    await aegisApi.sendSensors({ crew: 'A', slope: 12 });
+    expect(calls[0].body).toMatchObject({ type: 'telemetry', slope: 12 });
+    expect(calls[0].body).not.toHaveProperty('fall');
+    expect(calls[0].body).not.toHaveProperty('nirs_ok');
+    expect(calls[0].body).not.toHaveProperty('dizzy');
   });
 
   it('sendSensors: slider packets become telemetry with 0/1 flags and backend env ids', async () => {
