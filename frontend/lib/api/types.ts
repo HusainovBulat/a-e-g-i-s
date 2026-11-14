@@ -37,7 +37,8 @@ export type SensorInput = Partial<Omit<SensorPacket, 'crew'>> & {
 
 export interface ModelAState {
   fatigue_score: number;
-  legs_fail_min: number;
+  /** null = fatigue stable or recovering (no projected leg failure) */
+  legs_fail_min: number | null;
   fallback: boolean;
 }
 

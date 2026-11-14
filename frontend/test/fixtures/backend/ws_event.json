@@ -1,16 +1,17 @@
 {
   "type": "event",
-  "ts": "2026-11-14T15:29:21.007+00:00",
-  "crew": "Crew_A",
+  "ts": "2026-11-14T16:07:46.912+00:00",
+  "crew": "Crew_C",
   "data": {
-    "id": 2,
-    "time": "15:29",
-    "ts": "2026-11-14T15:29:21",
-    "type": "scenario",
-    "crew": "Crew_A",
-    "text": "15:29 Crew A scenario: Steep Crater Climb (LRO LOLA +18°)",
+    "id": 5,
+    "time": "16:07",
+    "ts": "2026-11-14T16:07:46",
+    "type": "triage",
+    "crew": "Crew_C",
+    "text": "16:07 Crew C triage: Nominal",
     "data": {
-      "scenario": "steep_climb"
+      "primary_class": "Nominal",
+      "why": "Resp rate 14 ≤ 27 + ST elevation (mV) 0 ≤ 0.0985 + Systolic BP 116 > 95 → Nominal"
     }
   }
 }

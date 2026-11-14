@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Panel } from '../ui/Panel';
 import { Button } from '../ui/Button';
 import { Segmented, Slider, Toggle } from '../ui/Controls';
@@ -10,6 +10,14 @@ import { aegisApi } from '../../lib/api/client';
 import { requestMotionPermission, subscribeMotion } from '../../lib/motion';
 import type { CrewId, Scenario, SensorPacket } from '../../lib/api/types';
 import styles from './phone.module.css';
+
+/** Scenario badge colour from scenarios.json ("#EF4444" / "red" ...) -> badge tone. */
+export function badgeTone(color: string | undefined): 'red' | 'amber' | 'green' {
+  const c = String(color ?? '').toLowerCase();
+  if (c === 'red' || c === '#ef4444') return 'red';
+  if (c === 'amber' || c === 'yellow' || c === '#f59e0b') return 'amber';
+  return 'green';
+}
 
 export function PhoneSimulator() {
   const [crew, setCrew] = useState<CrewId>('A');
@@ -40,6 +48,11 @@ export function PhoneSimulator() {
   const [nirsOk, setNirsOk] = useState<boolean>(true);
   const [dizzy, setDizzy] = useState<boolean>(false);
   const [fall, setFall] = useState<boolean>(false);
+
+  // While a server-side scenario plays, only explicit changes (sliders, tilt, fall) are sent:
+  // the backend treats phone values during playback as sticky overrides, so a 1 Hz
+  // keepalive with all slider values would freeze the scenario's 60-s timeline.
+  const [scenarioRunning, setScenarioRunning] = useState<boolean>(false);
 
   // Motion physics
   const [motionActive, setMotionActive] = useState<boolean>(false);
@@ -91,30 +104,33 @@ export function PhoneSimulator() {
     else if (param === 'smo2') { setSmo2(val); newSmo2 = val; }
     else if (param === 'bloodSugar') { setBloodSugar(val); newBloodSugar = val; }
 
-    void aegisApi.sendSensors({
-      crew,
-      hr: newHr,
-      sys: newSys,
-      dia: newDia,
-      spo2: newSpo2,
-      slope: newSlope,
-      smo2: newSmo2,
-      blood_sugar_mgdl: newBloodSugar,
-      temp,
-      nirs_ok: nirsOk,
-      dizzy,
-      fall,
-    });
-    setStatusMessage(`TRANSMITTED TO CONSOLE · CREW ${crew} (${param.toUpperCase()}: ${val})`);
+    aegisApi
+      .sendSensors({
+        crew,
+        hr: newHr,
+        sys: newSys,
+        dia: newDia,
+        spo2: newSpo2,
+        slope: newSlope,
+        smo2: newSmo2,
+        blood_sugar_mgdl: newBloodSugar,
+        temp,
+        nirs_ok: nirsOk,
+        dizzy,
+        fall,
+      })
+      .then(() => setStatusMessage(`TRANSMITTED TO CONSOLE · CREW ${crew} (${param.toUpperCase()}: ${val})`))
+      .catch(() => setStatusMessage('UPLINK DISCONNECTED'));
   };
 
-  // Periodic 1 Hz keepalive
+  // Periodic 1 Hz telemetry stream (paused while the server plays a scenario for this crew)
   useEffect(() => {
+    if (scenarioRunning) return;
     const interval = setInterval(() => {
       void sendTelemetry();
     }, 1000);
     return () => clearInterval(interval);
-  }, [sendTelemetry]);
+  }, [sendTelemetry, scenarioRunning]);
 
   // Handle Scenario trigger
   const handleSelectScenario = async (sc: Scenario) => {
@@ -136,6 +152,7 @@ export function PhoneSimulator() {
         crew,
         scenario: sc.id,
       });
+      setScenarioRunning(sc.id !== 'reset_all');
       if (sc.id === 'fall_in_crater') {
         setFall(true);
         await aegisApi.sendSensors({ crew, fall: true });
@@ -149,14 +166,19 @@ export function PhoneSimulator() {
   const toggleFall = async () => {
     const nextFall = !fall;
     setFall(nextFall);
-    if (nextFall) {
-      setStatusMessage(`🚨 FALL IMPACT TRIGGERED ON CREW ${crew}`);
-      await aegisApi.sendSensors({ crew, fall: true });
-      await aegisApi.sendSensors({ crew, scenario: 'fall_in_crater' });
-    } else {
-      setStatusMessage(`FALL CLEARED (NOMINAL) · CREW ${crew}`);
-      await aegisApi.sendSensors({ crew, fall: false });
-      await aegisApi.postEvent({ type: 'ack', crew, text: `Crew ${crew} conscious · fall cancelled` });
+    try {
+      if (nextFall) {
+        setStatusMessage(`🚨 FALL IMPACT TRIGGERED ON CREW ${crew}`);
+        await aegisApi.sendSensors({ crew, fall: true });
+        await aegisApi.sendSensors({ crew, scenario: 'fall_in_crater' });
+        setScenarioRunning(true);
+      } else {
+        setStatusMessage(`FALL CLEARED (NOMINAL) · CREW ${crew}`);
+        await aegisApi.sendSensors({ crew, fall: false });
+        await aegisApi.postEvent({ type: 'ack', crew, text: `Crew ${crew} conscious · fall cancelled` });
+      }
+    } catch {
+      setStatusMessage('UPLINK DISCONNECTED');
     }
   };
 
@@ -170,11 +192,14 @@ export function PhoneSimulator() {
     setMotionActive(true);
   };
 
+  const lastSentSlope = useRef<number | null>(null);
   useEffect(() => {
     if (!motionActive) return;
     const cleanup = subscribeMotion(data => {
-      if (data.slopeAngle !== undefined) {
+      if (data.slopeAngle !== undefined && data.slopeAngle !== lastSentSlope.current) {
+        lastSentSlope.current = data.slopeAngle;
         setSlope(data.slopeAngle);
+        void aegisApi.sendSensors({ crew, slope: data.slopeAngle }).catch(() => setStatusMessage('UPLINK DISCONNECTED'));
       }
       if (data.shakeDetected) {
         setFall(true);
@@ -182,7 +207,7 @@ export function PhoneSimulator() {
       }
     });
     return cleanup;
-  }, [motionActive, sendTelemetry]);
+  }, [motionActive, sendTelemetry, crew]);
 
   return (
     <div className={styles.phonePage}>
@@ -239,12 +264,21 @@ export function PhoneSimulator() {
           {scenarios.map(sc => (
             <div
               key={sc.id}
+              role="button"
+              tabIndex={0}
+              aria-pressed={activeScenarioId === sc.id}
               className={`${styles.scenarioCard} ${activeScenarioId === sc.id ? styles.scenarioCardActive : ''}`}
               onClick={() => handleSelectScenario(sc)}
+              onKeyDown={event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  void handleSelectScenario(sc);
+                }
+              }}
             >
               <div className={styles.scenarioTitle}>{sc.name}</div>
               <div className={styles.scenarioDesc}>{sc.description}</div>
-              <StatusBadge tone={sc.badge_color === 'red' ? 'red' : sc.badge_color === 'amber' ? 'amber' : 'green'}>
+              <StatusBadge tone={badgeTone(sc.badge_color)}>
                 {sc.badge}
               </StatusBadge>
             </div>
@@ -304,6 +338,7 @@ export function PhoneSimulator() {
                 setNirsOk(true);
                 setDizzy(false);
                 setFall(false);
+                setScenarioRunning(false);
                 void sendTelemetry({
                   hr: 74,
                   sys: 118,

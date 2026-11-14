@@ -58,12 +58,35 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-function normalizeCrewId(raw: any): CrewId {
-  const s = String(raw || 'A').toUpperCase();
-  if (s.includes('B')) return 'B';
-  if (s.includes('C')) return 'C';
-  if (s.includes('D')) return 'D';
-  return 'A';
+/** "Crew_A" / "crew a" / "A" -> "A". Uses the last letter: "CREW_A" itself contains a "C". */
+export function normalizeCrewId(raw: any): CrewId {
+  const letter = String(raw || 'A').trim().toUpperCase().slice(-1);
+  return (['A', 'B', 'C', 'D'] as string[]).includes(letter) ? (letter as CrewId) : 'A';
+}
+
+/** Backend organ zone keys (core_math.calculate_organ_scores) -> console zone ids. */
+const BACKEND_ZONES: Record<ZoneId, string> = {
+  cns: 'cns_brain',
+  cardio: 'cardiovascular',
+  resp: 'respiratory',
+  thermo: 'immune_thermo',
+  metabolic: 'metabolic_nutrition',
+  musculo: 'musculoskeletal',
+};
+
+function zoneScore(source: any, zone: ZoneId): number | undefined {
+  const value = source?.[BACKEND_ZONES[zone]] ?? source?.[zone];
+  const score = typeof value === 'object' && value !== null ? value.score : value;
+  return score === undefined || score === null ? undefined : Number(score);
+}
+
+/** Accepts {cns_brain: {score}} (backend) as well as {cns: 85} (mock) in organ_scores / organ_scores_6. */
+function parseOrganScores(raw: any): Record<ZoneId, number> {
+  const out = {} as Record<ZoneId, number>;
+  for (const zone of Object.keys(BACKEND_ZONES) as ZoneId[]) {
+    out[zone] = zoneScore(raw.organ_scores, zone) ?? zoneScore(raw.organ_scores_6, zone) ?? 85;
+  }
+  return out;
 }
 
 export function normalizeEnvId(raw: any): EnvId {
@@ -135,14 +158,7 @@ function createInitialCrewState(crew: CrewId): CrewState {
 }
 
 function parseCrewState(raw: any, crewId: CrewId): CrewState {
-  const organScores: Record<ZoneId, number> = {
-    cns: Number(raw.organ_scores?.cns_brain?.score ?? raw.organ_scores_6?.cns ?? 85),
-    cardio: Number(raw.organ_scores?.cardiovascular?.score ?? raw.organ_scores_6?.cardio ?? 85),
-    resp: Number(raw.organ_scores?.respiratory?.score ?? raw.organ_scores_6?.resp ?? 85),
-    thermo: Number(raw.organ_scores?.immune_thermo?.score ?? raw.organ_scores_6?.thermo ?? 85),
-    metabolic: Number(raw.organ_scores?.metabolic_nutrition?.score ?? raw.organ_scores_6?.metabolic ?? 85),
-    musculo: Number(raw.organ_scores?.musculoskeletal?.score ?? raw.organ_scores_6?.musculo ?? 85),
-  };
+  const organScores = parseOrganScores(raw);
 
   const v = raw.vitals || {};
   const vitals: SensorPacket = {
@@ -172,7 +188,11 @@ function parseCrewState(raw: any, crewId: CrewId): CrewState {
 
   const model_a: ModelAState = {
     fatigue_score: Number(raw.model_a?.fatigue_score ?? 15),
-    legs_fail_min: Number(raw.model_a?.legs_fail_in_min ?? raw.model_a?.legs_fail_min ?? 45),
+    // null = fatigue stable / recovering (Model A projects no leg failure)
+    legs_fail_min: (() => {
+      const v = raw.model_a?.legs_fail_in_min !== undefined ? raw.model_a.legs_fail_in_min : raw.model_a?.legs_fail_min;
+      return v === null || v === undefined ? null : Number(v);
+    })(),
     fallback: Boolean(raw.model_a?.nirs_fogged ?? raw.model_a?.fallback ?? !vitals.nirs_ok),
   };
 
@@ -211,14 +231,14 @@ function normalizeTriage(raw: any): TriageResponse {
     const action = String(s.action ?? s.instruction ?? (typeof s === 'string' ? s : ''));
     let diagram: ProtocolStep['diagram'] = 'none';
     const textLower = `${title} ${action}`.toLowerCase();
-    if (textLower.includes('position') || textLower.includes('sitting') || textLower.includes('elevat') || textLower.includes('posture')) {
+    if (/\baed\b|defibrillator/.test(textLower)) {
+      diagram = 'aed';
+    } else if (textLower.includes('position') || textLower.includes('sitting') || textLower.includes('elevat') || textLower.includes('posture')) {
       diagram = 'position';
     } else if (textLower.includes('oxygen') || textLower.includes('o2') || textLower.includes('mask')) {
       diagram = 'oxygen';
     } else if (textLower.includes('bay') || textLower.includes('cabinet') || textLower.includes('kit')) {
       diagram = 'bay';
-    } else if (textLower.includes('aed') || textLower.includes('defibrillator') || textLower.includes('pad')) {
-      diagram = 'aed';
     }
     return {
       order: Number(s.order ?? s.step ?? idx + 1),
@@ -245,14 +265,7 @@ function normalizeTriage(raw: any): TriageResponse {
 }
 
 function normalizeEvening(raw: any, crewId?: CrewId): EveningResponse {
-  const organScores: Record<ZoneId, number> = {
-    cns: Number(raw.organ_scores?.cns_brain?.score ?? raw.organ_scores_6?.cns ?? 85),
-    cardio: Number(raw.organ_scores?.cardiovascular?.score ?? raw.organ_scores_6?.cardio ?? 85),
-    resp: Number(raw.organ_scores?.respiratory?.score ?? raw.organ_scores_6?.resp ?? 85),
-    thermo: Number(raw.organ_scores?.immune_thermo?.score ?? raw.organ_scores_6?.thermo ?? 85),
-    metabolic: Number(raw.organ_scores?.metabolic_nutrition?.score ?? raw.organ_scores_6?.metabolic ?? 85),
-    musculo: Number(raw.organ_scores?.musculoskeletal?.score ?? raw.organ_scores_6?.musculo ?? 85),
-  };
+  const organScores = parseOrganScores(raw);
 
   const quests: string[] = Array.isArray(raw.completed_quests)
     ? raw.completed_quests
@@ -571,10 +584,13 @@ export const aegisApi: AegisTransport = {
   },
 
   async summary(response: EveningResponse): Promise<SummaryResponse> {
+    // The backend keeps the full result of the crew's last POST /evening (objective score,
+    // vitals, delta ...). The normalized EveningResponse drops those fields, so send only
+    // the crew id and let the Commander briefing use the complete server-side check-in.
     const cid = `Crew_${response.crew ?? 'A'}`;
     const raw = await requestJson<any>('/api/summary', {
       method: 'POST',
-      body: JSON.stringify({ evening: response, crew: cid })
+      body: JSON.stringify({ crew: cid }),
     });
     return normalizeSummary(raw);
   },

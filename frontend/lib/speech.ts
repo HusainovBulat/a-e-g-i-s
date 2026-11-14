@@ -11,11 +11,19 @@ const SYMPTOM_KEYWORDS: Record<SymptomId, string[]> = {
   headache: ['headache', 'head', 'migraine', 'vision', 'sans'],
 };
 
+/**
+ * Whole-word matching: a keyword matches a spoken word exactly, or as a stem when it has
+ * 5+ letters ("breath" -> "breathing"). Avoids substring hits like "chair" -> "air".
+ */
+function keywordMatches(tokens: string[], keyword: string): boolean {
+  return tokens.some(token => token === keyword || (keyword.length >= 5 && token.startsWith(keyword)));
+}
+
 export function matchSymptomsFromText(text: string): SymptomId[] {
-  const lower = text.toLowerCase();
+  const tokens = text.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
   const matched: SymptomId[] = [];
   for (const [symptom, words] of Object.entries(SYMPTOM_KEYWORDS)) {
-    if (words.some(word => lower.includes(word))) {
+    if (words.some(word => keywordMatches(tokens, word))) {
       matched.push(symptom as SymptomId);
     }
   }

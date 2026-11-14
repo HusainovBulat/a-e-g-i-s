@@ -12,7 +12,7 @@
     "NASA-STD-3001 Vol 1 Section 4.2 (EVA Readiness >= 85)",
     "NASA-STD-3001 Vol 1 Section 4.3 (Musculoskeletal Conditioning)"
   ],
-  "latency_ms": 0.4,
+  "latency_ms": 1.8,
   "crew": "Crew_A",
   "recommended_crew": {
     "crew": "Crew_C",

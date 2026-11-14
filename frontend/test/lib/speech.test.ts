@@ -18,12 +18,16 @@ describe('matchSymptomsFromText (Hold to speak keyword matcher)', () => {
       .toEqual(['chest_pain', 'dizziness', 'fall', 'shortness_of_breath']);
   });
 
+  it('matches word stems ("breathing", "chests")', () => {
+    expect(matchSymptomsFromText('Breathing is hard')).toEqual(['shortness_of_breath']);
+  });
+
   it('returns nothing for a nominal report', () => {
     expect(matchSymptomsFromText('all good, nominal, continuing the traverse')).toEqual([]);
   });
 
-  // KNOWN ISSUE: substring matching — "chair" contains "air", "download" contains "down".
-  it.fails('does not match keywords inside unrelated words', () => {
+  // Regression: substring matching used to hit "chair" -> "air" and "download" -> "down".
+  it('does not match keywords inside unrelated words', () => {
     expect(matchSymptomsFromText('sitting in the chair, download complete')).toEqual([]);
   });
 });

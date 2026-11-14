@@ -1,11 +1,11 @@
 {
   "type": "hello",
-  "ts": "2026-11-14T15:29:20.482+00:00",
+  "ts": "2026-11-14T16:07:46.618+00:00",
   "data": {
     "crews": {
       "Crew_A": {
         "crew": "Crew_A",
-        "t": 0.274,
+        "t": 5.836,
         "env": "lunar_base_habitat",
         "environment": {
           "environment_id": "lunar_base_habitat",
@@ -150,7 +150,7 @@
       },
       "Crew_B": {
         "crew": "Crew_B",
-        "t": 0.276,
+        "t": 5.838,
         "env": "lunar_base_habitat",
         "environment": {
           "environment_id": "lunar_base_habitat",
@@ -295,7 +295,7 @@
       },
       "Crew_C": {
         "crew": "Crew_C",
-        "t": 0.277,
+        "t": 5.839,
         "env": "lunar_base_habitat",
         "environment": {
           "environment_id": "lunar_base_habitat",
@@ -435,12 +435,12 @@
         "alarm": null,
         "fall_countdown_s": null,
         "packets_received": 1,
-        "has_triage": false,
+        "has_triage": true,
         "evening_readiness": null
       },
       "Crew_D": {
         "crew": "Crew_D",
-        "t": 0.277,
+        "t": 5.841,
         "env": "lunar_base_habitat",
         "environment": {
           "environment_id": "lunar_base_habitat",
@@ -587,12 +587,48 @@
     "events": [
       {
         "id": 1,
-        "time": "15:29",
-        "ts": "2026-11-14T15:29:20",
+        "time": "16:07",
+        "ts": "2026-11-14T16:07:41",
+        "type": "triage",
+        "crew": "Crew_C",
+        "text": "16:07 Crew C triage: Nominal",
+        "data": {
+          "primary_class": "Nominal",
+          "why": "Resp rate 14 ≤ 27 + ST elevation (mV) 0 ≤ 0.0985 + Systolic BP 116 > 95 → Nominal"
+        }
+      },
+      {
+        "id": 2,
+        "time": "16:07",
+        "ts": "2026-11-14T16:07:41",
+        "type": "triage",
+        "crew": "Crew_C",
+        "text": "16:07 Crew C triage: Nominal",
+        "data": {
+          "primary_class": "Nominal",
+          "why": "Resp rate 14 ≤ 27 + ST elevation (mV) 0 ≤ 0.0985 + Systolic BP 116 > 95 → Nominal"
+        }
+      },
+      {
+        "id": 3,
+        "time": "16:07",
+        "ts": "2026-11-14T16:07:46",
         "type": "reset",
         "crew": null,
-        "text": "15:29 Reset all — nominal baseline restored for all crew",
+        "text": "16:07 Reset all — nominal baseline restored for all crew",
         "data": {}
+      },
+      {
+        "id": 4,
+        "time": "16:07",
+        "ts": "2026-11-14T16:07:46",
+        "type": "triage",
+        "crew": "Crew_C",
+        "text": "16:07 Crew C triage: Nominal",
+        "data": {
+          "primary_class": "Nominal",
+          "why": "Resp rate 14 ≤ 27 + ST elevation (mV) 0 ≤ 0.0985 + Systolic BP 116 > 95 → Nominal"
+        }
       }
     ],
     "scenarios": [
@@ -613,50 +649,38 @@
     "models": {
       "model_a_full": {
         "name": "model_a_full",
-        "source": "trained_from_csv",
+        "source": "pkl",
         "features": [
           "calf_smo2_pct",
           "nirs_desat_slope",
           "semg_mdf_shift_pct",
           "imu_gait_asymmetry"
         ],
-        "metrics": {
-          "holdout_mae": 1.72,
-          "holdout_r2": 0.9951,
-          "algorithm": "LightGBM Monotonic Regressor"
-        }
+        "metrics": {}
       },
       "model_a_fallback": {
         "name": "model_a_fallback",
-        "source": "trained_from_csv",
+        "source": "pkl",
         "features": [
           "semg_mdf_shift_pct",
           "imu_gait_asymmetry",
           "hr_bpm"
         ],
-        "metrics": {
-          "holdout_mae": 1.97,
-          "holdout_r2": 0.9936,
-          "algorithm": "LightGBM Monotonic Regressor"
-        }
+        "metrics": {}
       },
       "model_b_metabolic": {
         "name": "model_b_metabolic",
-        "source": "trained_from_csv",
+        "source": "pkl",
         "features": [
           "speed_kmh",
           "slope_deg",
           "muscle_fatigue_score"
         ],
-        "metrics": {
-          "holdout_mae_w": 10.6,
-          "holdout_r2": 0.9772,
-          "algorithm": "LightGBM Monotonic Regressor"
-        }
+        "metrics": {}
       },
       "model_c_triage": {
         "name": "model_c_triage",
-        "source": "trained_from_csv",
+        "source": "pkl",
         "features": [
           "hr",
           "bp_sys",
@@ -671,11 +695,7 @@
           "cold_sweat",
           "fall_event"
         ],
-        "metrics": {
-          "holdout_accuracy": 1,
-          "holdout_accuracy_missing_symptoms": 1,
-          "algorithm": "LightGBM + Explainability Tree Surrogate"
-        }
+        "metrics": {}
       }
     },
     "consoles_connected": 2

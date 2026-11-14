@@ -11,15 +11,15 @@
       "probability": 0
     },
     {
-      "class": "Nominal",
+      "class": "Hypercapnia CO2",
       "probability": 0
     },
     {
-      "class": "Hypercapnia CO2",
+      "class": "Nominal",
       "probability": 0
     }
   ],
-  "tree_path_why": "SpO2 94.5 > 87.2 + ST elevation (mV) 0.286 > 0.123 → Acute Coronary Ischemia",
+  "tree_path_why": "Resp rate 24 ≤ 27 + ST elevation (mV) 0.286 > 0.0985 → Acute Coronary Ischemia",
   "dont_give_list": [
     {
       "drug": "Nitroglycerin",
@@ -84,7 +84,7 @@
     "temp": 36.8
   },
   "spoken_text": "Suspected Acute Coronary Ischemia. Do not give nitroglycerin. Blood pressure is too low. Step 1: Patient Posture & High-Flow Oxygen. Step 2: ⛔ NITROGLYCERIN CONTRAINDICATED (BP < 90). Step 3: Automated External Defibrillator (AED).",
-  "model": "model_c_triage (trained_from_csv)",
+  "model": "model_c_triage (pkl)",
   "crew": "Crew_A",
   "trigger": "console"
 }

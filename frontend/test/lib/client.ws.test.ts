@@ -29,6 +29,17 @@ describe('subscribeConsole', () => {
     unsubscribe();
   });
 
+  it('hello: routes every backend crew id to its own card', async () => {
+    const { ws, last, unsubscribe } = subscribe();
+    ws.receive(backend.hello);
+    await flushMicrotasks();
+    for (const letter of ['A', 'B', 'C', 'D'] as const) {
+      const raw = (backend.hello.data.crews as any)[`Crew_${letter}`];
+      expect(last().crews[letter].organ_scores_6.cns).toBe(raw.organ_scores.cns_brain.score);
+    }
+    unsubscribe();
+  });
+
   it('hello: builds all 4 crew states from the backend snapshot', async () => {
     const { ws, last, unsubscribe } = subscribe();
     ws.receive(backend.hello);
@@ -46,7 +57,7 @@ describe('subscribeConsole', () => {
     unsubscribe();
   });
 
-/** The live-EVA fixture re-addressed to Crew_B (Crew_A / Crew_D hit the crew-id bug below). */
+/** The live-EVA fixture re-addressed to another crew member. */
   const steepClimbOnB = () => {
     const msg = clone(backend.stateSteepClimb);
     msg.crew = 'Crew_B';
@@ -54,9 +65,9 @@ describe('subscribeConsole', () => {
     return msg;
   };
 
-  // KNOWN BUG (critical for the demo): normalizeCrewId() uses includes('C') on "CREW_A",
-  // so every Crew_A / Crew_D message from the backend is written into crew C.
-  it.fails.each(['Crew_A', 'Crew_D'])('routes %s backend messages to the right crew card', async crewId => {
+  // Regression (critical for the demo): normalizeCrewId() used includes('C') on "CREW_A",
+  // so every Crew_A / Crew_D message from the backend was written into crew C.
+  it.each(['Crew_A', 'Crew_D'])('routes %s backend messages to the right crew card', async crewId => {
     const { ws, last, unsubscribe } = subscribe();
     const msg = clone(backend.stateSteepClimb);
     msg.crew = crewId;
@@ -102,9 +113,8 @@ describe('subscribeConsole', () => {
     unsubscribe();
   });
 
-  // KNOWN ISSUE: the backend sends legs_fail_in_min = null while fatigue is stable/recovering;
-  // the adapter turns that into "legs fail in 45 min", which the Mode 1 panel then displays.
-  it.fails('keeps "legs fail in" empty when the backend reports a stable fatigue trend', async () => {
+  // Regression: legs_fail_in_min = null (stable fatigue) used to become "legs fail in 45 min".
+  it('keeps "legs fail in" empty when the backend reports a stable fatigue trend', async () => {
     const { ws, last, unsubscribe } = subscribe();
     const msg = steepClimbOnB();
     msg.data.model_a.legs_fail_in_min = null;

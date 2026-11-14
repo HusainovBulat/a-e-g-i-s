@@ -120,9 +120,8 @@ describe('REST transport', () => {
     expect(res.applied_quests).toEqual(['hydration']);
   });
 
-  // KNOWN BUG: the backend returns organ_scores_6 keyed by cns_brain/cardiovascular/...,
-  // the adapter only reads organ_scores.* or organ_scores_6.cns, so every zone falls back to 85.
-  it.fails('maps the 6 organ scores of the evening check-in (not the 85 placeholder)', async () => {
+  // Regression: organ_scores_6 is keyed by cns_brain/cardiovascular/... — all zones used to show 85.
+  it('maps the 6 organ scores of the evening check-in (not the 85 placeholder)', async () => {
     mockFetch({ '/api/evening': backend.evening });
     const res = await aegisApi.evening({ crew: 'A', answers: { sleep: 9, energy: 9, mood: 9, pain_free: 9, nutrition: 9 } } as any);
     for (const [ui, api] of Object.entries(ZONES)) {
@@ -130,23 +129,19 @@ describe('REST transport', () => {
     }
   });
 
-  // KNOWN BUG: /api/summary receives the already-normalized EveningResponse, which drops
-  // objective_score / vitals / delta, so the Commander template falls back to default numbers.
-  it.fails('POST /api/summary forwards the telemetry the Commander briefing needs', async () => {
+  // Regression: the normalized EveningResponse (no objective_score / vitals / delta) used to be
+  // posted as "evening", so the Commander briefing ran on default numbers. Now only the crew id
+  // is sent and the backend uses its full stored result of POST /evening.
+  it('POST /api/summary lets the backend use its full evening result', async () => {
     const { calls } = mockFetch({ '/api/evening': backend.evening, '/api/summary': backend.summary });
-    const evening = await aegisApi.evening({ crew: 'A', answers: { sleep: 9, energy: 9, mood: 9, pain_free: 9, nutrition: 9 } } as any);
+    const evening = await aegisApi.evening({ crew: 'D', answers: { sleep: 9, energy: 9, mood: 9, pain_free: 9, nutrition: 9 } } as any);
     await aegisApi.summary(evening);
-    const sent = calls.find(c => c.url.endsWith('/api/summary'))!.body.evening;
-    expect(sent).toMatchObject({
-      objective_score: backend.evening.objective_score,
-      delta: backend.evening.delta,
-      vitals: { calf_smo2_pct: backend.evening.vitals.calf_smo2_pct },
-    });
+    const body = calls.find(c => c.url.endsWith('/api/summary'))!.body;
+    expect(body).toEqual({ crew: 'Crew_D' });
   });
 
-  // KNOWN BUG: the AED step ("Retrieve AED from Bay B2 ...") matches 'bay' before 'aed',
-  // so the AED pad-placement diagram is never shown for the real chest-pain protocol.
-  it.fails('shows the AED pad diagram on the defibrillator step', async () => {
+  // Regression: "Retrieve AED from Bay B2" used to match 'bay' before 'aed'.
+  it('shows the AED pad diagram on the defibrillator step', async () => {
     mockFetch({ '/api/triage': backend.triage });
     const res = await aegisApi.triage({ crew: 'A', symptoms: ['chest_pain'] });
     const aedStep = res.protocol_steps.find(s => /AED|Defibrillator/.test(s.title))!;

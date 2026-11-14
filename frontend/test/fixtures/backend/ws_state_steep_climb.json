@@ -1,10 +1,10 @@
 {
   "type": "state",
-  "ts": "2026-11-14T15:30:03.188+00:00",
+  "ts": "2026-11-14T16:08:29.358+00:00",
   "crew": "Crew_A",
   "data": {
     "crew": "Crew_A",
-    "t": 42.998,
+    "t": 48.618,
     "env": "surface_eva_spacesuit",
     "environment": {
       "environment_id": "surface_eva_spacesuit",
@@ -108,7 +108,7 @@
     "composite_band": "amber",
     "model_a": {
       "fatigue_score": 86.2,
-      "fatigue_rate_per_min": 14.23,
+      "fatigue_rate_per_min": 14.22,
       "legs_fail_in_min": 0.3,
       "calf_smo2_pct": 40.8,
       "nirs_desat_slope": -5,

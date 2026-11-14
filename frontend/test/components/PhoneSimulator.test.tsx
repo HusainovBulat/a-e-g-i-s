@@ -3,7 +3,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { PhoneSimulator } from '../../components/phone/PhoneSimulator';
+import { badgeTone, PhoneSimulator } from '../../components/phone/PhoneSimulator';
 import { aegisApi } from '../../lib/api/client';
 import { mockFetch } from '../helpers';
 
@@ -49,6 +49,26 @@ describe('PhoneSimulator', () => {
     await waitFor(() => expect(sensorCalls(calls).some(c => c.body.scenario === 'chest_pain')).toBe(true));
     expect(String(sensorCalls(calls).find(c => c.body.scenario === 'chest_pain')!.body.crew)).toMatch(/C$/);
   });
+
+  it('an explicit slider change during a scenario is still sent (live override)', async () => {
+    const { calls } = setup();
+    fireEvent.click(await screen.findByText('Acute Chest Pain (Suspected Ischemia)'));
+    await waitFor(() => expect(sensorCalls(calls).some(c => c.body.scenario === 'chest_pain')).toBe(true));
+    fireEvent.change(screen.getByLabelText(/SYSTOLIC BLOOD PRESSURE/), { target: { value: '75' } });
+    await waitFor(() => expect(sensorCalls(calls).some(c => c.body.sys === 75)).toBe(true));
+  });
+
+  it('scenario cards work from the keyboard', async () => {
+    const { calls } = setup();
+    const card = (await screen.findByText('Acute Chest Pain (Suspected Ischemia)')).closest('[role="button"]')!;
+    fireEvent.keyDown(card, { key: 'Enter' });
+    await waitFor(() => expect(sensorCalls(calls).some(c => c.body.scenario === 'chest_pain')).toBe(true));
+  });
+
+  it.each([['#EF4444', 'red'], ['#F59E0B', 'amber'], ['#10B981', 'green'], ['red', 'red'], [undefined, 'green']])(
+    'scenario badge colour %s -> %s',
+    (color, tone) => expect(badgeTone(color as string | undefined)).toBe(tone),
+  );
 
   it('"Reset" restores the nominal baseline through POST /api/reset', async () => {
     const { calls } = setup();
@@ -96,21 +116,20 @@ describe('PhoneSimulator', () => {
     expect(await screen.findByText(/UPLINK DISCONNECTED/, undefined, { timeout: 2500 })).toBeTruthy();
   });
 
-  // KNOWN BUG: updateMetric() fires sendSensors() with `void` and no catch — offline it raises an
-  // unhandled promise rejection and still shows "TRANSMITTED TO CONSOLE".
-  it.fails('a slider update does not claim success when the send fails', async () => {
+  // Regression: updateMetric() used to fire sendSensors() without a catch (unhandled rejection)
+  // and claimed "TRANSMITTED TO CONSOLE" even when offline.
+  it('a slider update does not claim success when the send fails', async () => {
     setup();
     await screen.findByText('Normal Surface Walk');
     failSends();
     fireEvent.change(screen.getByLabelText(/HEART RATE/), { target: { value: '150' } });
-    await new Promise(r => setTimeout(r, 50));
+    expect(await screen.findByText(/UPLINK DISCONNECTED/)).toBeTruthy();
     expect(screen.queryByText(/TRANSMITTED TO CONSOLE/)).toBeNull();
   });
 
-  // KNOWN ISSUE: after a scenario starts, the 1 Hz keepalive keeps sending the slider values.
-  // The backend treats phone values during playback as sticky overrides, so the 60-s
-  // scenario timeline (HR/BP/SpO2 dynamics) is frozen at the slider values.
-  it.fails('does not overwrite a running scenario with keepalive slider packets', async () => {
+  // Regression: the 1 Hz keepalive kept sending slider values during playback; the backend
+  // treats them as sticky overrides, which froze the 60-s scenario timeline.
+  it('does not overwrite a running scenario with keepalive slider packets', async () => {
     const { calls } = setup();
     fireEvent.click(await screen.findByText('Acute Chest Pain (Suspected Ischemia)'));
     await waitFor(() => expect(sensorCalls(calls).some(c => c.body.scenario === 'chest_pain')).toBe(true));

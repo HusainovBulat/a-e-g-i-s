@@ -46,12 +46,14 @@ export function Mode1Screen() {
   const o2Burn = modelB?.o2_burn_l_min ?? 1.45;
   const metabolicW = modelB?.metabolic_w ?? 265;
   const fatigueScore = modelA?.fatigue_score ?? 42;
-  const legsFailMin = modelA?.legs_fail_min ?? 28;
+  // null from Model A = fatigue stable / recovering -> no countdown
+  const legsFailMin = modelA ? modelA.legs_fail_min : null;
+  const legsFailText = legsFailMin === null ? 'STABLE' : `${legsFailMin.toFixed(1)} MIN`;
   const isFallback = modelA?.fallback ?? false;
   const isDizzy = vitals?.dizzy ?? false;
 
   const isCriticalWalkBack = walkBackMin < 15;
-  const isWarningFatigue = legsFailMin <= 15 || fatigueScore >= 70;
+  const isWarningFatigue = (legsFailMin !== null && legsFailMin <= 15) || fatigueScore >= 70;
 
   // Format elevation points for SVG profile
   const elevationArray = routePoints.length > 0
@@ -91,7 +93,7 @@ export function Mode1Screen() {
             <Icon name="warning" size={20} style={{ color: 'var(--red)' }} />
             <div className={styles.warningText}>
               <strong>15-MINUTE EARLY WARNING // MODEL A:</strong> Muscle failure predicted in{' '}
-              <strong>{legsFailMin.toFixed(1)} MIN</strong> before suit CO₂ spikes. Recommendation: Halt for 60s micro-recovery.
+              <strong>{legsFailText}</strong> before suit CO₂ spikes. Recommendation: Halt for 60s micro-recovery.
             </div>
           </div>
           <Button variant="danger" size="sm" onClick={handleSendToVisor} disabled={sendingVisor}>
@@ -180,8 +182,8 @@ export function Mode1Screen() {
 
             <div className={styles.metricTile}>
               <span>LEGS FAIL IN</span>
-              <strong style={{ color: legsFailMin <= 15 ? 'var(--red)' : 'var(--text-strong)' }}>
-                {legsFailMin.toFixed(1)} MIN
+              <strong style={{ color: legsFailMin !== null && legsFailMin <= 15 ? 'var(--red)' : 'var(--text-strong)' }}>
+                {legsFailText}
               </strong>
               <small>Pre-CO₂ Warning</small>
             </div>

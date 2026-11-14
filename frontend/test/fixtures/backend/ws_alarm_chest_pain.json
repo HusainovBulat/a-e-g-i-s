@@ -1,6 +1,6 @@
 {
   "type": "alarm_jump_to_emergency",
-  "ts": "2026-11-14T15:30:01.039+00:00",
+  "ts": "2026-11-14T16:08:27.186+00:00",
   "crew": "Crew_B",
   "data": {
     "crew": "Crew_B",
@@ -21,15 +21,15 @@
           "probability": 0
         },
         {
-          "class": "Nominal",
+          "class": "Hypercapnia CO2",
           "probability": 0
         },
         {
-          "class": "Hypercapnia CO2",
+          "class": "Nominal",
           "probability": 0
         }
       ],
-      "tree_path_why": "SpO2 94.4 > 87.2 + ST elevation (mV) 0.289 > 0.123 → Acute Coronary Ischemia",
+      "tree_path_why": "Resp rate 24.7 ≤ 27 + ST elevation (mV) 0.289 > 0.0985 → Acute Coronary Ischemia",
       "dont_give_list": [
         {
           "drug": "Nitroglycerin",
@@ -94,13 +94,13 @@
         "temp": 36.79
       },
       "spoken_text": "Suspected Acute Coronary Ischemia. Do not give nitroglycerin. Blood pressure is too low. Step 1: Patient Posture & High-Flow Oxygen. Step 2: ⛔ NITROGLYCERIN CONTRAINDICATED (BP < 90). Step 3: Automated External Defibrillator (AED).",
-      "model": "model_c_triage (trained_from_csv)",
+      "model": "model_c_triage (pkl)",
       "crew": "Crew_B",
       "trigger": "auto"
     },
     "state": {
       "crew": "Crew_B",
-      "t": 40.845,
+      "t": 46.442,
       "env": "surface_eva_spacesuit",
       "environment": {
         "environment_id": "surface_eva_spacesuit",
@@ -274,7 +274,7 @@
           "st_elevation",
           "hypotension"
         ],
-        "since": 40.8
+        "since": 46.4
       },
       "fall_countdown_s": null,
       "packets_received": 1,
