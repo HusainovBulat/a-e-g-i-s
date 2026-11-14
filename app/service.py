@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import time
 from collections import deque
 from dataclasses import dataclass, field
@@ -68,6 +69,9 @@ class CrewRuntime:
     last_triage: Optional[Dict[str, Any]] = None
     last_evening: Optional[Dict[str, Any]] = None
     last_summary: Optional[Dict[str, Any]] = None
+    base_vitals: Dict[str, float] = field(default_factory=lambda: {
+        "hr": 72.0, "spo2": 98.4, "smo2": 78.5, "sys": 118.0, "dia": 76.0, "resp": 14.0
+    })
 
 
 class AegisService:
@@ -83,6 +87,7 @@ class AegisService:
         self._event_seq = 0
         self._t0 = time.monotonic()
         self._routine_task: Optional[asyncio.Task] = None
+        self._ticker_task: Optional[asyncio.Task] = None
         self._routine_idx = 0
         for rt in self.crews.values():
             rt.snapshot = self.engine.compute_snapshot(rt.telemetry, self.now())
@@ -94,13 +99,37 @@ class AegisService:
     async def start(self) -> None:
         if config.ROUTINE_PROMPT_INTERVAL_S > 0:
             self._routine_task = asyncio.create_task(self._routine_loop())
+        self._ticker_task = asyncio.create_task(self._ticker_loop())
 
     async def stop(self) -> None:
-        tasks = [self._routine_task] + [t for rt in self.crews.values() for t in (rt.player_task, rt.fall_task)]
+        tasks = [self._routine_task, self._ticker_task] + [t for rt in self.crews.values() for t in (rt.player_task, rt.fall_task)]
         for t in tasks:
             if t and not t.done():
                 t.cancel()
         await asyncio.gather(*(t for t in tasks if t), return_exceptions=True)
+
+    async def _ticker_loop(self) -> None:
+        tick = 0
+        while True:
+            await asyncio.sleep(1.0)
+            tick += 1
+            now = self.now()
+            # If any console is connected, keep 1 Hz telemetry alive with smooth, non-accumulating micro-fluctuations
+            for cid, rt in self.crews.items():
+                if rt.player_task is not None and not rt.player_task.done():
+                    continue
+                sin_wave = math.sin(tick * 0.15 + (ord(cid[-1]) % 4))
+                cos_wave = math.cos(tick * 0.12)
+                base_hr = float(rt.base_vitals.get("hr", 72.0))
+                base_spo2 = float(rt.base_vitals.get("spo2", 98.4))
+                base_smo2 = float(rt.base_vitals.get("smo2", 78.5))
+                fluct_hr = round(base_hr + sin_wave * 0.8, 1)
+                fluct_spo2 = round(min(100.0, max(85.0, base_spo2 + cos_wave * 0.15)), 1)
+                fluct_smo2 = round(max(20.0, min(100.0, base_smo2 + sin_wave * 0.25)), 1)
+                self.engine.ingest(rt.telemetry, {"hr": fluct_hr, "spo2": fluct_spo2, "smo2": fluct_smo2}, now)
+                rt.snapshot = self.engine.compute_snapshot(rt.telemetry, now, rt.last_evening)
+                if self.hub.count > 0:
+                    await self._broadcast_state(cid)
 
     async def _routine_loop(self) -> None:
         while True:
@@ -245,6 +274,9 @@ class AegisService:
             sticky = True  # live phone slider on top of a playing scenario -> keep as override
         if sticky:
             rt.overrides.update({k: v for k, v in values.items() if k != "distance_m"})
+        for k in ("hr", "spo2", "smo2", "sys", "dia", "resp"):
+            if k in values and values[k] is not None:
+                rt.base_vitals[k] = float(values[k])
         prev_fall = bool(rt.telemetry.packet.get("fall"))
         merged = {**values, **rt.overrides} if source.startswith("scenario") else values
         t = self.now()
@@ -397,6 +429,14 @@ class AegisService:
             rt.last_auto_triage = -1e9
             rt.last_triage = None
             rt.source = "idle"
+            rt.base_vitals = {
+                "hr": float(DEFAULT_PACKET.get("hr", 72)),
+                "spo2": float(DEFAULT_PACKET.get("spo2", 98.4)),
+                "smo2": float(DEFAULT_PACKET.get("smo2", 78.5)),
+                "sys": float(DEFAULT_PACKET.get("sys", 118)),
+                "dia": float(DEFAULT_PACKET.get("dia", 76)),
+                "resp": float(DEFAULT_PACKET.get("resp", 14)),
+            }
             self.engine.ingest(rt.telemetry, {**baseline, "env": DEFAULT_PACKET["env"]}, self.now())
             rt.snapshot = self.engine.compute_snapshot(rt.telemetry, self.now(), rt.last_evening)
         await self.add_event("reset", "Reset all — nominal baseline restored for all crew")
@@ -461,9 +501,10 @@ class AegisService:
     async def summary(self, req: Dict[str, Any]) -> Dict[str, Any]:
         evening = req.get("evening")
         if evening:
-            crew = normalize_crew(evening.get("crew_id") or evening.get("crew") or req.get("crew"))
+            raw_cid = evening.get("crew_id") or evening.get("crew") or req.get("crew") or "Crew_A"
+            crew = normalize_crew(raw_cid)
         else:
-            crew = normalize_crew(req.get("crew", "Crew_A"))
+            crew = normalize_crew(req.get("crew") or "Crew_A")
             evening = self.crews[crew].last_evening or await self.evening(self.default_evening_request(crew))
 
         payload = dict(evening)

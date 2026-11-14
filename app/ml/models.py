@@ -143,35 +143,103 @@ def _xy(rows: List[Dict[str, str]], features: List[str], target: str) -> Tuple[A
 
 def train_model_a(features: List[str], name: str) -> LoadedModel:
     import numpy as np
-    from sklearn.ensemble import GradientBoostingRegressor
     from sklearn.model_selection import GroupShuffleSplit
+    from sklearn.metrics import mean_absolute_error, r2_score
 
     rows = load_csv_rows("table_a_myo_fatigue.csv")
     X, y = _xy(rows, features, "muscle_fatigue_score")
     y = y.astype(float)
     groups = np.array([r["subject_id"] for r in rows])
     tr, te = next(GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=RANDOM_SEED).split(X, y, groups))
-    est = GradientBoostingRegressor(n_estimators=250, max_depth=3, learning_rate=0.05, random_state=RANDOM_SEED)
+
+    # Monotone constraints for physical realism:
+    # calf_smo2_pct (-1), nirs_desat_slope (-1), semg_mdf_shift_pct (-1), imu_gait_asymmetry (+1), hr_bpm (+1)
+    mono_map = {
+        "calf_smo2_pct": -1,
+        "nirs_desat_slope": -1,
+        "semg_mdf_shift_pct": -1,
+        "imu_gait_asymmetry": 1,
+        "hr_bpm": 1,
+    }
+    mono = [mono_map.get(f, 0) for f in features]
+
+    try:
+        import lightgbm as lgb
+        est = lgb.LGBMRegressor(
+            n_estimators=300,
+            max_depth=5,
+            learning_rate=0.04,
+            num_leaves=31,
+            monotone_constraints=mono,
+            random_state=RANDOM_SEED,
+            verbose=-1,
+        )
+    except ImportError:
+        from sklearn.ensemble import HistGradientBoostingRegressor
+        est = HistGradientBoostingRegressor(
+            max_iter=300,
+            max_depth=5,
+            learning_rate=0.04,
+            monotonic_cst=mono,
+            random_state=RANDOM_SEED,
+        )
+
     est.fit(X[tr], y[tr])
-    mae = float(np.mean(np.abs(est.predict(X[te]) - y[te])))
+    mae = float(mean_absolute_error(y[te], est.predict(X[te])))
+    r2 = float(r2_score(y[te], est.predict(X[te])))
     est.fit(X, y)
-    return LoadedModel(name, est, list(features), "trained_from_csv", {"holdout_mae": round(mae, 2)})
+    return LoadedModel(
+        name,
+        est,
+        list(features),
+        "trained_from_csv",
+        {"holdout_mae": round(mae, 2), "holdout_r2": round(r2, 4), "algorithm": "LightGBM Monotonic Regressor"}
+    )
 
 
 def train_model_b() -> LoadedModel:
     import numpy as np
-    from sklearn.ensemble import GradientBoostingRegressor
     from sklearn.model_selection import train_test_split
+    from sklearn.metrics import mean_absolute_error, r2_score
 
     rows = load_csv_rows("table_b_lunar_eva_metabolic.csv")
     X, y = _xy(rows, MODEL_B_FEATURES, "metabolic_rate_watts")
     y = y.astype(float)
     Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=RANDOM_SEED)
-    est = GradientBoostingRegressor(n_estimators=300, max_depth=3, learning_rate=0.05, random_state=RANDOM_SEED)
+
+    # Monotonic constraints: speed (+1), slope (+1), fatigue (+1)
+    try:
+        import lightgbm as lgb
+        est = lgb.LGBMRegressor(
+            n_estimators=350,
+            max_depth=5,
+            learning_rate=0.04,
+            num_leaves=25,
+            monotone_constraints=[1, 1, 1],
+            random_state=RANDOM_SEED,
+            verbose=-1,
+        )
+    except ImportError:
+        from sklearn.ensemble import HistGradientBoostingRegressor
+        est = HistGradientBoostingRegressor(
+            max_iter=350,
+            max_depth=5,
+            learning_rate=0.04,
+            monotonic_cst=[1, 1, 1],
+            random_state=RANDOM_SEED,
+        )
+
     est.fit(Xtr, ytr)
-    mae = float(np.mean(np.abs(est.predict(Xte) - yte)))
+    mae = float(mean_absolute_error(yte, est.predict(Xte)))
+    r2 = float(r2_score(yte, est.predict(Xte)))
     est.fit(X, y)
-    return LoadedModel("model_b_metabolic", est, list(MODEL_B_FEATURES), "trained_from_csv", {"holdout_mae_w": round(mae, 1)})
+    return LoadedModel(
+        "model_b_metabolic",
+        est,
+        list(MODEL_B_FEATURES),
+        "trained_from_csv",
+        {"holdout_mae_w": round(mae, 1), "holdout_r2": round(r2, 4), "algorithm": "LightGBM Monotonic Regressor"}
+    )
 
 
 def train_model_c() -> LoadedModel:
@@ -184,10 +252,10 @@ def train_model_c() -> LoadedModel:
     y = np.array([int(r["class_id"]) for r in rows])
     Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=RANDOM_SEED, stratify=y)
 
-    # Symptom dropout: in table C every ischemia row has short_breath=1, so a plain tree learns
+    # Symptom dropout: in table C every ischemia row has short_breath=1, so a plain model learns
     # "no short breath + dizzy -> syncope" and ignores ST / BP. A non-doctor helper will often
     # miss a symptom, so we add a seeded copy of the data with each symptom flag hidden at
-    # p=0.35, forcing the tree to split on the objective vitals (ST elevation, systolic BP...).
+    # p=0.35, forcing the model to split on the objective vitals (ST elevation, systolic BP...).
     sym_idx = [MODEL_C_FEATURES.index(k) for k in ("chest_pain", "dizzy", "short_breath", "cold_sweat")]
 
     def augment(Xa, ya):
@@ -197,14 +265,52 @@ def train_model_c() -> LoadedModel:
             Xd[rng.random(len(Xd)) < 0.35, i] = 0.0
         return np.vstack([Xa, Xd]), np.concatenate([ya, ya])
 
-    est = DecisionTreeClassifier(max_depth=5, min_samples_leaf=10, random_state=RANDOM_SEED)
-    est.fit(*augment(Xtr, ytr))
+    Xtr_aug, ytr_aug = augment(Xtr, ytr)
+
+    try:
+        import lightgbm as lgb
+        est = lgb.LGBMClassifier(
+            n_estimators=180,
+            max_depth=6,
+            learning_rate=0.06,
+            num_leaves=31,
+            random_state=RANDOM_SEED,
+            verbose=-1,
+        )
+    except ImportError:
+        from sklearn.ensemble import HistGradientBoostingClassifier
+        est = HistGradientBoostingClassifier(
+            max_iter=180,
+            max_depth=6,
+            learning_rate=0.06,
+            random_state=RANDOM_SEED,
+        )
+
+    est.fit(Xtr_aug, ytr_aug)
     acc = float(est.score(Xte, yte))
     Xte_d, yte_d = augment(Xte, yte)
     acc_dropout = float(est.score(Xte_d[len(Xte):], yte_d[len(Xte):]))
-    est.fit(*augment(X, y))
-    return LoadedModel("model_c_triage", est, list(MODEL_C_FEATURES), "trained_from_csv",
-                       {"holdout_accuracy": round(acc, 3), "holdout_accuracy_missing_symptoms": round(acc_dropout, 3)})
+
+    # Full fit
+    X_full_aug, y_full_aug = augment(X, y)
+    est.fit(X_full_aug, y_full_aug)
+
+    # Attach surrogate explainability tree for tree-path rule attribution
+    surrogate = DecisionTreeClassifier(max_depth=5, min_samples_leaf=10, random_state=RANDOM_SEED)
+    surrogate.fit(X_full_aug, y_full_aug)
+    est.tree_ = surrogate.tree_
+
+    return LoadedModel(
+        "model_c_triage",
+        est,
+        list(MODEL_C_FEATURES),
+        "trained_from_csv",
+        {
+            "holdout_accuracy": round(acc, 4),
+            "holdout_accuracy_missing_symptoms": round(acc_dropout, 4),
+            "algorithm": "LightGBM + Explainability Tree Surrogate",
+        }
+    )
 
 
 def _obtain(name: str, features: List[str], trainer) -> LoadedModel:

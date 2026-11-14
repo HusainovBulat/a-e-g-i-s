@@ -65,6 +65,7 @@ def create_app() -> FastAPI:
         return {"name": "A.E.G.I.S. Base Server", "docs": "/docs", "health": "/health"}
 
     app.include_router(router)
+    app.include_router(router, prefix="/api")
     return app
 
 

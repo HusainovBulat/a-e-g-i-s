@@ -46,8 +46,25 @@ if not exist ".venv" python -m venv .venv
 call .venv\Scripts\activate.bat
 pip install -q -r requirements.txt || goto :fail
 call :urls
-start "" http://localhost:8000/docs
-python run.py
+
+echo Starting A.E.G.I.S. Backend (port 8000)...
+start "A.E.G.I.S. Backend (FastAPI)" cmd /c "cd /d "%~dp0" && .venv\Scripts\python.exe run.py"
+
+echo Starting A.E.G.I.S. Web Console (port 3000)...
+start "A.E.G.I.S. Frontend (Next.js)" cmd /c "cd /d "%~dp0\frontend" && npm run dev"
+
+echo Waiting for services to initialize...
+ping -n 4 127.0.0.1 >nul
+
+start "" http://localhost:3000
+echo.
+echo ========================================================
+echo  A.E.G.I.S. Mission Control is running!
+echo  Web Console: http://localhost:3000
+echo  FastAPI Docs: http://localhost:8000/docs
+echo  To stop all services: run stop.bat
+echo ========================================================
+pause
 exit /b 0
 
 :urls

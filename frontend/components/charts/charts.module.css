@@ -1,0 +1,9 @@
+.sparkline { display: block; width: 100%; height: 34px; overflow: visible; }
+.chart { min-width: 0; }
+.chart > svg { display: block; width: 100%; height: 170px; overflow: visible; }
+.gridLine { stroke: var(--line-dim); stroke-width: 1; stroke-dasharray: 2 5; vector-effect: non-scaling-stroke; }
+.chartLabels { display: flex; justify-content: space-between; margin-top: 5px; color: var(--text-dim); font: 9px var(--font-mono); letter-spacing: .06em; }
+.elevation { display: block; width: 100%; min-height: 160px; }
+.turnaroundLine { stroke: var(--amber); stroke-width: 1.3; stroke-dasharray: 4 5; vector-effect: non-scaling-stroke; }
+.positionLine { stroke: var(--green); stroke-width: 1.2; stroke-dasharray: 2 4; vector-effect: non-scaling-stroke; }
+.annotation { fill: var(--text-secondary); font: 8px var(--font-mono); letter-spacing: 1px; }

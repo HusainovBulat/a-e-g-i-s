@@ -150,6 +150,27 @@ async def route(request: Request) -> Dict[str, Any]:
             "points": pts}
 
 
+@router.get("/route-profile", tags=["data"])
+async def route_profile(request: Request) -> Any:
+    return svc(request).store.route_profile
+
+
+@router.get("/pairing", tags=["meta"])
+async def pairing(request: Request, crew: str = Query("A")) -> Dict[str, Any]:
+    cid = normalize_crew(crew)
+    letter = cid.replace("Crew_", "")
+    hosts = _lan_ips()
+    scheme = request.url.scheme
+    port = 3000
+    host = hosts[0] if hosts else "localhost"
+    url = f"{scheme}://{host}:{port}/phone?crew={letter}"
+    return {
+        "crew": letter,
+        "url": url,
+        "lan_ips": hosts,
+    }
+
+
 @router.get("/thresholds", tags=["data"])
 async def thresholds(request: Request) -> Dict[str, Any]:
     return svc(request).store.thresholds

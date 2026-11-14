@@ -1,0 +1,9 @@
+.phonePage { display: grid; min-height: 100vh; align-content: center; gap: 20px; width: min(100% - 32px, 620px); margin: auto; padding: 28px 0; }
+.phoneBrand { display: flex; align-items: center; gap: 12px; }
+.phoneBrand strong { display: block; color: var(--text-primary); font: 700 15px var(--font-mono); letter-spacing: .12em; }
+.phoneBrand span:last-child { display: block; margin-top: 4px; color: var(--text-dim); font: 8px var(--font-mono); letter-spacing: .12em; }
+.brandMark { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--blue-bright); color: #b6d2ff; font: 700 20px var(--font-mono); }
+.intro { margin: 0 0 20px; color: var(--text-secondary); font-size: 12px; line-height: 1.7; }
+.statusLine { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line-dim); color: var(--text-dim); font: 9px var(--font-mono); letter-spacing: .08em; }
+.statusLine strong { color: #b9c9dc; font-weight: 500; text-align: right; }
+.notice { margin-top: 14px; padding: 10px; border-left: 2px solid var(--amber); background: rgba(245,179,1,.06); color: #aaa17e; font: 8px var(--font-mono); letter-spacing: .06em; }

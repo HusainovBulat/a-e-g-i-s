@@ -504,6 +504,7 @@ def detect_masking(
 
     return {
         "masking_detected": bool(masking_detected),
+        "mismatch_detected": bool(masking_detected),
         "delta": round(delta, 1),
         "subjective_score": round(subjective_score, 1),
         "subjective_mean_slider": round(subjective_mean_slider, 2),

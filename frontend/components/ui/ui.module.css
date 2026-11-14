@@ -1,0 +1,66 @@
+.panel {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: linear-gradient(145deg, rgba(14, 21, 31, .96), rgba(8, 13, 20, .96));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+.panel::before, .panel::after { position: absolute; z-index: 1; width: 10px; height: 10px; content: ''; pointer-events: none; }
+.panel::before { top: -1px; left: -1px; border-top: 2px solid var(--blue-bright); border-left: 2px solid var(--blue-bright); }
+.panel::after { right: -1px; bottom: -1px; border-right: 2px solid var(--blue-bright); border-bottom: 2px solid var(--blue-bright); }
+.panelHeader { display: flex; min-height: 54px; align-items: center; justify-content: space-between; gap: 16px; padding: 11px 16px; border-bottom: 1px solid var(--line-dim); }
+.panelEyebrow { display: block; margin-bottom: 4px; color: var(--text-dim); font: 600 9px/1.2 var(--font-mono); letter-spacing: .15em; text-transform: uppercase; }
+.panelTitle { color: var(--text-primary); font-size: 13px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+.panelBody { padding: 16px; }
+.panelAction { flex: 0 0 auto; }
+.button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 9px; padding: 0 14px; border: 1px solid transparent; color: var(--text-primary); font: 650 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease; }
+.button:hover { transform: translateY(-1px); }
+.button:active { transform: translateY(0); }
+.button:disabled { opacity: .48; cursor: not-allowed; transform: none; }
+.button_primary { background: var(--blue); border-color: var(--blue-bright); }
+.button_primary:hover { background: var(--blue-bright); }
+.button_secondary { background: #101923; border-color: var(--line); }
+.button_secondary:hover { border-color: var(--blue-bright); background: #152337; }
+.button_danger { background: rgba(252,61,33,.12); border-color: rgba(252,61,33,.62); color: #ff806b; }
+.button_danger:hover { background: rgba(252,61,33,.22); }
+.button_ghost { background: transparent; border-color: transparent; color: var(--text-secondary); }
+.button_ghost:hover { background: var(--panel-raised); color: var(--text-primary); }
+.badge { display: inline-flex; min-height: 23px; align-items: center; gap: 7px; padding: 3px 7px; border: 1px solid currentColor; font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.badge_green { color: var(--green); background: rgba(46,204,113,.08); }
+.badge_amber { color: var(--amber); background: rgba(245,179,1,.08); }
+.badge_red { color: var(--red); background: rgba(252,61,33,.09); }
+.badge_blue { color: #84b2ff; background: rgba(76,141,255,.08); }
+.badge_neutral { color: var(--text-secondary); background: rgba(124,142,163,.06); }
+.badgeDot { width: 5px; height: 5px; background: currentColor; box-shadow: 0 0 8px currentColor; }
+.segmentWrap { width: 100%; }
+.segmentTrack { display: grid; grid-template-columns: repeat(20, minmax(2px, 1fr)); gap: 2px; height: 7px; }
+.segmentTrack > span { background: #25313d; }
+.segment_green .segmentActive { background: var(--green); }
+.segment_amber .segmentActive { background: var(--amber); }
+.segment_red .segmentActive { background: var(--red); }
+.segment_blue .segmentActive { background: var(--blue-bright); }
+.segment_neutral .segmentActive { background: var(--text-secondary); }
+.segmented { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; border: 1px solid var(--line); background: var(--bg-deep); }
+.segmentedOption { min-height: 34px; padding: 0 12px; border: 1px solid transparent; background: transparent; color: var(--text-secondary); font: 600 10px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.segmentedOption:hover { color: var(--text-primary); }
+.segmentedActive { border-color: #31568e; background: #10213b; color: #a7c8ff; }
+.slider { display: grid; gap: 7px; color: var(--text-secondary); font-size: 11px; }
+.sliderMeta, .sliderTicks { display: flex; justify-content: space-between; align-items: center; }
+.sliderMeta strong { color: var(--text-primary); font: 600 12px var(--font-mono); }
+.slider input { width: 100%; accent-color: var(--blue-bright); cursor: pointer; }
+.sliderTicks { color: var(--text-dim); font: 9px var(--font-mono); }
+.toggleRow { display: flex; width: 100%; min-height: 44px; align-items: center; justify-content: space-between; gap: 12px; border: 0; border-bottom: 1px solid var(--line-dim); background: transparent; color: var(--text-secondary); text-align: left; font-size: 11px; cursor: pointer; }
+.toggleTrack { position: relative; width: 34px; height: 18px; border: 1px solid #536174; background: #121b25; transition: border-color .18s, background .18s; }
+.toggleTrack b { position: absolute; top: 3px; left: 3px; width: 10px; height: 10px; background: #8794a2; transition: transform .18s, background .18s; }
+.toggleOn { border-color: var(--blue-bright); background: #163d77; }
+.toggleOn b { background: #dceaff; transform: translateX(16px); }
+.modalScrim { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(1,4,8,.78); backdrop-filter: blur(7px); animation: scrimIn .16s ease both; }
+.modal { width: min(100%, 520px); max-height: min(82vh, 760px); overflow: auto; border: 1px solid #31425a; background: #0a111a; box-shadow: 0 28px 90px rgba(0,0,0,.62); }
+.modalHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+.modalHeader h2 { color: var(--text-primary); font-size: 16px; letter-spacing: .02em; }
+.modalBody { padding: 20px; color: var(--text-secondary); }
+.iconButton { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border: 1px solid var(--line); background: transparent; color: var(--text-secondary); cursor: pointer; }
+.iconButton:hover { border-color: var(--blue-bright); color: var(--text-primary); }
+.iconButton:focus-visible, .button:focus-visible, .segmentedOption:focus-visible, .toggleRow:focus-visible { outline: 2px solid #9fc2ff; outline-offset: 3px; }
+@keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .button, .toggleTrack, .toggleTrack b { transition-duration: .01ms; } .modalScrim { animation-duration: .01ms; } }

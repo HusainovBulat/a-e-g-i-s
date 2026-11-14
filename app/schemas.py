@@ -35,6 +35,23 @@ class TriageRequest(BaseModel):
     ultrasound_attached: bool = False
     readiness: Optional[float] = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def _adapt_symptoms(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            symptoms = data.get("symptoms")
+            if isinstance(symptoms, (list, tuple)):
+                flags = dict(data.get("symptom_flags") or {})
+                flags.setdefault("chest_pain", "chest_pain" in symptoms)
+                flags.setdefault("dizzy", "dizziness" in symptoms or "dizzy" in symptoms)
+                flags.setdefault("short_breath", "shortness_of_breath" in symptoms or "short_breath" in symptoms)
+                flags.setdefault("cold_sweat", "cold_sweat" in symptoms)
+                flags.setdefault("fall_event", "fall" in symptoms or "fall_event" in symptoms)
+                data["symptom_flags"] = flags
+            if "text" in data and "transcript" not in data:
+                data["transcript"] = data["text"]
+        return data
+
 
 class EveningRequest(BaseModel):
     crew: str = "Crew_A"
@@ -49,6 +66,21 @@ class EveningRequest(BaseModel):
     bp_dia: Optional[float] = Field(None, ge=20, le=180)
     temp: Optional[float] = Field(None, ge=30, le=44)
     completed_quests: List[str] = Field(default_factory=list, description="hydration | compression | breathing")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _flatten_answers(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            answers = data.get("answers")
+            if isinstance(answers, dict):
+                for k in ("sleep", "energy", "mood", "pain_free", "nutrition"):
+                    if k in answers and k not in data:
+                        data[k] = answers[k]
+            if "quest_ids" in data and "completed_quests" not in data:
+                data["completed_quests"] = data["quest_ids"]
+            if "body_temp_c" in data and "temp" not in data:
+                data["temp"] = data["body_temp_c"]
+        return data
 
     @model_validator(mode="after")
     def _split_bp(self) -> "EveningRequest":

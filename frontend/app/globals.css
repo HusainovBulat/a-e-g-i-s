@@ -1,0 +1,41 @@
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/dm-mono/400.css';
+@import '@fontsource/dm-mono/500.css';
+
+:root {
+  color-scheme: dark;
+  --bg: #05070b;
+  --bg-deep: #030509;
+  --panel: #0b1018;
+  --panel-raised: #111a25;
+  --line: #1e2a3a;
+  --line-dim: #182332;
+  --blue: #0b3d91;
+  --blue-bright: #4c8dff;
+  --red: #fc3d21;
+  --amber: #f5b301;
+  --green: #2ecc71;
+  --text-primary: #edf3fa;
+  --text-secondary: #a7b3c2;
+  --text-dim: #728095;
+  --font-sans: 'Inter', Arial, sans-serif;
+  --font-mono: 'DM Mono', Consolas, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; border-radius: 0 !important; }
+html { min-width: 360px; min-height: 100%; background: var(--bg); scroll-behavior: smooth; }
+body { min-width: 360px; min-height: 100vh; margin: 0; overflow-x: hidden; background: var(--bg); color: var(--text-primary); font-family: var(--font-sans); font-size: 13px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; }
+button { color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #9fc2ff; outline-offset: 3px; }
+::selection { background: rgba(76,141,255,.35); color: #fff; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #070b11; }
+::-webkit-scrollbar-thumb { background: #25364a; border: 2px solid #070b11; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
