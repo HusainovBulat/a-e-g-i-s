@@ -50,6 +50,20 @@ describe('PhoneSimulator', () => {
     expect(String(sensorCalls(calls).find(c => c.body.scenario === 'chest_pain')!.body.crew)).toMatch(/C$/);
   });
 
+  it('phone tilt drives CRATER SLOPE without flickering back to a default', async () => {
+    const { calls } = setup();
+    fireEvent.click(await screen.findByText(/ENABLE SMARTPHONE MOTION SENSORS/));
+    await screen.findByText(/ACCELEROMETER & GYRO ACTIVE/);
+    const tilt = (beta: number) => { const e = new Event('deviceorientation') as any; e.beta = beta; e.gamma = 0; window.dispatchEvent(e); };
+    const shakeFree = () => { const e = new Event('devicemotion') as any; e.accelerationIncludingGravity = { x: 0, y: 9.8, z: 0 }; window.dispatchEvent(e); };
+    // Real phones interleave gyroscope and accelerometer events many times per second
+    for (let i = 0; i < 5; i++) { tilt(45); shakeFree(); }
+    await waitFor(() => expect((screen.getByLabelText(/CRATER SLOPE/) as HTMLInputElement).value).toBe('22'));
+    const tiltPackets = sensorCalls(calls).filter(c => c.body.slope !== undefined && c.body.hr === undefined);
+    expect(tiltPackets.length).toBeGreaterThan(0);
+    expect(tiltPackets.every(c => c.body.slope === 22)).toBe(true);
+  });
+
   it('an explicit slider change during a scenario is still sent (live override)', async () => {
     const { calls } = setup();
     fireEvent.click(await screen.findByText('Acute Chest Pain (Suspected Ischemia)'));

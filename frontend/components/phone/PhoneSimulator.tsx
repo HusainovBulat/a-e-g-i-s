@@ -192,22 +192,36 @@ export function PhoneSimulator() {
     setMotionActive(true);
   };
 
+  // The subscription must survive state changes: re-subscribing on every slope update reset the
+  // tilt to a default and made CRATER SLOPE flicker. Latest values are read through refs instead.
   const lastSentSlope = useRef<number | null>(null);
+  const lastSlopeSentAt = useRef(0);
+  const sendTelemetryRef = useRef(sendTelemetry);
+  sendTelemetryRef.current = sendTelemetry;
+  const crewRef = useRef(crew);
+  crewRef.current = crew;
   useEffect(() => {
     if (!motionActive) return;
     const cleanup = subscribeMotion(data => {
       if (data.slopeAngle !== undefined && data.slopeAngle !== lastSentSlope.current) {
         lastSentSlope.current = data.slopeAngle;
         setSlope(data.slopeAngle);
-        void aegisApi.sendSensors({ crew, slope: data.slopeAngle }).catch(() => setStatusMessage('UPLINK DISCONNECTED'));
+        // At most ~4 tilt packets/s; the 1 Hz uplink carries the latest slope anyway.
+        const now = Date.now();
+        if (now - lastSlopeSentAt.current >= 250) {
+          lastSlopeSentAt.current = now;
+          void aegisApi
+            .sendSensors({ crew: crewRef.current, slope: data.slopeAngle })
+            .catch(() => setStatusMessage('UPLINK DISCONNECTED'));
+        }
       }
       if (data.shakeDetected) {
         setFall(true);
-        void sendTelemetry({ fall: true });
+        void sendTelemetryRef.current({ fall: true });
       }
     });
     return cleanup;
-  }, [motionActive, sendTelemetry, crew]);
+  }, [motionActive]);
 
   return (
     <div className={styles.phonePage}>

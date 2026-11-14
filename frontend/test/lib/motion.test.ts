@@ -90,3 +90,36 @@ describe('requestMotionPermission', () => {
     await expect(requestMotionPermission()).resolves.toBe(false);
   });
 });
+
+describe('subscribeMotion before the gyroscope reports', () => {
+  it('does not invent a slope from accelerometer-only updates', () => {
+    const updates: MotionData[] = [];
+    const unsubscribe = subscribeMotion(d => updates.push(d));
+    const event = new Event('devicemotion') as any;
+    event.accelerationIncludingGravity = { x: 0, y: 9.8, z: 0 };
+    window.dispatchEvent(event);
+    unsubscribe();
+    expect(updates).toHaveLength(1);
+    expect(updates[0].slopeAngle).toBeUndefined();
+  });
+});
+
+describe('requestMotionPermission on iOS asks for orientation too', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('denied orientation -> no tilt -> false', async () => {
+    vi.stubGlobal('DeviceMotionEvent', { requestPermission: vi.fn().mockResolvedValue('granted') });
+    vi.stubGlobal('DeviceOrientationEvent', { requestPermission: vi.fn().mockResolvedValue('denied') });
+    await expect(requestMotionPermission()).resolves.toBe(false);
+  });
+
+  it('requests both prompts in the same tap', async () => {
+    const m = vi.fn().mockResolvedValue('granted');
+    const o = vi.fn().mockResolvedValue('granted');
+    vi.stubGlobal('DeviceMotionEvent', { requestPermission: m });
+    vi.stubGlobal('DeviceOrientationEvent', { requestPermission: o });
+    await expect(requestMotionPermission()).resolves.toBe(true);
+    expect(m).toHaveBeenCalledOnce();
+    expect(o).toHaveBeenCalledOnce();
+  });
+});

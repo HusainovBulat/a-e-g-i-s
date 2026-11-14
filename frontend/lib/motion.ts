@@ -2,7 +2,8 @@
 
 export interface MotionData {
   shakeDetected: boolean;
-  slopeAngle: number;
+  /** Crater slope from the phone tilt; undefined until the first orientation event arrives */
+  slopeAngle?: number;
   gamma: number;
   beta: number;
 }
@@ -10,14 +11,25 @@ export interface MotionData {
 export async function requestMotionPermission(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
 
-  const DeviceMotionEventWithPermission = DeviceMotionEvent as unknown as {
-    requestPermission?: () => Promise<'granted' | 'denied'>;
-  };
+  type WithPermission = { requestPermission?: () => Promise<'granted' | 'denied'> };
+  const motion = (typeof DeviceMotionEvent !== 'undefined' ? DeviceMotionEvent : undefined) as unknown as
+    | WithPermission
+    | undefined;
+  const orientation = (typeof DeviceOrientationEvent !== 'undefined' ? DeviceOrientationEvent : undefined) as unknown as
+    | WithPermission
+    | undefined;
 
-  if (typeof DeviceMotionEventWithPermission.requestPermission === 'function') {
+  if (typeof motion?.requestPermission === 'function') {
     try {
-      const response = await DeviceMotionEventWithPermission.requestPermission();
-      return response === 'granted';
+      // iOS 13+: tilt (slope) comes from DeviceOrientation, shake (fall) from DeviceMotion.
+      // Both prompts must start inside the same tap, so they are requested together.
+      const [m, o] = await Promise.all([
+        motion.requestPermission(),
+        typeof orientation?.requestPermission === 'function'
+          ? orientation.requestPermission().catch(() => 'granted' as const)
+          : Promise.resolve('granted' as const),
+      ]);
+      return m === 'granted' && o === 'granted';
     } catch {
       return false;
     }
@@ -35,7 +47,7 @@ export function subscribeMotion(
   let lastY = 0;
   let lastZ = 0;
   let lastTime = 0;
-  let currentSlope = 4;
+  let currentSlope: number | undefined; // unknown until the gyroscope reports (was a fake 4°)
   let currentGamma = 0;
   let currentBeta = 0;
 
