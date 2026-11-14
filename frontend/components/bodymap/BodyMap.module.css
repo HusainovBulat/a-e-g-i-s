@@ -30,28 +30,28 @@
 .hotspot > span { color: #8193aa; }
 .hotspot > strong { font-weight: 500; }
 .hotspot > b { margin-left: 2px; color: var(--zone-color); font-weight: 500; }
-.organCard { position: absolute; z-index: 5; top: 48px; right: 12px; bottom: 48px; display: flex; width: min(350px, 46%); flex-direction: column; overflow-y: auto; border: 1px solid #345477; background: rgba(7,14,23,.96); box-shadow: 0 16px 48px rgba(0,0,0,.4), inset 0 0 24px rgba(44,100,168,.08); backdrop-filter: blur(14px); }
-.organCardHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 16px 15px 12px; border-bottom: 1px solid var(--line); }
-.kicker { color: #79a8e7; font: 8px var(--font-mono); letter-spacing: .15em; }
-.organCardHead h3 { margin: 6px 0 0; color: #edf4ff; font-size: 15px; font-weight: 500; line-height: 1.25; }
-.closeButton { width: 32px; height: 32px; flex: 0 0 auto; border: 1px solid #31445a; background: transparent; color: #aab8ca; font: 22px/1 var(--font-sans); cursor: pointer; }
-.closeButton:hover { border-color: #4c8dff; color: #fff; }
-.organScore { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 15px; border-bottom: 1px solid var(--line-dim); }
-.organScore > div { display: grid; gap: 2px; }
-.organScore > div span, .readout > span { color: #78899e; font: 7px var(--font-mono); letter-spacing: .12em; }
-.organScore > div strong { color: #f0f5fb; font: 24px/1.1 var(--font-mono); }
-.organScore > div small { color: #7d8ca0; font-size: 9px; }
-.organSection { padding: 11px 15px; border-bottom: 1px solid var(--line-dim); }
-.organSection:last-child { border-bottom: 0; }
-.organSection h4 { margin: 0 0 7px; color: #80a6d8; font: 8px var(--font-mono); letter-spacing: .13em; }
-.organSection p { margin: 0; color: #b5c1d0; font-size: 10px; line-height: 1.55; }
-.readoutGrid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px; }
-.readout { min-width: 0; padding: 7px; border: 1px solid #1d2b3c; background: rgba(14,24,36,.68); }
-.readout > span { display: block; font-size: 6px; }
-.readout > strong { display: block; margin-top: 4px; overflow-wrap: anywhere; color: #e4edf8; font: 10px var(--font-mono); }
-.hazardList { display: grid; gap: 6px; }
-.hazardList > span { display: flex; align-items: center; gap: 7px; color: #aab8c8; font-size: 9px; }
-.hazardList i { color: #6f8db4; font: 8px var(--font-mono); font-style: normal; }
+
+.organModal { width: min(100%, 620px); }
+.modalContent { display: flex; flex-direction: column; gap: 14px; }
+.modalScoreHeader { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(14, 25, 39, 0.7); border: 1px solid #23374d; border-radius: 4px; }
+.modalScoreKicker { display: block; font: 9px var(--font-mono); color: var(--text-dim); letter-spacing: 0.12em; }
+.modalScoreValue { margin-top: 3px; font: 24px/1 var(--font-mono); color: #f0f6ff; }
+.modalScoreValue small { font-size: 12px; color: #7d8da2; }
+.modalSection { padding: 13px 15px; background: rgba(8, 15, 24, 0.6); border: 1px solid var(--line-dim); border-radius: 4px; }
+.modalSection h4 { margin: 0 0 7px; color: #79a8e7; font: 9px var(--font-mono); letter-spacing: 0.14em; }
+.modalSection p { margin: 0; color: #d1dce8; font-size: 12px; line-height: 1.6; }
+.modalMeasureDesc { margin-bottom: 10px !important; }
+.modalReadoutGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.modalReadoutItem { padding: 8px 10px; background: rgba(16, 28, 43, 0.8); border: 1px solid #283e58; border-radius: 3px; }
+.modalReadoutItem span { display: block; font: 8px var(--font-mono); color: #8397ad; letter-spacing: 0.08em; }
+.modalReadoutItem strong { display: block; margin-top: 3px; font: 12px var(--font-mono); color: #f1f7ff; }
+.modalSectionDanger { padding: 13px 15px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 4px; }
+.modalSectionDanger h4 { margin: 0 0 7px; color: #fca5a5; font: 9px var(--font-mono); letter-spacing: 0.14em; }
+.modalSectionDanger p { margin: 0; color: #fde8e8; font-size: 12px; line-height: 1.6; }
+.modalHazards { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
+.modalHazardTag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; background: rgba(22, 36, 54, 0.7); border: 1px solid #2c4463; border-radius: 3px; color: #b9d2f2; font-size: 11px; }
+.modalHazardTag i { color: #6d90bc; font: 9px var(--font-mono); font-style: normal; }
+
 .systemList { display: grid; }
 .systemRow { display: grid; width: 100%; grid-template-columns: 27px minmax(0,1fr) 36px; align-items: center; gap: 8px; padding: 13px 0; border: 0; border-bottom: 1px solid var(--line-dim); background: transparent; text-align: left; cursor: pointer; transition: background .18s ease; }
 .systemRow:last-child { border-bottom: 0; }
@@ -77,6 +77,6 @@
 @keyframes loaderSpin { to { transform: rotate(360deg); } }
 @keyframes fallbackPing { 0% { opacity: .7; transform: scale(.65); } 80%, 100% { opacity: 0; transform: scale(1.6); } }
 @media (max-width: 1080px) { .bodyMapGrid { grid-template-columns: minmax(0,1fr) minmax(280px,.78fr); } .sceneStage { height: 520px; } .hotspot { gap: 3px; padding-right: 4px; padding-left: 4px; font-size: 6px; } }
-@media (max-width: 760px) { .bodyMapGrid { grid-template-columns: 1fr; } .scenePanel { min-height: 430px; } .sceneStage { min-height: 400px; height: 470px; } .organCard { width: min(340px, 58%); } .systemRow { grid-template-columns: 28px minmax(0,1fr) 42px; } }
-@media (max-width: 480px) { .sceneStage { min-height: 350px; height: 400px; } .sceneHudTop { font-size: 6px; } .sceneHudTop span:last-child { max-width: 96px; text-align: right; } .hotspot { min-height: 24px; gap: 3px; font-size: 6px; } .hotspot strong { max-width: 76px; overflow: hidden; text-overflow: ellipsis; } .organCard { top: 42px; right: 7px; bottom: 42px; width: min(320px, 72%); } .organCardHead { padding: 12px 10px 9px; } .organCardHead h3 { font-size: 12px; } .organScore, .organSection { padding-right: 10px; padding-left: 10px; } .fallbackSvg { padding: 44px 0; } }
+@media (max-width: 760px) { .bodyMapGrid { grid-template-columns: 1fr; } .scenePanel { min-height: 430px; } .sceneStage { min-height: 400px; height: 470px; } .systemRow { grid-template-columns: 28px minmax(0,1fr) 42px; } }
+@media (max-width: 480px) { .sceneStage { min-height: 350px; height: 400px; } .sceneHudTop { font-size: 6px; } .sceneHudTop span:last-child { max-width: 96px; text-align: right; } .hotspot { min-height: 24px; gap: 3px; font-size: 6px; } .hotspot strong { max-width: 76px; overflow: hidden; text-overflow: ellipsis; } .modalReadoutGrid { grid-template-columns: 1fr; } .fallbackSvg { padding: 44px 0; } }
 @media (prefers-reduced-motion: reduce) { .sceneStage::after, .fallbackPulse, .loaderMark { animation: none; } }

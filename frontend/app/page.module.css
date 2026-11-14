@@ -35,11 +35,13 @@
 .systemBar { margin-top: 7px; }
 .systemValue { color: var(--text-primary); font: 12px var(--font-mono); text-align: right; }
 .telemetryGrid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 14px; }
-.telemetryCard { display: grid; grid-template-columns: minmax(0,1fr) 92px; align-items: center; gap: 10px; }
+.telemetryCard { display: flex; flex-direction: column; justify-content: space-between; gap: 10px; width: 100%; min-height: 92px; }
+.telemetryCardHead { display: flex; align-items: baseline; justify-content: space-between; width: 100%; }
 .telemetryLabel { color: var(--text-dim); font: 9px var(--font-mono); letter-spacing: .1em; }
-.telemetryValue { margin-top: 5px; color: #ecf4ff; font: 25px/1.1 var(--font-mono); letter-spacing: -.06em; }
+.telemetryValue { margin-top: 2px; color: #ecf4ff; font: 25px/1.1 var(--font-mono); letter-spacing: -.06em; }
 .telemetryValue small { margin-left: 5px; color: #9eacbd; font: 10px var(--font-sans); letter-spacing: 0; }
-.telemetryDelta { display: block; margin-top: 5px; color: var(--green); font: 8px var(--font-mono); }
+.telemetryDelta { display: block; color: var(--green); font: 8px var(--font-mono); }
+.telemetrySparklineWrap { width: 100%; height: 42px; display: flex; align-items: flex-end; }
 .lowerGrid { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(270px,.7fr); gap: 14px; margin-top: 14px; }
 .routeHead { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; color: var(--text-dim); font: 8px var(--font-mono); letter-spacing: .08em; }
 .routeFoot { display: flex; justify-content: space-between; margin-top: 5px; color: #75849a; font: 8px var(--font-mono); }
@@ -61,6 +63,6 @@
 @keyframes scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
 @keyframes ping { 0% { opacity: .8; transform: scale(.7); } 80%, 100% { opacity: 0; transform: scale(1.7); } }
 @media (max-width: 1080px) { .content { padding-right: 18px; padding-left: 18px; } .overviewGrid { grid-template-columns: minmax(0,1fr) minmax(290px,.78fr); } .suitStage { grid-template-columns: minmax(120px,.5fr) minmax(200px,1fr) minmax(90px,.35fr); } .suitNotes { padding-left: 12px; } .systemRow { grid-template-columns: 24px minmax(0,1fr) 36px; gap: 6px; } }
-@media (max-width: 760px) { .content { padding: 14px 14px 30px; } .sectionMeta { flex-wrap: wrap; font-size: 8px; } .overviewGrid, .lowerGrid, .placeholderGrid { grid-template-columns: 1fr; } .suitPanel { min-height: auto; } .suitStage { min-height: 340px; grid-template-columns: minmax(78px,.45fr) minmax(180px,1fr) minmax(75px,.4fr); } .suitIllustration { max-height: 315px; } .suitNotes { gap: 14px; padding-left: 8px; } .suitNote { padding-left: 6px; } .suitNote strong { font-size: 7px; } .suitNote span { font-size: 7px; } .systemRow { grid-template-columns: 28px minmax(0,1fr) 42px; } .telemetryGrid { gap: 8px; } .telemetryCard { grid-template-columns: 1fr; } .telemetryValue { font-size: 20px; } .telemetryCard > svg { height: 22px; } .placeholderHero { min-height: 300px; } }
-@media (max-width: 440px) { .suitStage { min-height: 280px; grid-template-columns: 1fr; } .suitNotes { display: none; } .suitIllustration { max-height: 265px; width: 78%; justify-self: center; } .telemetryGrid { grid-template-columns: 1fr; } .telemetryCard { grid-template-columns: minmax(0,1fr) 100px; } .footerNote { flex-direction: column; } }
+@media (max-width: 760px) { .content { padding: 14px 14px 30px; } .sectionMeta { flex-wrap: wrap; font-size: 8px; } .overviewGrid, .lowerGrid, .placeholderGrid { grid-template-columns: 1fr; } .suitPanel { min-height: auto; } .suitStage { min-height: 340px; grid-template-columns: minmax(78px,.45fr) minmax(180px,1fr) minmax(75px,.4fr); } .suitIllustration { max-height: 315px; } .suitNotes { gap: 14px; padding-left: 8px; } .suitNote { padding-left: 6px; } .suitNote strong { font-size: 7px; } .suitNote span { font-size: 7px; } .systemRow { grid-template-columns: 28px minmax(0,1fr) 42px; } .telemetryGrid { gap: 8px; } .telemetryValue { font-size: 20px; } .placeholderHero { min-height: 300px; } }
+@media (max-width: 440px) { .suitStage { min-height: 280px; grid-template-columns: 1fr; } .suitNotes { display: none; } .suitIllustration { max-height: 265px; width: 78%; justify-self: center; } .telemetryGrid { grid-template-columns: 1fr; } .footerNote { flex-direction: column; } }
 @media (prefers-reduced-motion: reduce) { .suitStage::after, .zoneRing { animation: none; } }

@@ -1,14 +1,14 @@
 'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { zoneContent } from '../../server/mock/content';
 import type { CrewState, ZoneId } from '../../lib/api/types';
 import { Panel } from '../ui/Panel';
 import { SegmentBar, StatusBadge } from '../ui/StatusBadge';
+import { Modal } from '../ui/Controls';
 import { bodyZones, zoneTitles } from './zones';
-import { SvgFallback } from './SvgFallback';
 import styles from './BodyMap.module.css';
 
 const SuitScene = dynamic(() => import('./SuitScene'), {
@@ -24,93 +24,145 @@ export function BodyMapScreen({ crew, connection }: { crew: CrewState | null; co
   const selectedScore = selectedZone ? scores[selectedZone] : 0;
   const selectedDetails = selectedZone ? zoneContent[selectedZone] : null;
 
-  return <div className={styles.bodyMapLayout}>
-    <div className={styles.bodyMapGrid}>
-      <Panel eyebrow="BIO-MAP / EVA SUIT TELEMETRY" title="Crew health systems" action={<StatusBadge tone={connection === 'connected' ? 'green' : 'amber'} dot>{connection === 'connected' ? 'NASA-STD-3001 1 HZ LIVE' : 'AWAITING FEED'}</StatusBadge>} className={styles.scenePanel} bodyClassName={styles.sceneBody}>
-        <div className={styles.sceneStage}>
-          <div className={styles.sceneHudTop}><span>EMU · EXTRAVEHICULAR MOBILITY UNIT</span><span>DRAG TO ROTATE · SCROLL TO ZOOM</span></div>
-          <div className={styles.sceneViewport}>
-            <SuitScene
-              scores={scores}
-              heartRate={vitals?.hr ?? 72}
-              respiration={vitals?.resp ?? 14}
-              selectedZone={selectedZone}
-              onSelectZone={setSelectedZone}
-              reducedMotion={reducedMotion}
-            />
+  return (
+    <div className={styles.bodyMapLayout}>
+      <div className={styles.bodyMapGrid}>
+        <Panel
+          eyebrow="BIO-MAP / EVA SUIT TELEMETRY"
+          title="Crew health systems"
+          action={<StatusBadge tone={connection === 'connected' ? 'green' : 'amber'} dot>{connection === 'connected' ? 'NASA-STD-3001 1 HZ LIVE' : 'AWAITING FEED'}</StatusBadge>}
+          className={styles.scenePanel}
+          bodyClassName={styles.sceneBody}
+        >
+          <div className={styles.sceneStage}>
+            <div className={styles.sceneHudTop}>
+              <span>EMU · EXTRAVEHICULAR MOBILITY UNIT</span>
+              <span>DRAG TO ROTATE · SCROLL TO ZOOM</span>
+            </div>
+            <div className={styles.sceneViewport}>
+              <SuitScene
+                scores={scores}
+                heartRate={vitals?.hr ?? 72}
+                respiration={vitals?.resp ?? 14}
+                selectedZone={selectedZone}
+                onSelectZone={setSelectedZone}
+                reducedMotion={reducedMotion}
+              />
+            </div>
+            <div className={styles.sceneHudBottom}>
+              <span>NASA EMU / PUBLIC DOMAIN MODEL</span>
+              <button type="button" onClick={() => setSelectedZone(null)}>
+                RESET VIEW <span aria-hidden="true">↺</span>
+              </button>
+            </div>
           </div>
-          <div className={styles.sceneHudBottom}><span>NASA EMU / PUBLIC DOMAIN MODEL</span><button type="button" onClick={() => setSelectedZone(null)}>RESET VIEW <span aria-hidden="true">↺</span></button></div>
-          <AnimatePresence>
-            {selectedZone && selectedDetails && <motion.aside
-              key={selectedZone}
-              className={styles.organCard}
-              initial={reducedMotion ? false : { opacity: 0, x: 22 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={reducedMotion ? undefined : { opacity: 0, x: 16 }}
-              transition={{ duration: reducedMotion ? 0 : 0.22, ease: 'easeOut' }}
-              aria-labelledby="organ-card-title"
-            >
-              <div className={styles.organCardHead}>
-                <div><span className={styles.kicker}>ZONE {bodyZones.find(zone => zone.id === selectedZone)?.code}</span><h3 id="organ-card-title">{selectedDetails.title}</h3></div>
-                <button className={styles.closeButton} type="button" aria-label="Close system detail" onClick={() => setSelectedZone(null)}>×</button>
-              </div>
-              <div className={styles.organScore}>
-                <div><span>ORGAN INDEX</span><strong>{selectedScore}<small> / 100</small></strong></div>
-                <StatusBadge tone={selectedScore >= 80 ? 'green' : selectedScore >= 60 ? 'amber' : 'red'} dot>{selectedScore >= 80 ? 'NOMINAL' : selectedScore >= 60 ? 'CAUTION' : 'CRITICAL'}</StatusBadge>
-              </div>
-              <section className={styles.organSection}>
-                <h4>BIOLOGICAL FUNCTION</h4>
-                <p>{selectedDetails.function}</p>
-              </section>
-              <section className={styles.organSection}>
-                <h4>HOW IT IS MEASURED IN SPACE</h4>
-                <p style={{ marginBottom: '8px', color: '#c5d3e2' }}>{selectedDetails.how_measured}</p>
-                <div className={styles.readoutGrid}>
-                  {getZoneReadouts(selectedZone, crew).map(readout => (
-                    <div className={styles.readout} key={readout.label}>
-                      <span>{readout.label}</span>
-                      <strong>{readout.value}</strong>
-                    </div>
-                  ))}
-                </div>
-              </section>
-              <section className={styles.organSection}>
-                <h4>SPACE HAZARD & CLINICAL DANGER</h4>
-                <p style={{ lineHeight: 1.6 }}>{selectedDetails.space_hazard_danger}</p>
-              </section>
-              <section className={styles.organSection}>
-                <h4>MISSION HAZARDS / 5</h4>
-                <div className={styles.hazardList}>
-                  {selectedDetails.hazards.map((hazard, index) => (
-                    <span key={hazard}>
-                      <i>{String(index + 1).padStart(2, '0')}</i>
-                      {hazard}
+        </Panel>
+
+        <Panel eyebrow="SYSTEM INDEX / 0—100" title="Organ health" action={<StatusBadge tone="neutral">CREW {crew?.crew ?? 'A'}</StatusBadge>}>
+          <div className={styles.systemList}>
+            {bodyZones.map(zone => {
+              const score = scores[zone.id];
+              const tone = score >= 80 ? 'green' : score >= 60 ? 'amber' : 'red';
+              return (
+                <button
+                  className={`${styles.systemRow} ${selectedZone === zone.id ? styles.systemRowSelected : ''}`}
+                  key={zone.id}
+                  type="button"
+                  onClick={() => setSelectedZone(selectedZone === zone.id ? null : zone.id)}
+                  aria-pressed={selectedZone === zone.id}
+                >
+                  <span className={styles.systemCode}>{zone.code}</span>
+                  <span className={styles.systemInfo}>
+                    <span className={styles.systemName}>
+                      {zoneTitles[zone.id]}
+                      <StatusBadge tone={tone}>{tone === 'green' ? 'NOMINAL' : tone === 'amber' ? 'CAUTION' : 'CRITICAL'}</StatusBadge>
                     </span>
-                  ))}
+                    <span className={styles.systemBar}>
+                      <SegmentBar value={score} tone={tone} label={`${zoneTitles[zone.id]} index`} />
+                    </span>
+                  </span>
+                  <strong className={styles.systemValue}>{score}</strong>
+                </button>
+              );
+            })}
+          </div>
+          <div className={styles.systemLegend}>
+            <span><i className={styles.legendGreen} />80–100 NOMINAL</span>
+            <span><i className={styles.legendAmber} />60–79 CAUTION</span>
+            <span><i className={styles.legendRed} />0–59 CRITICAL</span>
+          </div>
+          <div className={styles.miniReadouts}>
+            <div><span>HEART RATE</span><strong>{vitals ? `${vitals.hr} BPM` : '—'}</strong></div>
+            <div><span>O₂ SATURATION</span><strong>{vitals ? `${vitals.spo2.toFixed(1)}%` : '—'}</strong></div>
+            <div><span>CORE TEMP</span><strong>{vitals ? `${vitals.temp.toFixed(1)} °C` : '—'}</strong></div>
+          </div>
+        </Panel>
+      </div>
+      <div className={styles.modelNote}>
+        <span className={styles.modelNoteMark} />
+        Rotatable 3D suit model · health-system volumes are telemetry overlays · click any organ to inspect
+      </div>
+
+      <Modal
+        open={Boolean(selectedZone && selectedDetails)}
+        onClose={() => setSelectedZone(null)}
+        title={selectedDetails?.title ?? ''}
+        eyebrow={`ZONE ${selectedZone ? bodyZones.find(z => z.id === selectedZone)?.code : ''} · PHYSIOLOGICAL SYSTEM`}
+        className={styles.organModal}
+      >
+        {selectedDetails && (
+          <div className={styles.modalContent}>
+            <div className={styles.modalScoreHeader}>
+              <div>
+                <span className={styles.modalScoreKicker}>SYSTEM HEALTH SCORE</span>
+                <div className={styles.modalScoreValue}>
+                  {selectedScore} <small>/ 100</small>
                 </div>
-              </section>
-            </motion.aside>}
-          </AnimatePresence>
-        </div>
-      </Panel>
-      <Panel eyebrow="SYSTEM INDEX / 0—100" title="Organ health" action={<StatusBadge tone="neutral">CREW {crew?.crew ?? 'A'}</StatusBadge>}>
-        <div className={styles.systemList}>
-          {bodyZones.map(zone => {
-            const score = scores[zone.id];
-            const tone = score >= 80 ? 'green' : score >= 60 ? 'amber' : 'red';
-            return <button className={`${styles.systemRow} ${selectedZone === zone.id ? styles.systemRowSelected : ''}`} key={zone.id} type="button" onClick={() => setSelectedZone(selectedZone === zone.id ? null : zone.id)} aria-pressed={selectedZone === zone.id}>
-              <span className={styles.systemCode}>{zone.code}</span>
-              <span className={styles.systemInfo}><span className={styles.systemName}>{zoneTitles[zone.id]}<StatusBadge tone={tone}>{tone === 'green' ? 'NOMINAL' : tone === 'amber' ? 'CAUTION' : 'CRITICAL'}</StatusBadge></span><span className={styles.systemBar}><SegmentBar value={score} tone={tone} label={`${zoneTitles[zone.id]} index`} /></span></span>
-              <strong className={styles.systemValue}>{score}</strong>
-            </button>;
-          })}
-        </div>
-        <div className={styles.systemLegend}><span><i className={styles.legendGreen} />80–100 NOMINAL</span><span><i className={styles.legendAmber} />60–79 CAUTION</span><span><i className={styles.legendRed} />0–59 CRITICAL</span></div>
-        <div className={styles.miniReadouts}><div><span>HEART RATE</span><strong>{vitals ? `${vitals.hr} BPM` : '—'}</strong></div><div><span>O₂ SATURATION</span><strong>{vitals ? `${vitals.spo2.toFixed(1)}%` : '—'}</strong></div><div><span>CORE TEMP</span><strong>{vitals ? `${vitals.temp.toFixed(1)} °C` : '—'}</strong></div></div>
-      </Panel>
+              </div>
+              <StatusBadge tone={selectedScore >= 80 ? 'green' : selectedScore >= 60 ? 'amber' : 'red'} dot>
+                {selectedScore >= 80 ? 'NOMINAL STATUS' : selectedScore >= 60 ? 'CAUTION REQUIRED' : 'CRITICAL LEVEL'}
+              </StatusBadge>
+            </div>
+
+            <div className={styles.modalSection}>
+              <h4>1. BIOLOGICAL FUNCTION</h4>
+              <p>{selectedDetails.function}</p>
+            </div>
+
+            <div className={styles.modalSection}>
+              <h4>2. HOW IT IS MEASURED IN SPACE</h4>
+              <p className={styles.modalMeasureDesc}>{selectedDetails.how_measured}</p>
+              <div className={styles.modalReadoutGrid}>
+                {getZoneReadouts(selectedZone!, crew).map(readout => (
+                  <div key={readout.label} className={styles.modalReadoutItem}>
+                    <span>{readout.label}</span>
+                    <strong>{readout.value}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.modalSectionDanger}>
+              <h4>3. SPACE HAZARD & CLINICAL DANGER</h4>
+              <p>{selectedDetails.space_hazard_danger}</p>
+            </div>
+
+            <div className={styles.modalSection}>
+              <h4>MISSION HAZARDS / 5</h4>
+              <div className={styles.modalHazards}>
+                {selectedDetails.hazards.map((hazard, index) => (
+                  <span key={hazard} className={styles.modalHazardTag}>
+                    <i>{String(index + 1).padStart(2, '0')}</i>
+                    {hazard}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
-    <div className={styles.modelNote}><span className={styles.modelNoteMark} />Rotatable 3D suit model · health-system volumes are telemetry overlays · all readings simulated</div>
-  </div>;
+  );
 }
 
 function getZoneReadouts(zone: ZoneId, crew: CrewState | null) {

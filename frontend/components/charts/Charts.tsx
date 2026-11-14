@@ -4,7 +4,23 @@ import styles from './charts.module.css';
 
 export function Sparkline({ values, color = 'var(--blue-bright)', label }: { values: number[]; color?: string; label: string }) {
   const points = chartPoints(values, 100, 34, 3);
-  return <svg className={styles.sparkline} viewBox="0 0 100 34" role="img" aria-label={label}><polyline points={points} fill="none" stroke={color} strokeWidth="1.7" vectorEffect="non-scaling-stroke" /></svg>;
+  return (
+    <svg
+      className={styles.sparkline}
+      viewBox="0 0 100 34"
+      preserveAspectRatio="none"
+      role="img"
+      aria-label={label}
+    >
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
 }
 
 export function LineChart({ values, labels, color = 'var(--blue-bright)', label, secondaryValues }: { values: number[]; labels?: string[]; color?: string; label: string; secondaryValues?: number[] }) {
@@ -129,14 +145,16 @@ function chartPoints(values: number[], width: number, height: number, insetX = 0
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
-  return values.map((value, index) => {
-    const x = insetX + (values.length === 1 ? 0 : (index / (values.length - 1)) * (width - insetX * 2));
-    const y = height - insetY - ((value - min) / range) * (height - insetY * 2);
-    return `${x},${y}`;
+  const step = (width - insetX * 2) / Math.max(values.length - 1, 1);
+  return values.map((val, idx) => {
+    const x = insetX + idx * step;
+    const y = height - insetY - ((val - min) / range) * (height - insetY * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(' ');
 }
 
-function lastPoint(points: string) {
-  const pair = points.trim().split(' ').at(-1)?.split(',').map(Number) ?? [0, 0];
-  return { x: pair[0], y: pair[1] };
+function lastPoint(pointsString: string) {
+  const pairs = pointsString.trim().split(' ');
+  const [x, y] = pairs[pairs.length - 1].split(',').map(Number);
+  return { x, y };
 }
