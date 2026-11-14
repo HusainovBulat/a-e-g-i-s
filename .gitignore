@@ -1,47 +1,21 @@
 # Environment variables & secrets
 .env
-.env.local
-*.env.local
 
-# Python virtual environments
+# Virtual environments
 .venv/
 venv/
 ENV/
-env/
 
 # Python cache & artifacts
 __pycache__/
 *.py[cod]
 *$py.class
-*.log
-.pytest_cache/
-
-# Keep models/*.pkl in repository (unignore models)
 *.pkl
-!models/*.pkl
-
-# Node / Frontend build artifacts & dependencies
-node_modules/
-*/node_modules/
-.next/
-*/.next/
-out/
-build/
-dist/
-*.tsbuildinfo
+*.log
 
 # IDE settings
 .idea/
 .vscode/
-.agents/
-.junie/
-
-# Heavy raw archives & staging folders (kept locally)
-Нужные источники/
-bulat_repo.zip
-bulat_extracted/
-/data.zip
-certs/
 
 # OS specific
 Thumbs.db
