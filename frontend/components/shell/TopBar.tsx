@@ -30,7 +30,7 @@ const modeOptions: SegmentOption<ConsoleMode>[] = [
   { value: 'mode3', label: '04 / Evening' },
 ];
 
-export function TopBar({ environment, onEnvironmentChange, crew, onCrewChange, connection = 'connecting' }: { environment: EnvironmentId; onEnvironmentChange: (value: EnvironmentId) => void; crew: CrewId; onCrewChange: (value: CrewId) => void; connection?: 'connecting' | 'connected' | 'disconnected' }) {
+export function TopBar({ environment, onEnvironmentChange, crew, onCrewChange, connection = 'connecting', events = [] }: { environment: EnvironmentId; onEnvironmentChange: (value: EnvironmentId) => void; crew: CrewId; onCrewChange: (value: CrewId) => void; connection?: 'connecting' | 'connected' | 'disconnected'; events?: ConsoleEvent[] }) {
   return (
     <header className={styles.topbar}>
       <div className={styles.topbarMain}>
@@ -41,7 +41,7 @@ export function TopBar({ environment, onEnvironmentChange, crew, onCrewChange, c
         <div className={styles.missionStatus} aria-live="polite"><span className={`${styles.liveDot} ${connection === 'connected' ? styles.liveConnected : connection === 'disconnected' ? styles.liveDisconnected : ''}`} /><span>{connection === 'connected' ? 'AUTONOMOUS 1 HZ FEED ACTIVE' : connection === 'disconnected' ? 'RECONNECTING LINK' : 'NEGOTIATING 1 HZ FEED'}</span><b>01 HZ</b></div>
         <div className={styles.topbarActions}>
           <ScenarioLauncher crew={crew} />
-          <RoutineBell />
+          <RoutineBell events={events} />
           <CrewSelect crew={crew} onChange={onCrewChange} />
           <QrPairing crew={crew} />
         </div>
@@ -145,16 +145,89 @@ export function CrewSelect({ crew, onChange }: { crew: CrewId; onChange: (value:
   </div>;
 }
 
-export function RoutineBell() {
+export function RoutineBell({ events = [] }: { events?: ConsoleEvent[] }) {
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<'prompts' | 'logs'>('prompts');
   const firstPrompt = routinePrompts[0];
+  const formatTime = (event: ConsoleEvent) => new Date(event.ts).toISOString().slice(11, 19);
+
   return <>
-    <button type="button" className={styles.utilityButton} onClick={() => setOpen(true)} aria-label="Open Mission Routine Prompts"><Icon name="bell" /><span className={styles.bellCount}>{routinePrompts.length}</span></button>
-    <Modal open={open} onClose={() => setOpen(false)} eyebrow="MISSION ROUTINE / SOL 14" title="Mission Routine Prompts">
-      <div className={styles.promptList}>
-        {routinePrompts.map((prompt, index) => <article className={styles.promptItem} key={prompt.id}><span className={styles.promptTime}>{prompt.due.replace(' UTC', '')}</span><div><strong>{prompt.title}</strong><p>{prompt.duration} · Scheduled crew check</p></div><StatusBadge tone={index === 0 ? 'amber' : 'blue'}>{index === 0 ? 'DUE' : 'UP NEXT'}</StatusBadge></article>)}
+    <button type="button" className={styles.utilityButton} onClick={() => setOpen(true)} aria-label="Open Mission Routine & Logs">
+      <Icon name="bell" />
+      <span className={styles.bellCount}>{routinePrompts.length + (events.length > 0 ? 1 : 0)}</span>
+    </button>
+    <Modal open={open} onClose={() => setOpen(false)} eyebrow="MISSION DISPATCH / NOTIFICATIONS" title="Mission Prompts & Event Logs">
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', borderBottom: '1px solid var(--line-dim)', paddingBottom: '8px' }}>
+        <button
+          type="button"
+          onClick={() => setTab('prompts')}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            borderBottom: tab === 'prompts' ? '2px solid var(--blue-bright)' : '2px solid transparent',
+            color: tab === 'prompts' ? 'var(--text-strong)' : 'var(--text-muted)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '11px',
+            fontWeight: 700,
+            padding: '4px 10px',
+            cursor: 'pointer',
+          }}
+        >
+          ROUTINE PROMPTS ({routinePrompts.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('logs')}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            borderBottom: tab === 'logs' ? '2px solid var(--blue-bright)' : '2px solid transparent',
+            color: tab === 'logs' ? 'var(--text-strong)' : 'var(--text-muted)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '11px',
+            fontWeight: 700,
+            padding: '4px 10px',
+            cursor: 'pointer',
+          }}
+        >
+          MISSION LOGS ({events.length})
+        </button>
       </div>
-      <div className={styles.whyBlock}><span className={styles.miniLabel}>WHY IS THIS EXAM NEEDED?</span><p>{firstPrompt.why} This is a simulated routine prompt for demonstration.</p></div>
+
+      {tab === 'prompts' ? (
+        <>
+          <div className={styles.promptList}>
+            {routinePrompts.map((prompt, index) => (
+              <article className={styles.promptItem} key={prompt.id}>
+                <span className={styles.promptTime}>{prompt.due.replace(' UTC', '')}</span>
+                <div>
+                  <strong>{prompt.title}</strong>
+                  <p>{prompt.duration} · Scheduled crew check</p>
+                </div>
+                <StatusBadge tone={index === 0 ? 'amber' : 'blue'}>{index === 0 ? 'DUE' : 'UP NEXT'}</StatusBadge>
+              </article>
+            ))}
+          </div>
+          <div className={styles.whyBlock}>
+            <span className={styles.miniLabel}>WHY IS THIS EXAM NEEDED?</span>
+            <p>{firstPrompt.why} This is a scheduled routine prompt for demonstration.</p>
+          </div>
+        </>
+      ) : (
+        <div className={styles.eventLogList}>
+          {events.length ? (
+            events.slice().reverse().map((event, index) => (
+              <article className={styles.eventLogItem} key={`${event.ts}-${index}`}>
+                <time>{formatTime(event)}Z</time>
+                <StatusBadge tone={eventTone(event)}>{eventTone(event).toUpperCase()}</StatusBadge>
+                <span>CREW {event.crew} · {event.text}</span>
+              </article>
+            ))
+          ) : (
+            <p className={styles.eventEmpty}>No mission events recorded yet.</p>
+          )}
+        </div>
+      )}
     </Modal>
   </>;
 }

@@ -26,10 +26,9 @@ function ConsoleContent() {
   const reducedMotion = useReducedMotion();
   return (
     <div className={styles.console}>
-      <TopBar environment={environment} onEnvironmentChange={setEnvironment} crew={crew} onCrewChange={setCrew} connection={connection} />
+      <TopBar environment={environment} onEnvironmentChange={setEnvironment} crew={crew} onCrewChange={setCrew} connection={connection} events={frame?.events ?? []} />
       <div className={styles.content}>
         <ModeTabs value={mode} onChange={setMode} />
-        <EventTicker events={frame?.events ?? []} />
       </div>
       <main className={styles.content}>
         <div className={styles.sectionMeta}>
