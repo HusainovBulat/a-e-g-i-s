@@ -28,15 +28,21 @@ import type {
   ZoneId,
 } from './types';
 
-export function getApiBase(): string {
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    const protocol = window.location.protocol;
+type LocationLike = Pick<Location, 'hostname' | 'protocol' | 'port'>;
+
+export function getApiBase(loc: LocationLike | undefined = typeof window !== 'undefined' ? window.location : undefined): string {
+  if (loc) {
+    const host = loc.hostname;
+    const protocol = loc.protocol;
     if (process.env.NEXT_PUBLIC_API_BASE) {
       if (host !== 'localhost' && host !== '127.0.0.1' && process.env.NEXT_PUBLIC_API_BASE.includes('localhost')) {
         return `${protocol}//${host}:8000`;
       }
       return process.env.NEXT_PUBLIC_API_BASE.replace(/\/$/, '');
+    }
+    // Served on the default port (HTTPS proxy on :443 / a cloud reverse proxy): API is same-origin.
+    if (!loc.port) {
+      return `${protocol}//${host}`;
     }
     return `${protocol}//${host}:8000`;
   }

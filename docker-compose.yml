@@ -1,3 +1,6 @@
+# Started by start.bat / start.sh (one stack for laptop and phones):
+#   http://localhost:3000        console on the laptop
+#   https://<laptop-ip>/phone    phone sensor page (HTTPS: iOS motion sensors need a secure page)
 services:
   aegis:
     build: .
@@ -10,6 +13,8 @@ services:
         required: false
     environment:
       AEGIS_PUBLIC_HOSTS: ${AEGIS_PUBLIC_HOSTS:-}
+      # 1: QR links point to the HTTPS proxy (https://<ip>/phone); 0: plain http://<ip>:3000/phone
+      AEGIS_PHONE_HTTPS: ${AEGIS_PHONE_HTTPS:-1}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
@@ -27,3 +32,34 @@ services:
       aegis:
         condition: service_healthy
     restart: unless-stopped
+
+  # One-shot: local CA (kept in a volume) + certificate for the current LAN IPs. No mkcert on the host.
+  certs:
+    build: ./deploy/certs
+    image: aegis-certs
+    container_name: aegis-certs
+    environment:
+      AEGIS_PUBLIC_HOSTS: ${AEGIS_PUBLIC_HOSTS:-}
+    volumes:
+      - aegis-ca:/ca
+      - aegis-certs:/certs
+    restart: "no"
+
+  # HTTPS on :443 for phones; :80 serves the root CA and redirects to HTTPS.
+  proxy:
+    image: caddy:2.8-alpine
+    container_name: aegis-proxy
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - aegis-certs:/certs:ro
+    depends_on:
+      certs:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  aegis-ca:
+  aegis-certs:

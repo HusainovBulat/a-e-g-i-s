@@ -18,23 +18,31 @@ one local network — no internet needed on stage. Full product spec: `Project A
 
 ## ▶ One-click start
 
-1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (fallback: Python 3.11+ and Node.js 20+).
-2. **Windows:** double-click `start.bat` · **macOS / Linux:** `./start.sh`
-3. The console opens at http://localhost:3000 (API / Swagger: http://localhost:8000/docs). The script prints the phone URLs `http://<laptop-ip>:3000/phone`. Stop with `stop.bat` / `./stop.sh`.
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) — that's the only requirement (fallback without Docker: Python 3.11+ and Node.js 20+).
+2. Start it:
+
+   | OS | How |
+   |---|---|
+   | **Windows** | double-click `start.bat` |
+   | **macOS** | double-click `start.command` (first time: right-click → *Open*) or `./start.sh` |
+   | **Linux** | `./start.sh` |
+
+3. The console opens at http://localhost:3000 (API / Swagger: http://localhost:8000/docs). The script prints the phone links, the console shows them as a QR code. Stop with `stop.bat` / `stop.command` / `./stop.sh`.
+
+The same script serves both the laptop and the phones — there is no separate HTTPS mode:
+
+- Docker Desktop is launched if it is installed but not running; images are built on the first run (3–5 min).
+- iOS Safari exposes motion sensors only on HTTPS pages, so a Caddy proxy (`deploy/Caddyfile`) serves console, phone page, `/api` and `/ws` from **one origin** on `https://<laptop-ip>/`; QR codes point to `https://<laptop-ip>/phone?crew=A`.
+- The certificate is issued **inside Docker** (`deploy/certs/`): a local CA is created once and kept in the `aegis-ca` volume, the server certificate is re-issued on every start for the laptop's current LAN IPs (+ `192.168.137.1`, the Windows Mobile Hotspot). Nothing is installed on the host — no mkcert, no admin rights.
+- If ports 80/443 are taken by another program, the stack still starts and phones fall back to `http://<laptop-ip>:3000/phone` (no iPhone motion sensors).
+- Without Docker the script runs the backend and console locally with Python + Node.js (plain HTTP).
+
+**iPhone, once per phone:** Safari → `http://<laptop-ip>/aegis-rootCA.crt` → Allow → Settings → *Profile Downloaded* → Install → Settings → General → About → *Certificate Trust Settings* → enable **AEGIS Demo Local CA**. Then open the phone page and tap *Enable motion*. **Android:** open the phone page → *Advanced* → *Proceed*.
+On a new network (venue Wi-Fi / hotspot) just run the start script again: the certificate is re-issued for the new IPs, the phone keeps trusting the same CA (`stop` keeps it; `docker compose down -v` would reset it).
+The phone may also be on Wi-Fi while the laptop is on Ethernet, as long as both are in the same subnet (no guest network / AP isolation) and the firewall lets them in: on Windows `start.bat` adds the rule **A.E.G.I.S. demo** (inbound TCP 80, 443, 3000, 8000 from the local subnet, any network profile) on the first run — press *Yes* in the Windows prompt once. macOS / Linux need nothing in Docker mode (Docker-published ports pass the macOS app firewall and bypass `ufw`); `start.sh` only prints a hint when something would block phones (macOS "Block all incoming connections", or `ufw` with the no-Docker fallback).
+Only the public root certificate is served over HTTP; the CA private key never leaves its Docker volume.
 
 Optional: put `GROQ_API_KEY=...` into `.env` (created from `.env.example` on first start) to let the Commander briefing use the LLM; without it (or if it takes > 4 s) the deterministic template answers instantly.
-
-### ▶ HTTPS for the stage demo (iPhone fall / tilt sensors)
-
-iOS Safari exposes motion sensors only on HTTPS pages. **Windows:** double-click `start-https.bat` · **macOS / Linux:** `./start.sh --https`
-
-- installs [mkcert](https://github.com/FiloSottile/mkcert) if needed (winget), creates a local CA and a certificate for the laptop's current LAN IPs (+ `192.168.137.1`, the Windows Mobile Hotspot);
-- a Caddy proxy (`deploy/Caddyfile`) serves console, phone page, `/api` and `/ws` from **one origin** on `https://<laptop-ip>/`; QR codes point to `https://<laptop-ip>/phone?crew=A`.
-
-**iPhone, once per phone:** Safari → `http://<laptop-ip>/aegis-rootCA.crt` → Allow → Settings → *Profile Downloaded* → Install → Settings → General → About → *Certificate Trust Settings* → enable **mkcert**. Then open the phone page and tap *Enable motion*.
-On a new network (venue Wi-Fi / hotspot) just run `start-https.bat` again: the certificate is re-issued for the new IPs, the iPhone keeps trusting the same CA.
-The phone may also be on Wi-Fi while the laptop is on Ethernet, as long as both are in the same subnet (no guest network / AP isolation) and Windows Firewall allows inbound TCP 80, 443, 3000, 8000 on the private network.
-Only the public root certificate is served over HTTP; `certs/` (with the private keys) is git-ignored.
 
 ## Project layout
 
@@ -54,7 +62,7 @@ frontend/               Next.js console (/), phone sensor simulator (/phone), vi
 data/                   normalized NASA / PhysioNet datasets (see data/README.md)
 models/                 exported runtime models (*.pkl, LightGBM)
 scripts/                dataset normalization + scripts/train_models.py (re-export models)
-deploy/                 Caddyfile (HTTPS proxy), lan-ips.ps1 (laptop LAN addresses)
+deploy/                 Caddyfile (HTTPS proxy), certs/ (in-Docker CA + certificate), lan-ips.ps1, firewall.ps1
 tests/                  backend tests · frontend/test/ — console tests
 ```
 
@@ -103,8 +111,7 @@ Walk-back limit: return speed slows with fatigue (`max(1.2, 2.5 × (1 − 0.3 ×
 
 ```bash
 # Docker
-docker compose up -d --build                       # backend :8000 + console :3000
-docker compose --profile https up -d --build       # + HTTPS proxy :443 (needs certs/ from mkcert)
+docker compose up -d --build                       # backend :8000, console :3000, HTTPS proxy :443
 
 # Locally
 pip install -r requirements-dev.txt

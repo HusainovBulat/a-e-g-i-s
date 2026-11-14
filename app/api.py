@@ -162,9 +162,14 @@ async def pairing(request: Request, crew: str = Query("A")) -> Dict[str, Any]:
     letter = cid.replace("Crew_", "")
     hosts = _lan_ips()
     scheme = request.url.scheme
-    port = 3000
+    # Console port in the QR link: 3000 for the plain-HTTP stack, empty behind the HTTPS proxy (:443).
+    port = os.getenv("AEGIS_CONSOLE_PORT", "3000").strip()
+    if os.getenv("AEGIS_PHONE_HTTPS", "").strip() == "1":
+        # Docker stack: phones always go through the HTTPS proxy, even when the laptop
+        # console itself is opened at http://localhost:3000.
+        scheme, port = "https", ""
     host = hosts[0] if hosts else "localhost"
-    url = f"{scheme}://{host}:{port}/phone?crew={letter}"
+    url = f"{scheme}://{host}{':' + port if port else ''}/phone?crew={letter}"
     return {
         "crew": letter,
         "url": url,

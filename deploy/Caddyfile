@@ -1,0 +1,35 @@
+# HTTPS reverse proxy for the live demo (started by start.bat / start.sh).
+# One origin for everything -> one trusted certificate on the phone, no mixed content,
+# and DeviceMotion / DeviceOrientation work in iOS Safari (secure context required).
+{
+	auto_https off
+	admin off
+	# Phones open https://<laptop-ip>/ — IP addresses carry no SNI, so pick the demo cert explicitly.
+	default_sni localhost
+}
+
+:443 {
+	tls /certs/cert.pem /certs/key.pem
+
+	@backend path /api/* /ws/* /docs /docs/* /openapi.json /health
+	handle @backend {
+		reverse_proxy aegis:8000
+	}
+	handle {
+		reverse_proxy console:3000
+	}
+}
+
+# Plain HTTP: only the demo root CA (to install it on the iPhone), everything else -> HTTPS.
+# Every path is rewritten to rootCA.crt; the CA private key lives in a separate volume.
+:80 {
+	handle /aegis-rootCA.crt {
+		root * /certs
+		rewrite * /rootCA.crt
+		header Content-Type application/x-x509-ca-cert
+		file_server
+	}
+	handle {
+		redir https://{host}{uri} 308
+	}
+}

@@ -26,6 +26,14 @@ describe('getApiBase', () => {
     expect(getApiBase()).toBe(`${window.location.protocol}//${window.location.hostname}:8000`);
   });
 
+  it('uses the same origin behind the HTTPS proxy (default port 443)', () => {
+    expect(getApiBase({ protocol: 'https:', hostname: '192.168.2.2', port: '' })).toBe('https://192.168.2.2');
+  });
+
+  it('keeps :8000 for the plain-HTTP stack (console on :3000)', () => {
+    expect(getApiBase({ protocol: 'http:', hostname: '192.168.2.2', port: '3000' })).toBe('http://192.168.2.2:8000');
+  });
+
   it('honours NEXT_PUBLIC_API_BASE and strips the trailing slash', () => {
     vi.stubEnv('NEXT_PUBLIC_API_BASE', 'https://aegis.example.org/');
     expect(getApiBase()).toBe('https://aegis.example.org');

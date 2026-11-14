@@ -10,4 +10,4 @@ COPY core_math.py rag_llm.py run.py ./
 COPY data ./data
 COPY models ./models
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
