@@ -107,7 +107,7 @@ firewall_hint() {   # $1 = docker | local
 # ------------------------------------------------------------------ Docker
 if docker_ready; then
   echo; echo "[1/3] Building images (first run takes 3-5 min, later a few seconds)..."
-  docker compose build
+  docker compose build || { echo; echo "Build failed - the reason is in the messages above (look for ERROR / error)."; exit 1; }
 
   echo; echo "[2/3] Starting the HTTPS proxy for phones..."
   export AEGIS_PHONE_HTTPS=1

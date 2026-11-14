@@ -173,6 +173,7 @@ exit /b 0
 
 :fail
 echo.
-echo Failed to start. Details: docker compose logs   (or the Backend / Console windows)
+echo Failed to start - the reason is in the messages above.
+echo Build errors: look for "ERROR" / "error". Runtime errors: docker compose logs
 pause
 exit /b 1
