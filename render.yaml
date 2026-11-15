@@ -1,0 +1,41 @@
+# Render Blueprint for the A.E.G.I.S. Base Server (FastAPI + WebSockets).
+# Dashboard -> New -> Blueprint -> pick this repo. The console itself is deployed to Vercel (frontend/).
+#
+# Keep exactly ONE instance: crew state, scenario player and fall countdowns live in process memory.
+# The free plan sleeps after 15 min without traffic; the console pings /health while a page is open
+# (frontend/lib/keepAlive.ts). Open the console a minute before the demo to absorb the cold start.
+services:
+  - type: web
+    name: aegis-backend
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - app/**
+        - data/**
+        - models/**
+        - scripts/**
+        - Dockerfile
+        - requirements.txt
+        - run.py
+        - render.yaml
+    envVars:
+      # Groq key for the Commander RAG briefing (optional: template fallback works without it).
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: qwen/qwen3.8-27b
+      # Comma-separated console origins, e.g. https://aegis.vercel.app. "*" also allows Vercel previews.
+      - key: AEGIS_CORS_ORIGINS
+        value: "*"
+      # Vercel domain used in the phone pairing QR link: <project>.vercel.app (no scheme).
+      - key: AEGIS_PUBLIC_HOSTS
+        sync: false
+      # QR links use https://<AEGIS_PUBLIC_HOSTS>/phone (Vercel serves HTTPS; iOS motion sensors need it).
+      - key: AEGIS_PHONE_HTTPS
+        value: "1"

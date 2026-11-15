@@ -3,10 +3,15 @@
  *   app/(v1)/layout.tsx -> original console at /, /phone, /visor
  *   app/v2/layout.tsx   -> redesigned console at /v2, /v2/phone, /v2/visor
  */
+import { KeepAlive } from '../components/KeepAlive';
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <KeepAlive />
+        {children}
+      </body>
     </html>
   );
 }

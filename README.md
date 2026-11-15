@@ -119,6 +119,28 @@ python run.py                                      # http://0.0.0.0:8000, Swagge
 cd frontend && npm ci && npm run dev               # http://localhost:3000
 ```
 
+## Cloud deploy: Vercel (console) + Render (Base Server)
+
+One repository, two services. The LAN stack above stays the offline fallback for the stage.
+
+1. **Render** → New → Blueprint → this repo. [`render.yaml`](render.yaml) builds the root `Dockerfile`
+   (one instance, `/health` check, rebuilds only on backend changes). Fill in the secret variables:
+   - `GROQ_API_KEY` — optional, enables the LLM Commander briefing;
+   - `AEGIS_PUBLIC_HOSTS` — the Vercel domain without scheme, e.g. `aegis.vercel.app` (phone pairing QR links);
+   - optionally narrow `AEGIS_CORS_ORIGINS` from `*` to `https://aegis.vercel.app` (previews then stop working).
+2. **Vercel** → New Project → this repo, **Root Directory = `frontend`**
+   ([`frontend/vercel.json`](frontend/vercel.json) skips builds when `frontend/` did not change). Environment variable:
+   - `NEXT_PUBLIC_API_BASE=https://<service>.onrender.com` (build-time: redeploy after changing it).
+3. Open `https://<project>.vercel.app`; the phone QR code points to `https://<project>.vercel.app/phone?crew=A`,
+   and phones talk to Render over `wss://`.
+
+**Free-tier sleep.** Render's free plan stops the service after 15 min without traffic (cold start ≈ 1 min, crew state
+in memory is reset). While any console / phone / visor page is open, it pings `<API>/health` every 4 min and whenever the
+tab becomes visible again ([`frontend/lib/keepAlive.ts`](frontend/lib/keepAlive.ts); `NEXT_PUBLIC_KEEPALIVE_MS`
+changes the interval, `0` disables it; LAN / localhost APIs are never pinged). Open the console a couple of minutes
+before the demo so the cold start happens off stage. The free plan allows ~750 instance-hours a month — enough for one
+service running non-stop.
+
 ## WebSockets
 
 All server → console messages: `{"type", "ts", "crew"?, "data"}`.
