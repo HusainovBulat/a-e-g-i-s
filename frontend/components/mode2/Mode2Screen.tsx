@@ -49,7 +49,15 @@ import { Button } from '../ui/Button';
 import { StatusBadge } from '../ui/StatusBadge';
 import { Icon } from '../ui/icons';
 import { useConsole } from '../../lib/ConsoleProvider';
-import { createSpeechRecognizer, speakInstruction, stopSpeaking } from '../../lib/speech';
+import {
+  createSpeechRecognizer,
+  preloadVoskModel,
+  speakInstruction,
+  stopSpeaking,
+  subscribeVoskModel,
+  usesOfflineVoiceModel,
+  type VoskLoadState,
+} from '../../lib/speech';
 import type { ProtocolStep, SymptomId, TriageResponse } from '../../lib/api/types';
 import styles from './mode2.module.css';
 
@@ -178,6 +186,9 @@ export function Mode2Screen() {
   const [voiceText, setVoiceText] = useState<string>('');
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recognizer, setRecognizer] = useState<{ start: () => void; stop: () => void; isSupported: boolean } | null>(null);
+  const [voiceStatus, setVoiceStatus] = useState<string>('');
+  const [voiceModel, setVoiceModel] = useState<VoskLoadState | null>(null);
+  const voiceInitializing = voiceModel?.status === 'loading';
 
   // Triage state
   const [triageResult, setTriageResult] = useState<TriageResponse | null>(null);
@@ -262,9 +273,15 @@ export function Mode2Screen() {
           setSelectedSymptoms(prev => Array.from(new Set([...prev, ...matched])));
         }
       },
-      () => setIsRecording(false)
+      () => setIsRecording(false),
+      setVoiceStatus
     );
     setRecognizer(rec);
+    // Firefox < 160: show the offline model initialisation (preloading starts with the page).
+    if (!usesOfflineVoiceModel()) return;
+    const unsubscribe = subscribeVoskModel(setVoiceModel);
+    preloadVoskModel().catch(() => {});
+    return unsubscribe;
   }, []);
 
   const handleVoiceToggle = () => {
@@ -553,13 +570,15 @@ export function Mode2Screen() {
             variant={isRecording ? 'danger' : 'secondary'}
             size="sm"
             onClick={handleVoiceToggle}
+            disabled={voiceInitializing}
+            progress={voiceInitializing ? voiceModel.progress : undefined}
           >
             <Icon name="radio" size={14} />
-            {isRecording ? 'RECORDING... (TAP TO STOP)' : 'HOLD TO SPEAK (WEB SPEECH)'}
+            {voiceInitializing ? 'INITIALIZATION' : isRecording ? 'RECORDING... (TAP TO STOP)' : 'HOLD TO SPEAK (WEB SPEECH)'}
           </Button>
 
           <span className={styles.voiceStatus}>
-            {voiceText ? `HEARD: "${voiceText}"` : recognizer?.isSupported ? 'Speak symptoms to auto-match keywords' : 'Voice API ready (use card clicks)'}
+            {voiceStatus || (voiceText ? `HEARD: "${voiceText}"` : recognizer?.isSupported ? 'Speak symptoms to auto-match keywords' : 'Voice API ready (use card clicks)')}
           </span>
 
           <Button

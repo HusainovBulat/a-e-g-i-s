@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+const vosk = vi.hoisted(() => ({ recognizer: null as any, createModel: null as any }));
+vi.mock('vosk-browser', () => ({ createModel: (...args: unknown[]) => vosk.createModel(...args) }));
+
 import { createSpeechRecognizer, matchSymptomsFromText, speakInstruction, stopSpeaking } from '../../lib/speech';
 
 describe('matchSymptomsFromText (Hold to speak keyword matcher)', () => {
@@ -89,5 +92,46 @@ describe('createSpeechRecognizer', () => {
     expect(onTranscript).toHaveBeenCalledWith('pain in the chest and dizzy', ['chest_pain', 'dizziness']);
     instance.onend();
     expect(onEnd).toHaveBeenCalled();
+  });
+
+  it('falls back to offline Vosk without SpeechRecognition (Firefox < 160)', async () => {
+    localStorage.setItem('aegis.vosk.cached', '/vosk/vosk-model-small-en-us-0.15.tar.gz'); // model already in IndexedDB
+    const handlers: Record<string, (m: any) => void> = {};
+    const recognizer = {
+      on: (event: string, fn: (m: any) => void) => { handlers[event] = fn; },
+      acceptWaveform: vi.fn(),
+      retrieveFinalResult: vi.fn(() => handlers.result({ result: { text: 'dizzy' } })),
+      remove: vi.fn(),
+    };
+    vosk.createModel = vi.fn().mockResolvedValue({ KaldiRecognizer: vi.fn(() => recognizer) });
+    const processor: any = { connect: vi.fn(), disconnect: vi.fn() };
+    const audioCtx = { sampleRate: 48000, destination: {}, close: vi.fn().mockResolvedValue(undefined),
+      createMediaStreamSource: () => ({ connect: vi.fn(), disconnect: vi.fn() }), createScriptProcessor: () => processor };
+    vi.stubGlobal('AudioContext', vi.fn(() => audioCtx));
+    const track = { stop: vi.fn() };
+    vi.stubGlobal('navigator', { mediaDevices: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [track] }) } });
+
+    const onTranscript = vi.fn();
+    const onEnd = vi.fn();
+    const onStatus = vi.fn();
+    const rec = createSpeechRecognizer(onTranscript, onEnd, onStatus);
+    expect(rec.isSupported).toBe(true);
+
+    rec.start();
+    await vi.waitFor(() => expect(processor.onaudioprocess).toBeTypeOf('function'));
+    expect(vosk.createModel).toHaveBeenCalledWith('/vosk/vosk-model-small-en-us-0.15.tar.gz', -1);
+    processor.onaudioprocess({ inputBuffer: 'chunk' });
+    expect(recognizer.acceptWaveform).toHaveBeenCalledWith('chunk');
+
+    handlers.partialresult({ result: { partial: 'chest [unk] pain' } });
+    expect(onTranscript).toHaveBeenLastCalledWith('chest pain', ['chest_pain']);
+    handlers.result({ result: { text: 'chest pain' } });
+
+    rec.stop();
+    expect(onTranscript).toHaveBeenLastCalledWith('chest pain dizzy', ['chest_pain', 'dizziness']);
+    expect(onEnd).toHaveBeenCalledOnce();
+    expect(track.stop).toHaveBeenCalled();
+    expect(recognizer.remove).toHaveBeenCalled();
+    expect(onStatus).not.toHaveBeenCalledWith(expect.stringMatching(/unavailable/));
   });
 });

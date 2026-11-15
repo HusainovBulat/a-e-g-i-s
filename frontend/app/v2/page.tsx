@@ -10,6 +10,7 @@ import { DemoDrawer } from '../../components/v2/shell/DemoDrawer';
 import { AlertStrip, TopBar } from '../../components/v2/shell/Header';
 import { CrewTabs } from '../../components/v2/shell/CrewTabs';
 import { ConsoleProvider, useConsole } from '../../lib/ConsoleProvider';
+import { preloadVoskModel, usesOfflineVoiceModel } from '../../lib/speech';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -21,6 +22,12 @@ const viewParam: Record<string, ConsoleMode> = { overview: 'body_map', body: 'bo
 function Console() {
   const { mode, setMode, setCrew } = useConsole();
   const [demoOpen, setDemoOpen] = useState(false);
+
+  // Firefox < 160 has no native speech recognition: warm up the offline Vosk model as soon as
+  // the console opens, so "Describe by voice" is ready before anyone reaches the Emergency tab.
+  useEffect(() => {
+    if (usesOfflineVoiceModel()) preloadVoskModel().catch(() => {});
+  }, []);
 
   // Deep links for demos and slide screenshots: /?view=emergency&crew=B (applied once)
   const deepLinked = useRef(false);

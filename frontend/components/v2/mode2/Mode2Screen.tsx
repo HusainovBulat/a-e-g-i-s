@@ -4,7 +4,15 @@ import { useCallback, useEffect, useState, useTransition } from 'react';
 import { useConsole } from '../../../lib/ConsoleProvider';
 import type { ProtocolStep, SymptomId, TriageResponse } from '../../../lib/api/types';
 import { crewMeta } from '../../../lib/crew';
-import { createSpeechRecognizer, speakInstruction, stopSpeaking } from '../../../lib/speech';
+import {
+  createSpeechRecognizer,
+  preloadVoskModel,
+  speakInstruction,
+  stopSpeaking,
+  subscribeVoskModel,
+  usesOfflineVoiceModel,
+  type VoskLoadState,
+} from '../../../lib/speech';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Icon, type IconName } from '../ui/icons';
@@ -55,6 +63,9 @@ export function Mode2Screen() {
   const [ultrasound, setUltrasound] = useState(false);
   const [voiceText, setVoiceText] = useState('');
   const [recording, setRecording] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState('');
+  const [voiceModel, setVoiceModel] = useState<VoskLoadState | null>(null);
+  const voiceInitializing = voiceModel?.status === 'loading';
   const [recognizer, setRecognizer] = useState<{ start: () => void; stop: () => void; isSupported: boolean } | null>(null);
   const [triage, setTriage] = useState<TriageResponse | null>(null);
   const [, startTransition] = useTransition();
@@ -105,7 +116,13 @@ export function Mode2Screen() {
         if (matched.length) setSelected(prev => Array.from(new Set([...prev, ...matched])));
       },
       () => setRecording(false),
+      setVoiceStatus,
     ));
+    // Firefox < 160: load the offline model right away so the first tap records immediately.
+    if (!usesOfflineVoiceModel()) return;
+    const unsubscribe = subscribeVoskModel(setVoiceModel);
+    preloadVoskModel().catch(() => {});
+    return unsubscribe;
   }, []);
 
   const toggleVoice = () => {
@@ -177,12 +194,19 @@ export function Mode2Screen() {
             })}
           </div>
           <div className={styles.inputs}>
-            <Button variant={recording ? 'danger' : 'secondary'} icon="mic" onClick={toggleVoice} disabled={!recognizer?.isSupported}>
-              {recording ? 'Listening… tap to stop' : 'Describe by voice'}
+            <Button
+              variant={recording ? 'danger' : 'secondary'}
+              icon="mic"
+              onClick={toggleVoice}
+              disabled={!recognizer?.isSupported || voiceInitializing}
+              progress={voiceInitializing ? voiceModel.progress : undefined}
+            >
+              {voiceInitializing ? 'Initialization' : recording ? 'Listening… tap to stop' : 'Describe by voice'}
             </Button>
             <Button variant={ultrasound ? 'primary' : 'secondary'} icon="scan" onClick={() => setUltrasound(!ultrasound)}>
               {ultrasound ? 'Ultrasound attached' : 'Attach ultrasound'}
             </Button>
+            {voiceStatus && <p className={styles.heard}>{voiceStatus}</p>}
             {voiceText && <p className={styles.heard}>Heard: “{voiceText}”</p>}
           </div>
         </Card>

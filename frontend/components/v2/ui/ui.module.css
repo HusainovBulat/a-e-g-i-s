@@ -96,3 +96,8 @@
 
 @keyframes pulse { 50% { opacity: .35; } }
 @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } }
+.buttonLoading { position: relative; overflow: hidden; isolation: isolate; }
+.buttonLoading:disabled { opacity: 1; cursor: progress; }
+.buttonProgress { position: absolute; inset: 0 auto 0 0; z-index: -1; background: var(--blue-bg); border-right: 2px solid var(--blue); transition: width .2s linear; }
+.buttonPct { color: var(--text-2); font-size: .85em; }
+@media (prefers-reduced-motion: reduce) { .buttonProgress { transition: none; } }

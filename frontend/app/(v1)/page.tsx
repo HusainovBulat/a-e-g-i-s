@@ -12,6 +12,7 @@ import { Panel } from '../../components/ui/Panel';
 import { NumberTicker } from '../../components/ui/NumberTicker';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { ConsoleProvider, useConsole } from '../../lib/ConsoleProvider';
+import { preloadVoskModel, usesOfflineVoiceModel } from '../../lib/speech';
 import type { CrewState } from '../../lib/api/types';
 import styles from './page.module.css';
 
@@ -22,6 +23,13 @@ export default function Home() {
 function ConsoleContent() {
   const { frame, connection, crew, setCrew, environment, setEnvironment, mode, setMode, currentCrew } = useConsole();
   const reducedMotion = useReducedMotion();
+
+  // Firefox < 160 has no native speech recognition: warm up the offline Vosk model as soon as
+  // the console opens, so "Hold to speak" is ready before anyone reaches the Emergency tab.
+  useEffect(() => {
+    if (usesOfflineVoiceModel()) preloadVoskModel().catch(() => {});
+  }, []);
+
   return (
     <div className={styles.console}>
       <TopBar environment={environment} onEnvironmentChange={setEnvironment} crew={crew} onCrewChange={setCrew} connection={connection} events={frame?.events ?? []} />
