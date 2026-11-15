@@ -201,13 +201,19 @@ export function Mode2Screen() {
       </div>
 
       {(nitroBlocked || otherDontGive.length > 0) && (
-        <section className={styles.dontGive} role="alert">
-          <span className={styles.stopSign} aria-hidden="true">✕</span>
-          <div>
+        <section className={styles.dontGive} role="alert" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {nitroBlocked && (
+            <img
+              src="/images/nitro_contraindicated_aspirin.png"
+              alt="Nitroglycerin Contraindicated"
+              style={{ width: '160px', height: '95px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--red)', flexShrink: 0 }}
+            />
+          )}
+          <div style={{ flex: 1 }}>
             {nitroBlocked && (
               <>
                 <h3>Do not administer nitroglycerin</h3>
-                <p>Systolic blood pressure is <b className="num">{Math.round(sysBp)} mmHg</b> (below 90). Nitroglycerin would drop it further and can cause cardiogenic shock.</p>
+                <p>Systolic blood pressure is <b className="num">{Math.round(sysBp)} mmHg</b> (below 90). Nitroglycerin would drop it further and can cause cardiogenic shock. Administer chewable Aspirin (325 mg) instead.</p>
               </>
             )}
             {otherDontGive.length > 0 && <p className={styles.otherDont}>Also avoid: {otherDontGive.join(' · ')}</p>}
@@ -217,7 +223,7 @@ export function Mode2Screen() {
 
       <Card
         title="3 · What to do now"
-        subtitle="Plain-language steps for a crew member without medical training."
+        subtitle="Plain-language steps for immediate crew response."
         action={<>
           <Button variant="secondary" size="sm" icon="volume" onClick={readAloud} disabled={!steps.length}>Read aloud</Button>
           <Button variant="ghost" size="sm" icon="stop" onClick={stopSpeaking}>Stop</Button>

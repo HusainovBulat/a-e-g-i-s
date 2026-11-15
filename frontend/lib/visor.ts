@@ -35,34 +35,38 @@ export function visorModel(frame: ConsoleFrame | null, crew: CrewId): VisorModel
   const buddy = buddyOf[crew];
   const state = frame?.crews[crew];
   const buddyState = frame?.crews[buddy];
+  const currentEnv = normalizeEnvId(state?.vitals?.env ?? 'crater_eva');
   const base: VisorModel = {
-    crew, buddy, env: normalizeEnvId(state?.vitals?.env ?? 'crater_eva'), waiting: true, walkBack: '--:--', walkBackTone: 'neutral', walkBackPct: 0,
+    crew, buddy, env: currentEnv, waiting: true, walkBack: '--:--', walkBackTone: 'neutral', walkBackPct: 0,
     o2: null, o2Tone: 'neutral', hr: null, hrTone: 'neutral', slope: null, legs: null, legsTone: 'neutral',
     buddyDown: false, selfDown: false, command: { text: 'LINKING TO SUIT…', tone: 'neutral' }, alert: null,
   };
   if (!frame || !state) return base;
 
   const v = state.vitals;
+  const envId = normalizeEnvId(v.env);
+  const isOutside = envId === 'crater_eva' || envId === 'rover';
   const walk = state.model_b.walk_back_min;
   const legsFail = state.model_a.legs_fail_min;
   const fatigue = Math.round(state.model_a.fatigue_score);
   const selfDown = hasFall(state);
   const buddyDown = hasFall(buddyState) || Boolean(buddyState?.alarm?.reasons?.some(r => /fall|sos/i.test(r)));
-  const walkBackTone: Tone = selfDown || walk < 15 ? 'red' : walk < 30 ? 'amber' : 'green';
+
+  const walkBackTone: Tone = !isOutside ? 'green' : (selfDown || walk < 15 ? 'red' : walk < 30 ? 'amber' : 'green');
   const legsTone: Tone = fatigue >= 70 || (legsFail !== null && legsFail <= 15) ? 'red' : fatigue >= 50 ? 'amber' : 'neutral';
 
-  let command: VisorModel['command'] = { text: 'ON SCHEDULE', tone: 'neutral' };
+  let command: VisorModel['command'] = { text: isOutside ? 'ON SCHEDULE' : 'CABIN NOMINAL', tone: 'neutral' };
   if (buddyDown) command = { text: `GO TO BUDDY ${buddy}`, tone: 'red' };
   else if (selfDown) command = { text: 'FALL DETECTED · PRESS OK ON WRIST', tone: 'red' };
-  else if (walk < 15) command = { text: 'TURN BACK NOW', tone: 'red' };
+  else if (isOutside && walk < 15) command = { text: 'TURN BACK NOW', tone: 'red' };
   else if (v.dizzy) command = { text: 'STOP · SIT DOWN', tone: 'amber' };
   else if (legsTone === 'red') command = { text: 'REST 60 S · LEGS TIRING', tone: 'amber' };
 
   return {
-    crew, buddy, env: normalizeEnvId(v.env), waiting: false,
-    walkBack: selfDown ? '00:00' : formatMinutes(walk),
+    crew, buddy, env: envId, waiting: false,
+    walkBack: selfDown ? '00:00' : (!isOutside ? 'SAFE' : formatMinutes(walk)),
     walkBackTone,
-    walkBackPct: selfDown ? 0 : Math.min(100, (walk / 60) * 100),
+    walkBackPct: selfDown ? 0 : (!isOutside ? 100 : Math.min(100, (walk / 60) * 100)),
     o2: Math.round(state.model_b.o2_left_pct),
     o2Tone: state.model_b.o2_left_pct < 25 ? 'red' : state.model_b.o2_left_pct < 50 ? 'amber' : 'neutral',
     hr: Math.round(v.hr),

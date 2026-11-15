@@ -18,7 +18,7 @@ import core_math
 from .data_store import DataStore
 from .ml.models import ModelRegistry, finite, o2_burn_l_min
 
-EVA_ENVS = {"surface_eva_spacesuit"}
+EVA_ENVS = {"surface_eva_spacesuit", "pressurized_rover"}
 
 DEFAULT_PACKET: Dict[str, Any] = {
     "env": "lunar_base_habitat", "hr": 68, "sys": 116, "dia": 74, "spo2": 99, "resp": 14, "st": 0.0,
@@ -201,11 +201,20 @@ class Engine:
         if env in EVA_ENVS:
             reserve = float(plss.get("emergency_reserve_liters", 150))
             return_speed = max(1.2, 2.5 * (1.0 - 0.3 * fatigue / 100.0))  # tired legs walk back slower
-            return_time_min = tel.distance_m / (return_speed * 1000.0 / 60.0)
+            dist_m = float(tel.distance_m) if tel.distance_m is not None and tel.distance_m > 0 else 1850.0
+            return_time_min = dist_m / (return_speed * 1000.0 / 60.0)
             return_w, _ = self.models.predict_metabolic_watts(return_speed, 0.0, fatigue)  # downhill ≈ flat cost
             o2_return = o2_burn_l_min(return_w, fatigue) * return_time_min
-            # NASA Apollo/Artemis sortie stay limit: 180 min (3.0 hours) max stay before turn-around
-            minutes = max(0.0, (o2_left - reserve - o2_return) / max(burn_now, 0.1))
+            
+            # NASA-STD-3001: PLSS battery, cooling water and LiOH CO2 scrubbing cap EVA sortie to 300 min (5.0h)
+            plss_cap_min = float(plss.get('max_sortie_minutes', 300.0))
+            # For rover, emergency walk-back is on foot, using EVA walking burn rate
+            burn_rate = burn_now
+            if env == "pressurized_rover" and speed < 1.0:
+                burn_rate = max(burn_now, o2_burn_l_min(return_w, fatigue))
+            effective_burn = max(burn_rate, 1.0)
+            o2_minutes = max(0.0, (o2_left - reserve - o2_return) / effective_burn)
+            minutes = max(0.0, min(plss_cap_min - return_time_min, o2_minutes))
             warn = float(plss.get("walk_back_warning_minutes", 15))
             crit = float(plss.get("walk_back_critical_minutes", 5))
             level = "red" if minutes <= crit else ("amber" if minutes <= warn else "green")

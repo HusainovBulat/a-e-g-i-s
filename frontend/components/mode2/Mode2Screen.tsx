@@ -55,13 +55,37 @@ import styles from './mode2.module.css';
 
 
 function resolveStepImage(step: ProtocolStep, isNominal: boolean, usedImages: Set<string>): { src: string; alt: string } | null {
+  const fullText = `${step.title} ${step.instruction}`.toLowerCase();
   if (isNominal) {
-    // In nominal baseline, crew is healthy; do not show scary resuscitation photos for routine tasks
+    if (fullText.includes('monitoring') || fullText.includes('biometrics') || step.order === 1) {
+      return { src: '/images/nominal_step1_maintain_monitoring.png', alt: 'Wrist Telemetry: All Systems Nominal' };
+    }
+    if (fullText.includes('routine') || fullText.includes('sampling') || fullText.includes('tasks') || step.order === 2) {
+      return { src: '/images/nominal_step2_routine_eva_tasks.png', alt: 'Lunar Geology: Sampling & Exploration' };
+    }
+    if (fullText.includes('check-in') || fullText.includes('habitat') || fullText.includes('telemetry') || step.order === 3) {
+      return { src: '/images/nominal_step3_regular_checkin.png', alt: '15-Minute Habitat AR Telemetry Sync' };
+    }
     return null;
   }
-  const fullText = `${step.title} ${step.instruction}`.toLowerCase();
 
-  // 1. AED / Defibrillator
+  // 1. Repressurize Suit to 5.0 PSI (Decompression Barotrauma / suit breach)
+  if (fullText.includes('repressurize') || fullText.includes('suit pressure') || fullText.includes('5.0 psi') || (fullText.includes('pressure') && fullText.includes('suit'))) {
+    if (!usedImages.has('repressurize')) {
+      usedImages.add('repressurize');
+      return { src: '/images/2_repressurize_suit_5psi.png', alt: 'Artemis Suit Repressurization to 5.0 PSI' };
+    }
+  }
+
+  // 2. 100% Normobaric Oxygen / Flush Breathing Loop (Wash out nitrogen)
+  if (fullText.includes('normobaric') || fullText.includes('wash out nitrogen') || (fullText.includes('breathing loop') && fullText.includes('flush'))) {
+    if (!usedImages.has('normobaric')) {
+      usedImages.add('normobaric');
+      return { src: '/images/3_normobaric_oxygen_loop.png', alt: '100% Normobaric Oxygen Loop & Mask Unit' };
+    }
+  }
+
+  // 3. AED / Defibrillator
   if (fullText.includes('aed') || fullText.includes('defibrillator') || fullText.includes('rhythm analysis')) {
     if (!usedImages.has('aed')) {
       usedImages.add('aed');
@@ -69,7 +93,7 @@ function resolveStepImage(step: ProtocolStep, isNominal: boolean, usedImages: Se
     }
   }
 
-  // 2. Posture / Semi-sitting 30-45° / Elevation / Bed
+  // 4. Posture / Semi-sitting 30-45° / Elevation / Bed
   if (fullText.includes('posture') || fullText.includes('semi-sitting') || fullText.includes('elevat') || fullText.includes('supine') || (fullText.includes('position') && !fullText.includes('sampling'))) {
     if (!usedImages.has('position')) {
       usedImages.add('position');
@@ -77,16 +101,24 @@ function resolveStepImage(step: ProtocolStep, isNominal: boolean, usedImages: Se
     }
   }
 
-  // 3. High-flow O2 / Oxygen Purge / Umbilical / Mask / Breathing loop
-  if (fullText.includes('100%') || fullText.includes('purge') || fullText.includes('umbilical') || fullText.includes('normobaric') || fullText.includes('mask') || fullText.includes('airway') || fullText.includes('oxygen')) {
+  // 5. High-flow O2 / Oxygen Purge / Umbilical / Mask / Breathing loop
+  if (fullText.includes('mask') || fullText.includes('umbilical') || fullText.includes('purge') || fullText.includes('airway') || fullText.includes('oxygen') || fullText.includes('100%')) {
     if (!usedImages.has('oxygen')) {
       usedImages.add('oxygen');
       return { src: '/images/2_2_step2_oxygen_umbilical.png', alt: 'High-Flow 100% O2 Purge Umbilical' };
     }
   }
 
-  // 4. Hyperbaric chamber / Airlock evacuation
-  if (fullText.includes('hyperbaric') || fullText.includes('airlock') || fullText.includes('chamber')) {
+  // 6. Hydration & Electrolytes (Syncope / Orthostatic)
+  if (fullText.includes('hydration') || fullText.includes('electrolyte') || fullText.includes('saline')) {
+    if (!usedImages.has('hydration')) {
+      usedImages.add('hydration');
+      return { src: '/images/3_1_quest1_electrolyte_rehydration.png', alt: 'Isotonic Electrolyte Hydration' };
+    }
+  }
+
+  // 7. Hyperbaric chamber / Airlock evacuation
+  if (fullText.includes('hyperbaric') || fullText.includes('airlock') || fullText.includes('chamber') || fullText.includes('evacuate')) {
     if (!usedImages.has('airlock')) {
       usedImages.add('airlock');
       return { src: '/images/1_2_gasping_air.png', alt: 'Hyperbaric Airlock Evacuation Chamber' };
@@ -419,13 +451,27 @@ export function Mode2Screen() {
       {/* HARD CLINICAL SAFETY BANNER: NITROGLYCERIN BAN */}
       {isNitroBlocked && (
         <div className={styles.nitroBlockBanner}>
-          <Icon name="warning" size={32} style={{ color: 'var(--red)', flexShrink: 0 }} />
-          <div>
+          <img
+            src="/images/nitro_contraindicated_aspirin.png"
+            alt="Nitroglycerin Contraindicated - Aspirin 325mg Indicated"
+            style={{
+              width: '180px',
+              height: '105px',
+              objectFit: 'cover',
+              borderRadius: '4px',
+              border: '2px solid var(--red)',
+              flexShrink: 0,
+            }}
+          />
+          <div style={{ flex: 1 }}>
             <div className={styles.nitroTitle}>
               ⛔ HARD CLINICAL SAFETY INTERLOCK: DO NOT ADMINISTER NITROGLYCERIN!
             </div>
             <div className={styles.nitroDesc}>
               Systolic BP is <strong>{sysBp} mmHg (&lt; 90 mmHg)</strong>. Nitroglycerin administration in acute hypotensive coronary ischemia will cause catastrophic cardiovascular collapse and irreversible cardiogenic shock!
+            </div>
+            <div style={{ marginTop: '8px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--amber)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>💊 <strong>AUTHORIZED COUNTERMEASURE:</strong> Administer chewable Aspirin (325 mg) from Medical Bay Drawer B2.</span>
             </div>
           </div>
         </div>
@@ -593,7 +639,6 @@ export function Mode2Screen() {
                   <div key={step.order} className={styles.stepCard}>
                     <div className={styles.stepHeader}>
                       <span className={styles.stepOrder}>STEP 0{step.order}</span>
-                      <StatusBadge tone="neutral">NON-DOCTOR</StatusBadge>
                     </div>
                     <div className={styles.stepTitle}>{step.title}</div>
                     <p className={styles.stepInst}>{step.instruction}</p>

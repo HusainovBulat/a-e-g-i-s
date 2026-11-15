@@ -4,22 +4,25 @@ import React, { useState, useEffect } from 'react';
 import { Panel } from '../ui/Panel';
 import { Button } from '../ui/Button';
 import { StatusBadge } from '../ui/StatusBadge';
-import { ElevationProfile, LineChart, Sparkline, TrendAreaChart } from '../charts/Charts';
+import { ElevationProfile, TrendAreaChart } from '../charts/Charts';
 import { Icon } from '../ui/icons';
 import { useConsole } from '../../lib/ConsoleProvider';
+import { normalizeEnvId } from '../../lib/api/client';
+import { crewMeta, envTitle } from '../../lib/crew';
+import { visorModel } from '../../lib/visor';
+import { VisorHud } from '../v2/visor/VisorHud';
 import type { RoutePoint } from '../../lib/api/types';
 import styles from './mode1.module.css';
 
 export function Mode1Screen() {
-  const { currentCrew, crew, api } = useConsole();
+  const { currentCrew, crew, frame } = useConsole();
   const [showVisorPopup, setShowVisorPopup] = useState<boolean>(false);
   const [routePoints, setRoutePoints] = useState<RoutePoint[]>([]);
-  const [visorStatusText, setVisorStatusText] = useState<string>('VISOR HUD SYNCED');
-  const [sendingVisor, setSendingVisor] = useState<boolean>(false);
 
   const vitals = currentCrew?.vitals;
   const modelA = currentCrew?.model_a;
   const modelB = currentCrew?.model_b;
+  const env = normalizeEnvId(vitals?.env ?? 'crater_eva');
 
   const [smo2History, setSmo2History] = useState<number[]>([78, 77.5, 78, 78.2, 78, 77.8, 78.1]);
   const [o2BurnHistory, setO2BurnHistory] = useState<number[]>([1.35, 1.4, 1.42, 1.45, 1.44, 1.46, 1.45]);
@@ -39,71 +42,63 @@ export function Mode1Screen() {
   }, [vitals?.t, modelB?.o2_burn_l_min]);
 
   useEffect(() => {
-    void api.getRouteProfile().then(setRoutePoints).catch(() => {});
-  }, [api]);
+    fetch('/api/route_profile')
+      .then(res => (res.ok ? res.json() : []))
+      .then(data => setRoutePoints(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
 
-  // Defaults if loading
-  const rawWalkBackMin = modelB?.walk_back_min ?? 24.5;
-  // NASA Apollo/Artemis operational cap: 180 min (3.0 hours) max stay before turn-around
-  const walkBackMin = Math.max(0, rawWalkBackMin);
-  const distanceM = currentCrew?.model_b?.distance_m ?? (vitals?.distance_m ?? 1850);
+  // Environment Classification
+  const isCrater = env === 'crater_eva';
+  const isRover = env === 'rover';
+  const isLunarBase = env === 'moon_base';
+  const isMarsTransit = env === 'mars_transit';
+  const isOrbit = env === 'orbit_station';
+  const isOutside = isCrater || isRover;
+
+  const isFall = Boolean(vitals?.fall);
+
+  // Defaults if loading / rover duplication
+  const serverWalkBack = modelB?.walk_back_min;
+  const rawWalkBackMin = isFall
+    ? 0
+    : (serverWalkBack !== undefined && serverWalkBack !== null && serverWalkBack > 0)
+    ? serverWalkBack
+    : (isOutside ? 105.8 : 0);
+  const walkBackMin = isFall ? 0 : Math.max(0, rawWalkBackMin);
+  const isCriticalWalkBack = isOutside && !isFall && walkBackMin < 15;
+
+  const distanceM = (currentCrew?.model_b?.distance_m && currentCrew.model_b.distance_m > 0)
+    ? currentCrew.model_b.distance_m
+    : (vitals?.distance_m && vitals.distance_m > 0 ? vitals.distance_m : 1850);
   const returnSpeedKmh = Math.max(1.2, 2.5 * (1.0 - 0.3 * ((modelA?.fatigue_score ?? 42) / 100)));
   const returnTimeMin = currentCrew?.model_b?.return_time_min ?? (distanceM / (returnSpeedKmh * 1000 / 60));
   const o2LeftPct = modelB?.o2_left_pct ?? 78.4;
   const o2Burn = modelB?.o2_burn_l_min ?? 1.45;
   const metabolicW = modelB?.metabolic_w ?? 265;
   const fatigueScore = modelA?.fatigue_score ?? 42;
-  // null from Model A = fatigue stable / recovering -> no countdown
   const legsFailMin = modelA ? modelA.legs_fail_min : null;
   const legsFailText = legsFailMin === null ? 'STABLE' : `${legsFailMin.toFixed(1)} MIN`;
   const isFallback = modelA?.fallback ?? false;
   const isDizzy = vitals?.dizzy ?? false;
-  const isFall = Boolean(vitals?.fall);
 
   const currentSmo2 = vitals?.smo2 ?? (smo2History[smo2History.length - 1] ?? 78.0);
   const smo2Tone: 'green' | 'amber' | 'red' = currentSmo2 < 60 ? 'red' : currentSmo2 < 72 ? 'amber' : 'green';
   const o2BurnTone: 'green' | 'amber' | 'red' = o2Burn > 2.0 ? 'red' : o2Burn > 1.65 ? 'amber' : 'green';
 
-  const isCriticalWalkBack = walkBackMin < 15;
   const isWarningFatigue = (legsFailMin !== null && legsFailMin <= 15) || fatigueScore >= 70;
-  const isCritical = isCriticalWalkBack || isWarningFatigue || isDizzy || isFall || smo2Tone === 'red' || o2BurnTone === 'red';
-  const isCaution = !isCritical && (walkBackMin < 30 || fatigueScore >= 50 || (legsFailMin !== null && legsFailMin <= 30) || smo2Tone === 'amber' || o2BurnTone === 'amber');
-  const isNominal = !isCritical && !isCaution;
 
   // Format elevation points for SVG profile
   const elevationArray = routePoints.length > 0
     ? routePoints.map(p => p.elevation_m)
     : [12, 14, 17, 15, 20, 23, 21, 28, 26, 30, 34, 31, 39, 43, 41, 47, 45, 54, 51, 60, 58, 64, 69, 66, 75, 79, 73, 82, 88, 85, 94, 90, 98];
 
-  const handleSendToVisor = async () => {
-    setSendingVisor(true);
-    const msg = isCriticalWalkBack
-      ? 'TURN-BACK POINT REACHED // RETURN TO LUNAR BASE'
-      : isWarningFatigue
-      ? 'REST 60S // QUADRICEPS DESATURATION WARNING'
-      : isCritical || isCaution
-      ? 'STOP 60S // PHYSIOLOGICAL CAUTION'
-      : 'TRAVERSE ON SCHEDULE // PROCEED NOMINAL';
-
-    try {
-      await api.postEvent({
-        type: 'visor_instruction',
-        crew,
-        text: msg,
-      });
-      setVisorStatusText(`SENT TO VISOR: "${msg}"`);
-      setTimeout(() => setVisorStatusText('VISOR HUD SYNCED'), 4000);
-    } catch {
-      setVisorStatusText('FAILED TO TRANSMIT TO VISOR');
-    } finally {
-      setSendingVisor(false);
-    }
-  };
+  // Dynamic helmet visor model from live console frame
+  const visor = visorModel(frame, crew);
 
   return (
     <div className={styles.screen}>
-      
-      {/* Early Warning Banner */}
+      {/* Early Warning Banner with Visor button */}
       {isWarningFatigue && (
         <div className={styles.warningBanner}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -124,28 +119,38 @@ export function Mode1Screen() {
               Recommendation: Halt for 60s micro-recovery.
             </div>
           </div>
-          <Button variant="danger" size="sm" onClick={handleSendToVisor} disabled={sendingVisor}>
-            SEND REST DIRECTIVE TO CREW
-          </Button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button variant="secondary" size="sm" onClick={() => setShowVisorPopup(true)}>
+              <Icon name="scan" size={14} />
+              OPEN VISOR HUD ↗
+            </Button>
+          </div>
         </div>
       )}
 
       {/* Top Row: Walk-Back Hero & Model A */}
       <div className={styles.topRow}>
-        
         {/* Walk-Back Limit (Model B) */}
         <Panel
-          eyebrow="MODEL B // POINT OF NO RETURN"
-          title="Dynamic walk-back limit"
+          eyebrow={isOutside ? 'MODEL B // POINT OF NO RETURN' : 'ENVIRONMENT // LIFE SUPPORT MONITOR'}
+          title={isOutside ? 'Dynamic walk-back limit' : 'Cabin atmospheric monitor'}
           action={
-            <StatusBadge tone={isCriticalWalkBack ? 'red' : walkBackMin < 30 ? 'amber' : 'green'} dot>
-              {isCriticalWalkBack ? 'MARGIN CRITICAL' : walkBackMin < 30 ? 'MARGIN SHORT' : 'MARGIN SAFE'}
-            </StatusBadge>
+            isFall ? (
+              <StatusBadge tone="red" dot>CREW DOWN</StatusBadge>
+            ) : isCrater || isRover ? (
+              <StatusBadge tone={isCriticalWalkBack ? 'red' : walkBackMin < 30 ? 'amber' : 'green'} dot>
+                {isCriticalWalkBack ? 'TURN BACK NOW' : walkBackMin < 30 ? 'SLOW DOWN' : 'SAFE TO PROCEED'}
+              </StatusBadge>
+            ) : (
+              <StatusBadge tone="green" dot>
+                STANDBY
+              </StatusBadge>
+            )
           }
         >
           <div className={styles.walkBackHero}>
             <div className={styles.timerDisplay}>
-              {vitals?.fall ? (
+              {isFall ? (
                 <>
                   <div className={styles.timerNumber} style={{ color: 'var(--red)' }}>
                     00:00
@@ -154,7 +159,7 @@ export function Mode1Screen() {
                     EVA ABORTED // CREW DOWN · RESCUE IN PROGRESS
                   </span>
                 </>
-              ) : (
+              ) : isCrater ? (
                 <>
                   <div
                     className={styles.timerNumber}
@@ -165,6 +170,38 @@ export function Mode1Screen() {
                   </div>
                   <span className={styles.timerUnit}>MINUTES REMAINING BEFORE POINT OF NO RETURN</span>
                 </>
+              ) : isRover ? (
+                <>
+                  <div
+                    className={styles.timerNumber}
+                    style={{ color: isCriticalWalkBack ? 'var(--red)' : walkBackMin < 30 ? 'var(--amber)' : 'var(--green)' }}
+                  >
+                    {Math.floor(walkBackMin).toString().padStart(2, '0')}:
+                    {Math.floor((walkBackMin % 1) * 60).toString().padStart(2, '0')}
+                  </div>
+                  <span className={styles.timerUnit}>MINUTES REMAINING BEFORE POINT OF NO RETURN</span>
+                </>
+              ) : isLunarBase ? (
+                <>
+                  <div className={styles.timerNumber} style={{ color: 'var(--green)', fontSize: '42px' }}>
+                    IN HABITAT
+                  </div>
+                  <span className={styles.timerUnit}>SHIRT-SLEEVE ENVIRONMENT · CABIN O₂ / CO₂ REGULATED</span>
+                </>
+              ) : isMarsTransit ? (
+                <>
+                  <div className={styles.timerNumber} style={{ color: 'var(--blue-bright)', fontSize: '42px' }}>
+                    IN TRANSIT
+                  </div>
+                  <span className={styles.timerUnit}>INTERPLANETARY SPACECRAFT CABIN · 0G ENVIRONMENT</span>
+                </>
+              ) : (
+                <>
+                  <div className={styles.timerNumber} style={{ color: 'var(--blue-bright)', fontSize: '42px' }}>
+                    IN ORBIT
+                  </div>
+                  <span className={styles.timerUnit}>ORBITAL STATION MODULE · 0G CLOSED-LOOP ECLSS</span>
+                </>
               )}
             </div>
 
@@ -172,8 +209,12 @@ export function Mode1Screen() {
               <div
                 className={styles.timerBarFill}
                 style={{
-                  width: `${Math.min(100, (walkBackMin / 90) * 100)}%`,
-                  backgroundColor: isCriticalWalkBack ? 'var(--red)' : walkBackMin < 30 ? 'var(--amber)' : 'var(--green)',
+                  width: isOutside
+                    ? `${Math.min(100, (walkBackMin / 90) * 100)}%`
+                    : '100%',
+                  backgroundColor: isOutside
+                    ? (isCriticalWalkBack ? 'var(--red)' : walkBackMin < 30 ? 'var(--amber)' : 'var(--green)')
+                    : 'var(--green)',
                 }}
               />
             </div>
@@ -181,7 +222,7 @@ export function Mode1Screen() {
             <div className={styles.timerMeta}>
               <span>METABOLIC EXPENDITURE: {metabolicW} W</span>
               <span>O₂ BURN RATE: {o2Burn.toFixed(2)} L/MIN</span>
-              <span>PLSS RESERVE: {o2LeftPct.toFixed(1)}%</span>
+              <span>{isOutside ? `PLSS RESERVE: ${o2LeftPct.toFixed(1)}%` : `CABIN O₂: ${o2LeftPct.toFixed(1)}%`}</span>
             </div>
 
             <div style={{
@@ -196,23 +237,51 @@ export function Mode1Screen() {
               fontSize: '11px',
               color: 'var(--text-muted)',
             }}>
-              <span>🚶 <strong>RETURN TREK ON FOOT:</strong> ~{Math.round(returnTimeMin)} MIN ({(distanceM / 1000).toFixed(2)} KM @ {returnSpeedKmh.toFixed(1)} KM/H)</span>
-              <span style={{ color: 'var(--blue-bright)', letterSpacing: '0.05em' }}>NASA APOLLO / ARTEMIS CONSTRAINT</span>
+              {isCrater && (
+                <>
+                  <span>🚶 <strong>RETURN TREK ON FOOT:</strong> ~{Math.round(returnTimeMin)} MIN ({(distanceM / 1000).toFixed(2)} KM @ {returnSpeedKmh.toFixed(1)} KM/H)</span>
+                  <span style={{ color: 'var(--blue-bright)', letterSpacing: '0.05em' }}>NASA APOLLO / ARTEMIS CONSTRAINT</span>
+                </>
+              )}
+              {isRover && (
+                <>
+                  <span>🛞 <strong>ROVER EGRESS ON FOOT:</strong> ~{Math.round(returnTimeMin)} MIN ({(distanceM / 1000).toFixed(2)} KM @ {returnSpeedKmh.toFixed(1)} KM/H)</span>
+                  <span style={{ color: 'var(--blue-bright)', letterSpacing: '0.05em' }}>NASA ROVER WALKBACK CONSTRAINT</span>
+                </>
+              )}
+              {isLunarBase && (
+                <>
+                  <span>🏠 <strong>LUNAR BASE ECLSS ACTIVE:</strong> CENTRAL LIFE SUPPORT NOMINAL · REGENERATIVE O₂ LOOP</span>
+                  <span style={{ color: 'var(--green)', letterSpacing: '0.05em' }}>ZERO PLSS EXPENDITURE</span>
+                </>
+              )}
+              {isMarsTransit && (
+                <>
+                  <span>🚀 <strong>SPACECRAFT LIFE SUPPORT:</strong> 0G DEEP SPACE TRANSIT · SOLAR PARTICLE SHIELDING NOMINAL</span>
+                  <span style={{ color: 'var(--blue-bright)', letterSpacing: '0.05em' }}>EARTH-MARS COMM DELAY ACTIVE</span>
+                </>
+              )}
+              {isOrbit && (
+                <>
+                  <span>🛰️ <strong>ORBITAL STATION MODULE:</strong> CLOSED-LOOP RECIRCULATION · MICROGRAVITY WORKOUT PROTOCOL</span>
+                  <span style={{ color: 'var(--blue-bright)', letterSpacing: '0.05em' }}>0G CARDIO MONITORED</span>
+                </>
+              )}
             </div>
 
-            {/* Plain-English explanation box for non-doctors */}
+            {/* Plain-English explanation box with exact requested texts */}
             <div
               style={{
                 padding: '9px 12px',
                 background: isCriticalWalkBack
                   ? 'rgba(239, 68, 68, 0.12)'
-                  : walkBackMin < 30
+                  : (isOutside && walkBackMin < 30)
                   ? 'rgba(245, 179, 1, 0.12)'
                   : 'rgba(46, 204, 113, 0.12)',
                 border: `1px solid ${
                   isCriticalWalkBack
                     ? 'var(--red)'
-                    : walkBackMin < 30
+                    : (isOutside && walkBackMin < 30)
                     ? 'var(--amber)'
                     : 'var(--green)'
                 }`,
@@ -220,54 +289,56 @@ export function Mode1Screen() {
                 lineHeight: 1.45,
                 color: isCriticalWalkBack
                   ? '#fca5a5'
-                  : walkBackMin < 30
+                  : (isOutside && walkBackMin < 30)
                   ? '#fde68a'
                   : '#a7f3d0',
                 fontFamily: 'var(--font-mono)',
               }}
             >
-              {isCriticalWalkBack ? (
-                <span>🚨 TURN BACK NOW: Point of no return reached. Head back to the habitat airlock immediately.</span>
-              ) : walkBackMin < 30 ? (
-                <span>⚠️ SLOW DOWN (STOP 60s): Steep climb is draining leg oxygen faster than blood can deliver it. Rest 60 seconds and reduce pace by 30% to avoid leg cramps.</span>
-              ) : (
-                <span>✅ SAFE TO PROCEED: You have plenty of oxygen and leg stamina to climb back to the airlock.</span>
+              {isCrater && (
+                <span>
+                  🚶 <strong>CRATER EVA (0.16g)</strong> — Dynamic on-foot walk-back limit based on slope, PLSS O₂ burn rate, and muscle fatigue.
+                </span>
               )}
-            </div>
-
-            <div className={styles.visorControls}>
-              <Button variant="primary" size="sm" onClick={handleSendToVisor} disabled={sendingVisor}>
-                <Icon name="arrowUpRight" size={14} />
-                SEND TO CREW VISOR
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => setShowVisorPopup(true)}>
-                <Icon name="scan" size={14} />
-                POPUP VISOR + WRIST HUD
-              </Button>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', alignSelf: 'center' }}>
-                {visorStatusText}
-              </span>
+              {isRover && (
+                <span>
+                  🛞 <strong>ROVER (0.16g)</strong> — ROVER TRAVERSE: Tracking emergency on-foot walk-back limit to base in case of rover mechanical failure.
+                </span>
+              )}
+              {isLunarBase && (
+                <span>
+                  🏠 <strong>INSIDE LUNAR BASE (SHIRT-SLEEVE):</strong> Crew is inside pressurized habitat. Walk-Back Limit in standby; monitoring cabin O2/CO2 & recovery.
+                </span>
+              )}
+              {isMarsTransit && (
+                <span>
+                  🚀 <strong>DEEP SPACE TRANSIT (0g):</strong> Inside spacecraft cabin. Walk-Back Limit in standby; monitoring 0g deconditioning, radiation & comm delay.
+                </span>
+              )}
+              {isOrbit && (
+                <span>
+                  🛰️ <strong>ORBITAL STATION (0g):</strong> Inside station module. Walk-Back Limit in standby; monitoring microgravity exercise load & cabin air.
+                </span>
+              )}
             </div>
           </div>
         </Panel>
 
-        {/* Model A Muscles Panel */}
+        {/* Model A: Leg Muscle Fatigue */}
         <Panel
-          eyebrow="MODEL A // MYO-FATIGUE CASCADE"
-          title="Lower-limb fatigue"
+          eyebrow="MODEL A // MUSCLE STAMINA"
+          title="Leg fatigue & failure forecast"
           action={
-            isFallback ? (
-              <StatusBadge tone="amber" dot>NIRS FOGGED / FALLBACK</StatusBadge>
-            ) : (
-              <StatusBadge tone="blue" dot>OPTICAL NIRS ACTIVE</StatusBadge>
-            )
+            <StatusBadge tone={isFallback ? 'amber' : 'blue'} dot>
+              {isFallback ? 'FALLBACK (NIRS FOGGED)' : 'PRIMARY (NIRS + sEMG)'}
+            </StatusBadge>
           }
         >
           <div className={styles.metricsGrid2}>
             <div className={styles.metricTile}>
               <span>FATIGUE SCORE</span>
               <strong style={{ color: fatigueScore >= 70 ? 'var(--red)' : fatigueScore >= 50 ? 'var(--amber)' : 'var(--green)' }}>
-                {fatigueScore} / 100
+                {fatigueScore.toFixed(0)} <small>/ 100</small>
               </strong>
               <small>How tired your leg muscles are (0 = fresh, 100 = exhaustion)</small>
             </div>
@@ -297,21 +368,76 @@ export function Mode1Screen() {
             STEP BALANCE / STUMBLE RISK: <strong style={{ color: '#fff' }}>Normal ({vitals?.gait ? vitals.gait.toFixed(2) : '0.22'} SD)</strong> · SPEED: {vitals?.speed ? vitals.speed.toFixed(1) : '2.5'} KM/H
           </div>
         </Panel>
-
       </div>
+
+      {/* Live Helmet Visor HUD borrowed from V2 */}
+      <Panel
+        eyebrow="A.E.G.I.S. // HEADS-UP DISPLAY"
+        title={`Spacesuit helmet visor · ${crewMeta[crew]?.name ?? `Crew ${crew}`}`}
+        action={
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <Button variant="secondary" size="sm" onClick={() => setShowVisorPopup(true)}>
+              <Icon name="scan" size={14} />
+              OPEN FULL VISOR HUD ↗
+            </Button>
+            <a
+              href={`/v2/visor?crew=${crew}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                color: 'var(--blue-bright)',
+                textDecoration: 'none',
+                padding: '5px 8px',
+                border: '1px solid var(--line-subtle)',
+                borderRadius: '4px'
+              }}
+            >
+              STANDALONE TAB ↗
+            </a>
+          </div>
+        }
+      >
+        <div style={{
+          aspectRatio: '16 / 9',
+          width: '100%',
+          maxHeight: '420px',
+          overflow: 'hidden',
+          borderRadius: '8px',
+          border: '1px solid #1d3354',
+          background: '#010204',
+          position: 'relative',
+          margin: '0 auto',
+        }}>
+          <VisorHud model={visor} />
+        </div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '11px',
+          color: 'var(--text-muted)',
+          marginTop: '10px'
+        }}>
+          <span>ENVIRONMENT SCENE: <strong style={{ color: '#fff' }}>{envTitle(env).toUpperCase()}</strong></span>
+          <span>HEADS-UP TELEMETRY: <strong style={{ color: 'var(--green)' }}>EDGES ACTIVE · CLEAR CENTER</strong></span>
+        </div>
+      </Panel>
 
       {/* Route Elevation Profile (LRO LOLA Site04) */}
       <Panel
         eyebrow="LRO LOLA / SITE 04 SHACKLETON CRATER"
-        title="Route topography & point of no return"
-        action={<StatusBadge tone="blue">MAP SCALE 5M/PX</StatusBadge>}
+        title={isOutside ? 'Route topography & point of no return' : `Topography overview · ${envTitle(env)}`}
+        action={<StatusBadge tone="blue">{isOutside ? 'MAP SCALE 5M/PX' : 'SURFACE REFERENCE'}</StatusBadge>}
       >
         {(() => {
           const distanceM = currentCrew?.model_b?.distance_m ?? (vitals?.distance_m ?? 1850);
           const totalRouteM = 4950;
           const currentPosRatio = Math.max(0.08, Math.min(0.88, distanceM / totalRouteM));
           const maxForwardMargin = 0.94 - currentPosRatio;
-          const walkBackFactor = Math.max(0, Math.min(1, walkBackMin / 90));
+          const walkBackFactor = isOutside ? Math.max(0, Math.min(1, walkBackMin / 90)) : 1;
           const turnaroundRatio = Math.max(
             currentPosRatio,
             Math.min(0.95, currentPosRatio + Math.max(0.02, maxForwardMargin * walkBackFactor))
@@ -408,110 +534,70 @@ export function Mode1Screen() {
         </div>
       </Panel>
 
-      {/* Floating Visor & Wrist HUD Popup */}
+      {/* Floating Visor Modal with V2 VisorHud */}
       {showVisorPopup && (
         <div className={styles.hudPopupOverlay} onClick={() => setShowVisorPopup(false)}>
-          <div className={styles.hudPopupBox} onClick={e => e.stopPropagation()}>
+          <div
+            className={styles.hudPopupBox}
+            style={{ width: '1040px', maxWidth: '96vw', background: '#02050c', border: '1px solid var(--blue-bright)' }}
+            onClick={e => e.stopPropagation()}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--blue-bright)', letterSpacing: '0.1em' }}>
-                SPACESUIT AR VISOR & FOREARM CUFF PREVIEW
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--blue-bright)', letterSpacing: '0.1em' }}>
+                SPACESUIT AR HELMET VISOR // {envTitle(env).toUpperCase()} · {crewMeta[crew]?.name.toUpperCase()}
               </span>
               <button
                 type="button"
                 onClick={() => setShowVisorPopup(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--red)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '16px' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--red)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '18px', padding: '4px 8px' }}
               >
                 ✕
               </button>
             </div>
 
-            {/* AR Visor Strip */}
-            <div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                PROJECTED IN UPPER-RIGHT HELMET VISOR (HUD):
-              </div>
-              <div className={styles.visorPhotoWrap}>
-                <img src="/images/4_1_eva_ar_visor_warning.png" alt="AR Visor HUD Real View" className={styles.visorPhoto} />
-              </div>
-              <div className={styles.visorStrip}>
-                <div className={styles.visorReticle}>
-                  {isFall ? (
-                    <span style={{ color: 'var(--red)' }}>🚨 FALL DETECTED · RESCUE ARMED</span>
-                  ) : isCritical ? (
-                    <span style={{ color: 'var(--red)' }}>
-                      ⚠️ {Math.floor(walkBackMin).toString().padStart(2, '0')}:
-                      {Math.floor((walkBackMin % 1) * 60).toString().padStart(2, '0')} · STOP 60S · ↗ 34M
-                    </span>
-                  ) : isCaution ? (
-                    <span style={{ color: 'var(--amber)' }}>
-                      ⚠️ {Math.floor(walkBackMin).toString().padStart(2, '0')}:
-                      {Math.floor((walkBackMin % 1) * 60).toString().padStart(2, '0')} · STOP 60S · ↗ 34M
-                    </span>
-                  ) : (
-                    <span style={{ color: 'var(--green)' }}>
-                      {Math.floor(walkBackMin).toString().padStart(2, '0')}:
-                      {Math.floor((walkBackMin % 1) * 60).toString().padStart(2, '0')} · PROCEED NOMINAL · ↗ 34M
-                    </span>
-                  )}
-                </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
-                  SLOPE {vitals?.slope ? vitals.slope.toFixed(0) : '12'}° · AZ 248°
-                </div>
-              </div>
+            <div style={{
+              aspectRatio: '16 / 9',
+              width: '100%',
+              overflow: 'hidden',
+              borderRadius: '8px',
+              border: '1px solid #1d3354',
+              background: '#010204',
+              position: 'relative',
+            }}>
+              <VisorHud model={visor} />
             </div>
 
-            {/* Forearm Cuff ("часы" скафандра) */}
-            <div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                FOREARM CUFF DISPLAY (WRIST):
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
+                {isOutside ? 'Dynamic walk-back & buddy radar active' : 'Cabin mode: shirt-sleeve environment · safe oxygen supply'}
               </div>
-              <div className={styles.wristFrame}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '28px', fontWeight: 700, color: 'var(--text-strong)' }}>
-                    O₂ {o2LeftPct.toFixed(0)}% · HR {vitals?.hr ?? 74}
-                  </span>
-                  <StatusBadge tone="green" dot>AUTO LOOP ARMED</StatusBadge>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', textAlign: 'center' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px', border: '1px solid var(--line-subtle)' }}>
-                    100% O₂ SURGE: <span style={{ color: 'var(--green)' }}>READY</span>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px', border: '1px solid var(--line-subtle)' }}>
-                    HEATING LCVG: <span style={{ color: 'var(--green)' }}>READY</span>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px', border: '1px solid var(--line-subtle)' }}>
-                    BURST S-BAND: <span style={{ color: 'var(--green)' }}>ONLINE</span>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px', border: '1px solid var(--line-subtle)' }}>
-                    EVAC RADAR: <span style={{ color: 'var(--blue-bright)' }}>34 M</span>
-                  </div>
-                </div>
-
-                <div className={styles.wristButtons}>
-                  <Button variant="secondary" size="sm" style={{ flex: 1 }} onClick={() => setShowVisorPopup(false)}>
-                    OK / ACK
-                  </Button>
-                  <Button variant="ghost" size="sm" style={{ flex: 1 }}>
-                    LIGHT
-                  </Button>
-                  <Button variant="danger" size="sm" style={{ flex: 1 }} onClick={async () => {
-                    await api.postEvent({ type: 'alarm_jump_to_emergency', crew, text: 'SOS TRIGGERED FROM FOREARM CUFF' });
-                    setShowVisorPopup(false);
-                  }}>
-                    SOS ALERT
-                  </Button>
-                </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <a
+                  href={`/v2/visor?crew=${crew}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11px',
+                    color: 'var(--blue-bright)',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '6px 12px',
+                    border: '1px solid var(--line-subtle)',
+                    borderRadius: '4px'
+                  }}
+                >
+                  OPEN IN STANDALONE TAB ↗
+                </a>
+                <Button variant="secondary" size="sm" onClick={() => setShowVisorPopup(false)}>
+                  CLOSE VISOR HUD
+                </Button>
               </div>
             </div>
-
-            <Button variant="secondary" size="sm" onClick={() => setShowVisorPopup(false)}>
-              CLOSE PREVIEW
-            </Button>
           </div>
         </div>
       )}
-
     </div>
   );
 }
