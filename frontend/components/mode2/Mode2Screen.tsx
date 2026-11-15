@@ -865,13 +865,41 @@ export function Mode2Screen() {
         eyebrow="MODEL C // CLINICAL TRIAGE"
         title="Automated diagnostic verdict & reasoning"
         action={
-          <StatusBadge tone={isNominal ? "green" : "red"} dot>
-            {isNominal
-              ? 'FLIGHT SURGEONS: STANDBY'
-              : triageResult?.flight_surgeons_queued
-              ? 'FLIGHT SURGEONS ALERT QUEUED'
-              : 'TRIAGE READY'}
-          </StatusBadge>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <a
+              href="https://github.com/HusainovBulat/a-e-g-i-s"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: 'rgba(56, 189, 248, 0.08)',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+                color: '#38bdf8',
+                fontSize: '11px',
+                fontFamily: 'var(--font-mono)',
+                textDecoration: 'none',
+                fontWeight: 600,
+                letterSpacing: '0.04em',
+                transition: 'all 0.15s ease',
+              }}
+              title="Inspect Model C ML Clinical Triage Source Code on GitHub"
+            >
+              <Icon name="github" size={13} />
+              <span>GITHUB // ML MODEL</span>
+              <Icon name="arrowUpRight" size={11} />
+            </a>
+            <StatusBadge tone={isNominal ? "green" : "red"} dot>
+              {isNominal
+                ? 'FLIGHT SURGEONS: STANDBY'
+                : triageResult?.flight_surgeons_queued
+                ? 'FLIGHT SURGEONS ALERT QUEUED'
+                : 'TRIAGE READY'}
+            </StatusBadge>
+          </div>
         }
       >
         <div className={styles.verdictBox}>

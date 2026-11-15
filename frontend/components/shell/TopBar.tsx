@@ -40,6 +40,28 @@ export function TopBar({ environment, onEnvironmentChange, crew, onCrewChange, c
         </div>
         <div className={styles.missionStatus} aria-live="polite"><span className={`${styles.liveDot} ${connection === 'connected' ? styles.liveConnected : connection === 'disconnected' ? styles.liveDisconnected : ''}`} /><span>{connection === 'connected' ? 'AUTONOMOUS 1 HZ FEED ACTIVE' : connection === 'disconnected' ? 'RECONNECTING LINK' : 'NEGOTIATING 1 HZ FEED'}</span><b>01 HZ</b></div>
         <div className={styles.topbarActions}>
+          <a
+            href="https://github.com/HusainovBulat/a-e-g-i-s"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.utilityButton}
+            style={{
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0 10px',
+              width: 'auto',
+              fontSize: '11px',
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 600,
+              color: 'var(--text-strong)',
+            }}
+            title="A.E.G.I.S. GitHub Repository (ML Models and Source Code)"
+          >
+            <Icon name="github" size={15} />
+            <span>GITHUB</span>
+          </a>
           <ScenarioLauncher crew={crew} />
           <RoutineBell events={events} />
           <QrPairing crew={crew} />
