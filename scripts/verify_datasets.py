@@ -142,5 +142,5 @@ if __name__ == "__main__":
     check_table_c()
     check_table_d()
     print("\n" + "=" * 60)
-    print("VERIFICATION COMPLETE: ALL 4 TABLES ARE 100% READY FOR GEORGIY!")
+    print("VERIFICATION COMPLETE: ALL 4 TABLES ARE 100% READY FOR MODEL TRAINING!")
     print("=" * 60)

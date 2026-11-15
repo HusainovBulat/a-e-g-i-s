@@ -1,0 +1,16 @@
+[project]
+name = "aegis"
+version = "0.1.0"
+description = "A.E.G.I.S. — Autonomous EVA Gait, Ischemia & Survival System (Base Server)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [
+    { name = "Husainov Bulat" },
+    { name = "Kuzmichev Konstantin" },
+    { name = "Simonishvili Kristina" },
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".venv", "venv", "node_modules", "frontend", "bulat_extracted"]

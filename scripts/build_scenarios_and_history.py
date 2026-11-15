@@ -24,7 +24,7 @@ import json
 import csv
 import numpy as np
 
-PROJECT_ROOT = r"D:\PycharmProject\nasa_hakaton"
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 TABLE_D_FILE = os.path.join(DATA_DIR, "table_d_osdr_14day_trend.csv")
 CREW_HISTORY_FILE = os.path.join(DATA_DIR, "crew_history.json")

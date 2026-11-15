@@ -4,8 +4,8 @@ __pycache__
 .env
 certs
 data.zip
-*.markdown
+docs
+tests
 frontend
 node_modules
 .next
-astronaut_3d_preview.html

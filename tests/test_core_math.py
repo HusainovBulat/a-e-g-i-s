@@ -1,5 +1,5 @@
 import unittest
-from core_math import (
+from app.core_math import (
     clamp,
     classify_health_band,
     scale_slider_to_system,

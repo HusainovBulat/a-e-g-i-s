@@ -11,15 +11,12 @@ Authors: Kostya (AI & Core Architecture Lead) & Bulat (Backend API Pipeline)
 """
 
 import os
-import sys
 import json
 import time
 from typing import Dict, Any, List, Optional
 
-# Ensure project root is in sys.path
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
+# Project root (this module lives in app/)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def _load_env_file():
     """Auto-loads environment variables from .env if not already set in os.environ."""
@@ -117,7 +114,7 @@ def prepare_mode3_payload(
       STREAM 2 (Evening Terminal): 5 Subjective sliders (0..10) submitted by the astronaut
     Runs them through core_math (detect_masking & calculate_eva_readiness_score).
     """
-    from core_math import detect_masking, calculate_eva_readiness_score
+    from .core_math import detect_masking, calculate_eva_readiness_score
 
     # Stream 1: Objective telemetry from day's traverse (NASA OSDR)
     day_data = load_crew_day_telemetry(crew_id, sol)

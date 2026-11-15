@@ -1,7 +1,7 @@
 """
 A.E.G.I.S. Core ML Prediction Engine (predict_all.py)
 Autonomous EVA Gait, Ischemia & Survival System · NASA Space Apps Challenge 2026
-Authors: Georgiy (ML Engineer) & Kostya (Lead / AI Core Architecture)
+Authors: Kostya (Lead / AI Core Architecture)
 
 Production-grade, zero-hallucination ML pipeline for astronaut health & survival.
 Runs at 1 Hz on live suit and base telemetry streams:
@@ -25,21 +25,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import joblib
 import numpy as np
 
-# Setup root path resolution
-ROOT_DIR = Path(__file__).resolve().parent
-MODELS_DIR = ROOT_DIR / "models"
-DATA_DIR = ROOT_DIR / "data"
-
-# Import core_math for organ systems & clinical math
-try:
-    import core_math
-except ImportError:
-    if str(ROOT_DIR) not in sys.path:
-        sys.path.insert(0, str(ROOT_DIR))
-    try:
-        import core_math
-    except ImportError:
-        core_math = None
+from .. import core_math
+from ..config import DATA_DIR, MODELS_DIR  # noqa: F401  (DATA_DIR re-exported)
 
 log = logging.getLogger("aegis.predict_all")
 

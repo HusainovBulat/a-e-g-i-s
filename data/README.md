@@ -14,7 +14,7 @@ All raw physical datasets from NASA OSDR, MIT PhysioNet, NIH Figshare, and LRO L
 - **Targets:**
   - `muscle_fatigue_score`: strictly **0..100** (0 = fresh, 100 = total exhaustion).
   - `time_to_failure_min`: predicted minutes to leg muscle failure (0 to 42 min).
-- **Owner:** Georgiy (`model_a_full.pkl` and `model_a_fallback.pkl`).
+- **Models:** `model_a_full.pkl`, `model_a_fallback.pkl`.
 
 ### 2. `table_b_lunar_eva_metabolic.csv` (Model B: EVA Metabolic & Walk-Back)
 - **Sources:** `test_measure.csv` (Treadmill 992 subjects) + `actes` (Cycloergometer) + `Site04 LOLA TIF` + Apollo EVA scaling (`20170007261.pdf`).
@@ -24,7 +24,7 @@ All raw physical datasets from NASA OSDR, MIT PhysioNet, NIH Figshare, and LRO L
   - `metabolic_rate_watts`: metabolic rate (160 to 780 W).
   - `o2_burn_rate_l_min`: oxygen burn rate (0.45 to 2.40 L/min).
   - `walk_back_limit_min`: Dynamic Point of No Return (minutes before PLSS tank 750 L is exhausted).
-- **Owner:** Georgiy (`model_b_metabolic.pkl`).
+- **Model:** `model_b_metabolic.pkl`.
 
 ### 3. `table_c_emergency_triage.csv` (Model C: Emergency Triage Decision Tree)
 - **Sources:** `Pulse/pulse_features_1hz.csv` (PTT healthy cohort) + `ppg/bidmc` (ICU distress signals).
@@ -37,7 +37,7 @@ All raw physical datasets from NASA OSDR, MIT PhysioNet, NIH Figshare, and LRO L
   - `4: Decompression Barotrauma`
 - **Clinical Interlocks:**
   - `dont_give_nitro`: strictly `1` when `bp_sys < 90 mmHg` (549 cases in Ischemia, all 1500 cases in Syncope).
-- **Owner:** Georgiy (`model_c_triage.pkl`) & Bulat (`POST /triage`).
+- **Model:** `model_c_triage.pkl` · **Owner:** Bulat (`POST /triage`).
 
 ### 4. `table_d_osdr_14day_trend.csv` (Longitudinal 14-Sol Trends)
 - **Sources:** NASA OSDR `OSD-783` (soleus muscle unloading) + `OSD-435` (radiation cardiac remodeling).

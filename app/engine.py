@@ -13,7 +13,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Deque, Dict, List, Optional, Tuple
 
-import core_math
+from . import core_math
 
 from .data_store import DataStore
 from .ml.models import ModelRegistry, finite, o2_burn_l_min

@@ -1,6 +1,6 @@
 import unittest
 import time
-from rag_llm import (
+from app.rag_llm import (
     load_nasa_standards,
     retrieve_relevant_standards,
     generate_deterministic_fallback,
@@ -87,7 +87,7 @@ class TestRagLLM(unittest.TestCase):
         }
         res_c = generate_deterministic_fallback(payload_nominal)
         self.assertEqual(res_c["schedule_action"], "CLEARED_NOMINAL")
-        self.assertIn("CLEARED FOR EVA", res_c["commander_summary"])
+        self.assertIn("CLEARED: NOMINAL READINESS", res_c["commander_summary"])
 
     def test_generate_summary_latency_and_fallback(self):
         payload = {

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import sys
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -12,15 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from . import config
-
-# core_math.py / rag_llm.py live in the project root (owned by the AI/DS track).
-if str(config.PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(config.PROJECT_ROOT))
-
-from .api import router  # noqa: E402
-from .data_store import get_store  # noqa: E402
-from .ml.models import ModelRegistry  # noqa: E402
-from .service import AegisService, ServiceError  # noqa: E402
+from .api import router
+from .data_store import get_store
+from .ml.models import ModelRegistry
+from .service import AegisService, ServiceError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("aegis")

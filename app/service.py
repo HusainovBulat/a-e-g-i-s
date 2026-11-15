@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Deque, Dict, List, Optional
 
-import rag_llm
+from . import rag_llm
 
 from . import config
 from .data_store import DataStore

@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import pytest
 
-from predict_all import (
+from app.ml.predict_all import (
     predict_all,
     predict_fatigue,
     predict_metabolic,

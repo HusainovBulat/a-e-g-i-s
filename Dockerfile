@@ -6,7 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
 COPY scripts ./scripts
-COPY core_math.py rag_llm.py run.py ./
+COPY run.py ./
 COPY data ./data
 COPY models ./models
 EXPOSE 8000

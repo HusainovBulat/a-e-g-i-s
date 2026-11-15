@@ -6,8 +6,8 @@
 
 Offline health monitoring for a crew of four: a phone acts as the suit's sensor pack, a laptop runs the
 Base Server (FastAPI + deterministic ML models) and a Next.js mission console. Everything runs in a browser on
-one local network — no internet needed on stage. Full product spec: `Project Aegis Unified Master Plan En.markdown`
-(RU: `Project_Aegis_Unified_Master_Plan_Ru.markdown`).
+one local network — no internet needed on stage. Full product spec: [`docs/master-plan.en.md`](docs/master-plan.en.md)
+(RU: [`docs/master-plan.ru.md`](docs/master-plan.ru.md)).
 
 | Mode | What it does |
 |---|---|
@@ -55,15 +55,15 @@ app/                    Base Server (FastAPI)
   ml/models.py          Model A / A-fallback / B / C: loads models/*.pkl, else trains from data/*.csv (seed 42)
   ml/predict_all.py     single-call ML pipeline (POST /api/predict_all), see below
   hub.py                console broadcast hub
-core_math.py            organ scores, masking detector, readiness, forecast, Mode 2 hard rules
-rag_llm.py              Commander RAG-LLM (Groq, temperature 0) + deterministic template
-predict_all.py          copy of app/ml/predict_all.py used by the root tests — keep both in sync
+  core_math.py          organ scores, masking detector, readiness, forecast, Mode 2 hard rules
+  rag_llm.py            Commander RAG-LLM (Groq, temperature 0) + deterministic template
 frontend/               Next.js console (/), phone sensor simulator (/phone), visor mirror (/visor)
 data/                   normalized NASA / PhysioNet datasets (see data/README.md)
 models/                 exported runtime models (*.pkl, LightGBM)
 scripts/                dataset normalization + scripts/train_models.py (re-export models)
 deploy/                 Caddyfile (HTTPS proxy), certs/ (in-Docker CA + certificate), lan-ips.ps1, firewall.ps1
-tests/                  backend tests · frontend/test/ — console tests
+docs/                   master plan (EN/RU), slides plan, prototypes/ (3D astronaut preview)
+tests/                  backend tests (pytest) · frontend/test/ — console tests (vitest)
 ```
 
 ## ML models
@@ -81,11 +81,11 @@ To use new exports, drop the four `.pkl` files into `models/` (bare estimator or
 
 ### `predict_all` — the whole pipeline in one call
 
-`POST /api/predict_all` (or `from predict_all import predict_all`) runs Model A → B → C, the clinical rules, the 6 organ scores,
+`POST /api/predict_all` (or `from app.ml.predict_all import predict_all`) runs Model A → B → C, the clinical rules, the 6 organ scores,
 voice keyword extraction and the Mode 3 masking detector on one telemetry packet:
 
 ```python
-from predict_all import predict_all
+from app.ml.predict_all import predict_all
 
 result = predict_all({
     "crew": "Crew_A", "distance_m": 1250, "speed": 2.5, "slope": 5, "o2_left": 580,
@@ -101,7 +101,7 @@ result["mode3_readiness"]["masking_detected"]
 ```
 
 Keys accept common aliases (`hr`/`hr_bpm`, `sys`/`bp_sys`, `st`/`st_elevation_mv`, `o2_left`/`o2_tank_l`, …); missing values fall back to nominal defaults.
-Run `python predict_all.py` for a standalone self-check.
+Run `python -m app.ml.predict_all` for a standalone self-check.
 
 Walk-back limit: return speed slows with fatigue (`max(1.2, 2.5 × (1 − 0.3 × fatigue/100))` km/h), the O₂ needed to walk back is reserved, and the rest is divided by the current burn rate (🟡 ≤ 15 min, 🔴 ≤ 5 min).
 
@@ -181,3 +181,8 @@ NASA OSDR [OSD-783](https://osdr.nasa.gov/bio/repo/data/studies/OSD-783) / [OSD-
 NASA LRO LOLA Site04 (Shackleton rim), Apollo 14–16 EVA metabolic report, 2023 simulated lunar EVA study,
 NASA-STD-3001 Vol. 1 & 2, NASA OCHMO-TB-004, PhysioNet (BIDMC, PTT PPG, sEMG, treadmill, ACTES), Figshare PLOS ONE NIRS/sEMG.
 Normalized files and their mapping to the models: [`data/README.md`](data/README.md).
+
+## License
+
+Code is released under the [MIT License](LICENSE). Datasets in `data/` and the bundled Draco decoder (`frontend/public/draco/`, Apache-2.0)
+keep the licenses and attribution terms of their original sources listed above.
