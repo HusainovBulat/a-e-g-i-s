@@ -8,7 +8,7 @@ import { ElevationProfile, TrendAreaChart } from '../charts/Charts';
 import { Icon } from '../ui/icons';
 import { useConsole } from '../../lib/ConsoleProvider';
 import { normalizeEnvId } from '../../lib/api/client';
-import { crewMeta, envTitle } from '../../lib/crew';
+import { crewMeta, envTitle, hasFall } from '../../lib/crew';
 import { visorModel } from '../../lib/visor';
 import { VisorHud } from '../v2/visor/VisorHud';
 import type { RoutePoint } from '../../lib/api/types';
@@ -426,30 +426,32 @@ export function Mode1Screen() {
         </div>
       </Panel>
 
-      {/* Route Elevation Profile (LRO LOLA Site04) */}
-      <Panel
-        eyebrow="LRO LOLA / SITE 04 SHACKLETON CRATER"
-        title={isOutside ? 'Route topography & point of no return' : `Topography overview · ${envTitle(env)}`}
-        action={<StatusBadge tone="blue">{isOutside ? 'MAP SCALE 5M/PX' : 'SURFACE REFERENCE'}</StatusBadge>}
-      >
-        {(() => {
-          const distanceM = currentCrew?.model_b?.distance_m ?? (vitals?.distance_m ?? 1850);
-          const totalRouteM = 4950;
-          const currentPosRatio = Math.max(0.08, Math.min(0.88, distanceM / totalRouteM));
-          const maxForwardMargin = 0.94 - currentPosRatio;
-          const walkBackFactor = isOutside ? Math.max(0, Math.min(1, walkBackMin / 90)) : 1;
-          const turnaroundRatio = Math.max(
-            currentPosRatio,
-            Math.min(0.95, currentPosRatio + Math.max(0.02, maxForwardMargin * walkBackFactor))
-          );
-          return <ElevationProfile values={elevationArray} position={currentPosRatio} turnaround={turnaroundRatio} />;
-        })()}
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
-          <span>LUNAR BASE (0 M)</span>
-          <span>CRATER RIDGE (143 M)</span>
-          <span>SLOPE: {vitals?.slope ? vitals.slope.toFixed(1) : '12.0'}°</span>
-        </div>
-      </Panel>
+      {/* Route Elevation Profile (LRO LOLA Site04) - Only visible outside (Crater EVA / Rover) */}
+      {isOutside && (
+        <Panel
+          eyebrow="LRO LOLA / SITE 04 SHACKLETON CRATER"
+          title="Route topography & point of no return"
+          action={<StatusBadge tone="blue">MAP SCALE 5M/PX</StatusBadge>}
+        >
+          {(() => {
+            const distanceM = currentCrew?.model_b?.distance_m ?? (vitals?.distance_m ?? 1850);
+            const totalRouteM = 4950;
+            const currentPosRatio = Math.max(0.08, Math.min(0.88, distanceM / totalRouteM));
+            const maxForwardMargin = 0.94 - currentPosRatio;
+            const walkBackFactor = Math.max(0, Math.min(1, walkBackMin / 90));
+            const turnaroundRatio = Math.max(
+              currentPosRatio,
+              Math.min(0.95, currentPosRatio + Math.max(0.02, maxForwardMargin * walkBackFactor))
+            );
+            return <ElevationProfile values={elevationArray} position={currentPosRatio} turnaround={turnaroundRatio} />;
+          })()}
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
+            <span>LUNAR BASE (0 M)</span>
+            <span>CRATER RIDGE (143 M)</span>
+            <span>SLOPE: {vitals?.slope ? vitals.slope.toFixed(1) : '12.0'}°</span>
+          </div>
+        </Panel>
+      )}
 
       {/* Live Trend Charts */}
       <Panel
@@ -539,7 +541,7 @@ export function Mode1Screen() {
         <div className={styles.hudPopupOverlay} onClick={() => setShowVisorPopup(false)}>
           <div
             className={styles.hudPopupBox}
-            style={{ width: '1040px', maxWidth: '96vw', background: '#02050c', border: '1px solid var(--blue-bright)' }}
+            style={{ width: '1040px', maxWidth: '96vw', background: '#02050c', border: '1px solid var(--blue-bright)', display: 'flex', flexDirection: 'column', gap: '10px' }}
             onClick={e => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -554,6 +556,25 @@ export function Mode1Screen() {
                 ✕
               </button>
             </div>
+
+            {/* Persistent High-Contrast Red Lock-in Banner inside Visor Popup if alarm active */}
+            {(visor.selfDown || visor.alert === 'red') && (
+              <div style={{
+                background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.3) 0%, rgba(185, 28, 28, 0.5) 100%)',
+                border: '2px solid #EF4444',
+                boxShadow: '0 0 24px rgba(239, 68, 68, 0.5)',
+                padding: '12px 16px',
+                borderRadius: '6px',
+                color: '#fff',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                lineHeight: 1.5,
+              }}>
+                {hasFall(frame?.crews[crew])
+                  ? '🚨 30s OVERRIDE EXPIRED — NO CREW RESPONSE COLLAPSE DETECTED. AUTONOMOUS LIFE-SUPPORT ENGAGED: [1] 100% O₂ High-Flow Purge Active (SpO₂ < 92% & CO₂ Flush) · [2] Suboccipital Peltier Cold Shock (+10°C) Active · [3] FES Calf Venous Compression Active · [4] UHF/UWB SOS Beacon Locked (↗ 34m) & Telemetry Sent to Flight Surgeons. Status locked until manual Reset.'
+                  : '🚨 30s OVERRIDE EXPIRED — HYPOXIA & UNCONSCIOUSNESS PROTOCOL LOCKED: [1] 100% O2 Surge & Helmet CO2 Purge Active (SpO2 < 92%) · [2] Peltier Neck Cooling (+10°C) Active · [3] FES Leg Compression Pumping Blood to Brain · [4] UWB SOS Beacon Broadcasting (↗ 34m) & Alert Sent to Ground Flight Surgeons. Locked until manual Reset.'}
+              </div>
+            )}
 
             <div style={{
               aspectRatio: '16 / 9',

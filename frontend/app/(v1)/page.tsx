@@ -8,6 +8,7 @@ import { Mode1Screen } from '../../components/mode1/Mode1Screen';
 import { Mode2Screen } from '../../components/mode2/Mode2Screen';
 import { Mode3Screen } from '../../components/mode3/Mode3Screen';
 import { ModeTabs, TopBar } from '../../components/shell/TopBar';
+import { LeftCrewRail } from '../../components/shell/LeftCrewRail';
 import { Panel } from '../../components/ui/Panel';
 import { NumberTicker } from '../../components/ui/NumberTicker';
 import { StatusBadge } from '../../components/ui/StatusBadge';
@@ -30,8 +31,12 @@ function ConsoleContent() {
     if (usesOfflineVoiceModel()) preloadVoskModel().catch(() => {});
   }, []);
 
+  const isFallOrCount = Boolean(currentCrew?.vitals?.fall) || (currentCrew?.fall_countdown_s !== null && currentCrew?.fall_countdown_s !== undefined && currentCrew.fall_countdown_s > 0);
+  const isSevereHypoxia = currentCrew?.vitals?.spo2 !== undefined && currentCrew.vitals.spo2 < 92;
+
   return (
     <div className={styles.console}>
+      <LeftCrewRail />
       <TopBar environment={environment} onEnvironmentChange={setEnvironment} crew={crew} onCrewChange={setCrew} connection={connection} events={frame?.events ?? []} />
       <div className={styles.content}>
         <ModeTabs value={mode} onChange={setMode} />
@@ -41,13 +46,15 @@ function ConsoleContent() {
           <div className={styles.metaLeft}><span>MISSION SOL 014</span><i className={styles.metaSeparator} /><span>{frame?.emitted_at.slice(11, 19) ?? '--:--:--'} UTC</span><i className={styles.metaSeparator} /><span>CREW {crew}</span></div>
           <div className={styles.metaRight}><StatusBadge tone={connection === 'connected' ? 'green' : connection === 'disconnected' ? 'red' : 'amber'} dot>{connection === 'connected' ? 'A.E.G.I.S. TELEMETRY LIVE' : connection === 'disconnected' ? 'RECONNECTING FEED' : 'CONNECTING'}</StatusBadge><span>STREAM 1.0 HZ</span></div>
         </div>
-        {(Boolean(currentCrew?.vitals?.fall) || (currentCrew?.fall_countdown_s !== null && currentCrew?.fall_countdown_s !== undefined && currentCrew.fall_countdown_s > 0)) && mode !== 'mode2' && (
+        {(isFallOrCount || isSevereHypoxia) && mode !== 'mode2' && (
           <div style={{ background: 'rgba(239, 68, 68, 0.25)', border: '2px solid var(--red)', padding: '12px 20px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '20px' }}>🚨</span>
               <div>
                 <strong style={{ color: 'var(--red)', fontSize: '13px', letterSpacing: '0.05em' }}>
-                  CRITICAL: CREW {crew} FALL DETECTED IN CRATER — {Math.ceil(currentCrew?.fall_countdown_s ?? 30)}S RESCUE COUNTDOWN
+                  {isFallOrCount
+                    ? `CRITICAL: CREW ${crew} FALL DETECTED IN CRATER — ${Math.ceil(currentCrew?.fall_countdown_s ?? 30)}S RESCUE COUNTDOWN`
+                    : `CRITICAL: CREW ${crew} SEVERE HYPOXIA (SpO₂ ${(currentCrew?.vitals?.spo2 ?? 88).toFixed(1)}% < 92%) — 30S OVERRIDE COUNTDOWN`}
                 </strong>
                 <div style={{ fontSize: '11px', color: '#fca5a5' }}>
                   Suit 100% O2 purge armed · Rescue radar beacon transmitting

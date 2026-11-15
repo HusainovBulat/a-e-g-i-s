@@ -74,6 +74,52 @@
   line-height: 1;
 }
 
+.lockedEmergencyBanner {
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.28) 0%, rgba(185, 28, 28, 0.5) 100%);
+  border: 2px solid #EF4444;
+  box-shadow: 0 0 28px rgba(239, 68, 68, 0.5);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: pulseLocked 2s ease-in-out infinite;
+}
+
+@keyframes pulseLocked {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+    border-color: #EF4444;
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(239, 68, 68, 0.7);
+    border-color: #ff8585;
+  }
+}
+
+.lockedBannerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lockedBannerTitle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #fff;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.lockedBannerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .autoSystemGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -94,6 +140,19 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.systemActiveGreen {
+  border-color: rgba(16, 185, 129, 0.7) !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.28);
+}
+
+.systemActiveAmber {
+  border-color: rgba(245, 158, 11, 0.7) !important;
+  background: rgba(245, 158, 11, 0.1) !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.28);
 }
 
 .autoSystemCard span {

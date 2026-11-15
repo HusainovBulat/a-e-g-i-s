@@ -1,4 +1,4 @@
-.console { min-height: 100vh; background: radial-gradient(ellipse at 50% -35%, rgba(15,46,87,.28), transparent 62%), var(--bg); }
+.console { min-height: 100vh; padding-left: 68px; background: radial-gradient(ellipse at 50% -35%, rgba(15,46,87,.28), transparent 62%), var(--bg); }
 .content { max-width: 1740px; margin: 0 auto; padding: 18px 28px 44px; }
 .sectionMeta { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0 0 15px; color: var(--text-dim); font: 9px var(--font-mono); letter-spacing: .12em; }
 .metaLeft, .metaRight { display: flex; align-items: center; gap: 12px; }

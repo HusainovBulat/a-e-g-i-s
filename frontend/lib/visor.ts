@@ -49,15 +49,18 @@ export function visorModel(frame: ConsoleFrame | null, crew: CrewId): VisorModel
   const walk = state.model_b.walk_back_min;
   const legsFail = state.model_a.legs_fail_min;
   const fatigue = Math.round(state.model_a.fatigue_score);
-  const selfDown = hasFall(state);
+  const isHypoxia = v.spo2 !== undefined && v.spo2 < 92;
+  const isLocked = Boolean(state.alarm?.reasons?.some(r => /fall_no_ack|sos_auto|hypoxia_locked/i.test(r))) || (state.fall_countdown_s === 0);
+  const selfDown = hasFall(state) || isHypoxia;
   const buddyDown = hasFall(buddyState) || Boolean(buddyState?.alarm?.reasons?.some(r => /fall|sos/i.test(r)));
 
   const walkBackTone: Tone = !isOutside ? 'green' : (selfDown || walk < 15 ? 'red' : walk < 30 ? 'amber' : 'green');
   const legsTone: Tone = fatigue >= 70 || (legsFail !== null && legsFail <= 15) ? 'red' : fatigue >= 50 ? 'amber' : 'neutral';
 
   let command: VisorModel['command'] = { text: isOutside ? 'ON SCHEDULE' : 'CABIN NOMINAL', tone: 'neutral' };
-  if (buddyDown) command = { text: `GO TO BUDDY ${buddy}`, tone: 'red' };
-  else if (selfDown) command = { text: 'FALL DETECTED · PRESS OK ON WRIST', tone: 'red' };
+  if (isLocked) command = { text: isHypoxia ? '30S OVERRIDE EXPIRED · 100% O2 PURGE LOCKED' : '30S OVERRIDE EXPIRED · SOS BEACON LOCKED', tone: 'red' };
+  else if (buddyDown) command = { text: `GO TO BUDDY ${buddy}`, tone: 'red' };
+  else if (selfDown) command = { text: isHypoxia ? 'HYPOXIA (SpO2 < 92%) · 30S OVERRIDE ACTIVE' : 'FALL DETECTED · PRESS OK ON WRIST', tone: 'red' };
   else if (isOutside && walk < 15) command = { text: 'TURN BACK NOW', tone: 'red' };
   else if (v.dizzy) command = { text: 'STOP · SIT DOWN', tone: 'amber' };
   else if (legsTone === 'red') command = { text: 'REST 60 S · LEGS TIRING', tone: 'amber' };

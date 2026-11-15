@@ -42,7 +42,6 @@ export function TopBar({ environment, onEnvironmentChange, crew, onCrewChange, c
         <div className={styles.topbarActions}>
           <ScenarioLauncher crew={crew} />
           <RoutineBell events={events} />
-          <CrewSelect crew={crew} onChange={onCrewChange} />
           <QrPairing crew={crew} />
         </div>
       </div>
@@ -133,7 +132,7 @@ export function EnvSwitcher({ environment, onChange }: { environment: Environmen
       <div className={styles.envCurrent}><Icon name="globe" size={15} /><strong>{activeEnvironment.title}</strong></div>
       <span className={styles.envData}><span>GRAVITY <b>{activeEnvironment.gravity}</b></span><span>RADIATION <b>{activeEnvironment.radiation}</b></span></span>
       <span className={styles.envHazard}>{activeEnvironment.hazard}</span>
-      <StatusBadge tone={environment === 'crater_eva' ? 'amber' : 'blue'}>{environment === 'crater_eva' ? 'SPACE SHIFT' : 'EARTH SHIFT'}</StatusBadge>
+      <StatusBadge tone={environment === 'crater_eva' ? 'amber' : 'blue'}>SPACE SHIFT</StatusBadge>
     </div>
   </>;
 }
